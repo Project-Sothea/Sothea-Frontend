@@ -201,7 +201,7 @@
           <div class="w-1/3"></div>
           <div class="font-medium text-sm pr-5">Yes</div>
           <div class="font-medium text-sm">No</div>
-          <div class="font-medium text-sm w-1/3 pl-11">Location</div>
+          <div class="font-medium text-sm w-1/3" style="padding-left: 4.3rem;">Location</div>
         </div>
       </div>
 
@@ -214,13 +214,15 @@
             <div class="flex items-center pr-7">
               <label class="inline-flex items-center">
                 <input type="radio" name="ref-needed" class="w-4 h-4" v-model="referralNeeded" :value="true"
-                  :disabled="!isEditing" />
+                  :disabled="!isEditing" 
+                  @click="yLocation=true"/>
               </label>
             </div>
             <div class="flex items-center">
               <label class="inline-flex items-center">
                 <input type="radio" name="ref-needed" class="w-4 h-4" v-model="referralNeeded" :value="false"
-                  :disabled="!isEditing" />
+                  :disabled="!isEditing" 
+                  @click="yLocation=false"/>
               </label>
             </div>
           </div>
@@ -228,7 +230,7 @@
           <div class="flex w-1/3 grow">
             <textarea v-model="referralLoc" rows="1" placeholder="Enter Location"
               class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
-              :disabled="!isEditing"></textarea>
+              :disabled="!isEditing || !yLocation" :required="yLocation"></textarea>
           </div>
         </div>
       </div>
@@ -296,6 +298,7 @@ export default defineComponent({
       referralLoc: '' as string | null,
       remarks: 'remarks' as string | null,
       isEditing: false,
+      yLocation: false,
     }
   },
   created() {
@@ -317,6 +320,7 @@ export default defineComponent({
       this.referralNeeded = drConsult.referralNeeded;
       this.referralLoc = drConsult.referralLoc;
       this.remarks = drConsult.remarks;
+      this.yLocation = this.referralNeeded;
     }
   },
   methods: {
@@ -362,6 +366,13 @@ export default defineComponent({
         if (this.referralNeeded === null) {
           toast.error('Please indicate if patient needs referral')
           return
+        }
+        if (this.referralNeeded && this.referralLoc === '') {
+          toast.error('Please enter referral location')
+          return
+        }
+        if (!this.referralNeeded) { // if referral not needed, set referralLoc to null
+          this.referralLoc = null
         }
         const doctorsConsultation: DoctorsConsultation = { // need to define outside to catch missing fields
           healthy: this.healthy,
