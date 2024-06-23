@@ -10,7 +10,7 @@
           <div class="font-medium text-md w-1/3">History</div>
           <div class="font-medium text-md pr-5">Yes</div>
           <div class="font-medium text-md">No</div>
-          <div class="font-medium text-md w-1/3 pl-10">Remarks</div>
+          <div class="font-medium text-md w-1/3" style="padding-left: 4rem;">Remarks</div>
         </div>
       </div>
 
@@ -23,13 +23,15 @@
             <div class="flex items-center pr-7">
               <label class="inline-flex items-center">
                 <input type="radio" name="smoking-hist" class="w-4 h-4" v-model="pastSmokingHistory" :value="true"
-                  :disabled="!isEditing" />
+                  :disabled="!isEditing" 
+                  @click="yPsh=true"/>
               </label>
             </div>
             <div class="flex items-center">
               <label class="inline-flex items-center">
                 <input type="radio" name="smoking-hist" class="w-4 h-4" v-model="pastSmokingHistory" :value="false"
-                  :disabled="!isEditing" />
+                  :disabled="!isEditing" 
+                  @click="yPsh=false"/>
               </label>
             </div>
           </div>
@@ -37,7 +39,7 @@
           <div class="flex w-1/3 grow">
             <textarea rows="1" placeholder="If Y, no. of years" type="number" v-model="numberOfYears"
               class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
-              :disabled="!isEditing"></textarea>
+              :disabled="!isEditing || !yPsh" :required="yPsh"></textarea>
           </div>
         </div>
       </div>
@@ -53,13 +55,15 @@
             <div class="flex items-center pr-7">
               <label class="inline-flex items-center">
                 <input type="radio" name="curr-smoking-hist" class="w-4 h-4" v-model="currentSmokingHistory"
-                  :value="true" :disabled="!isEditing" />
+                  :value="true" :disabled="!isEditing" 
+                  @click="yCsh=true"/>
               </label>
             </div>
             <div class="flex items-center">
               <label class="inline-flex items-center">
                 <input type="radio" name="curr-smoking-hist" class="w-4 h-4" v-model="currentSmokingHistory"
-                  :value="false" :disabled="!isEditing" />
+                  :value="false" :disabled="!isEditing" 
+                  @click="yCsh=false"/>
               </label>
             </div>
           </div>
@@ -67,7 +71,7 @@
           <div class="flex w-1/3 grow">
             <textarea rows="1" placeholder="If Y, how many cigarettes/day?" type="number" v-model="cigarettesPerDay"
               class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
-              :disabled="!isEditing"></textarea>
+              :disabled="!isEditing || !yCsh" :required="yCsh"></textarea>
           </div>
         </div>
       </div>
@@ -81,13 +85,15 @@
             <div class="flex items-center pr-7">
               <label class="inline-flex items-center">
                 <input type="radio" name="alc-hist" class="w-4 h-4" v-model="alcoholHistory" :value="true"
-                  :disabled="!isEditing" />
+                  :disabled="!isEditing" 
+                  @click="yAh=true"/>
               </label>
             </div>
             <div class="flex items-center">
               <label class="inline-flex items-center">
                 <input type="radio" name="alc-hist" class="w-4 h-4" v-model="alcoholHistory" :value="false"
-                  :disabled="!isEditing" />
+                  :disabled="!isEditing" 
+                  @click="yAh=false"/>
               </label>
             </div>
           </div>
@@ -95,7 +101,7 @@
           <div class="flex w-1/3 grow">
             <textarea rows="1" placeholder="If Y, how regularly?" v-model="howRegular"
               class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
-              :disabled="!isEditing"></textarea>
+              :disabled="!isEditing || !yAh" :required="yAh"></textarea>
           </div>
         </div>
       </div>
@@ -154,6 +160,9 @@ export default defineComponent({
       alcoholHistory: null as boolean | null,
       howRegular: '' as string | null,
       isEditing: false,
+      yPsh: false,
+      yCsh: false,
+      yAh: false
     }
   },
   created() {
@@ -166,6 +175,9 @@ export default defineComponent({
       this.cigarettesPerDay = socialHistory.cigarettesPerDay;
       this.alcoholHistory = socialHistory.alcoholHistory;
       this.howRegular = socialHistory.howRegular;
+      this.yPsh = this.pastSmokingHistory;
+      this.yCsh = this.currentSmokingHistory;
+      this.yAh = this.alcoholHistory;
     }
   },
   methods: {
@@ -176,14 +188,38 @@ export default defineComponent({
           toast.error('Please indicate past smoking history')
           return
         }
-        if (this.currentSmokingHistory === null) {
+        if (this.yPsh && this.numberOfYears === null) { // if yes, check if number of years is filled
+          toast.error('Please indicate number of years')
+          return
+        }
+        if (!this.yPsh) { // if past smoking history is no, clear remarks input
+          this.numberOfYears = null
+        }
+
+        if (this.currentSmokingHistory === null) { 
           toast.error('Please indicate current smoking history')
           return
         }
+        if (this.yCsh && this.cigarettesPerDay === null) { // if yes, check if number of cigarettes per day is filled
+          toast.error('Please indicate number of cigarettes per day')
+          return
+        }
+        if (!this.yCsh) { // if current smoking history is no, clear remarks input
+          this.cigarettesPerDay = null
+        }
+
         if (this.alcoholHistory === null) {
           toast.error('Please indicate alcohol history')
           return
         }
+        if (this.yAh && this.howRegular === '') { // if yes, check if how regularly is filled
+          toast.error('Please indicate how regularly')
+          return
+        }
+        if (!this.yAh) { // if alcohol history is no, clear remarks input
+          this.howRegular = null
+        }
+
         const socialHistory: SocialHistory = { // need to define outside to catch missing fields
           pastSmokingHistory: this.pastSmokingHistory,
           numberOfYears: this.numberOfYears,
