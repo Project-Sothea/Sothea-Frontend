@@ -14,7 +14,7 @@
               type="number"
               step="1"
               placeholder="cm"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -29,7 +29,7 @@
               type="number"
               step="0.1"
               placeholder="kg"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -46,7 +46,7 @@
               v-model="paedsHeight"
               type="number"
               placeholder=""
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -60,7 +60,7 @@
               v-model="paedsWeight"
               type="number"
               placeholder=""
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -230,7 +230,8 @@ export default defineComponent({
           toast.error('Please enter height and weight to calculate BMI Analysis')
           return
         }
-        const heightAndWeight: HeightAndWeight = { // need to define outside to catch missing fields
+        const heightAndWeight: HeightAndWeight = {
+          // need to define outside to catch missing fields
           height: this.height,
           weight: this.weight,
           bmi: this.bmi,
@@ -238,17 +239,19 @@ export default defineComponent({
           paedsHeight: this.paedsHeight,
           paedsWeight: this.paedsWeight
         }
-        await axios.patch(`${BaseURL}/patient/${this.patientId}`, {
-          heightAndWeight: heightAndWeight 
-        }).then(response => {
-          console.log(response.data)
-          console.log('Height and Weight is posted successfully!')
-          if (this.isEditing) {
-            this.toggleEdit() // to switch back to read-only mode
-          }
-          toast.success('Height and Weight saved successfully!')
-        })
-      } catch (error : unknown) {
+        await axios
+          .patch(`${BaseURL}/patient/${this.patientId}`, {
+            heightAndWeight: heightAndWeight
+          })
+          .then((response) => {
+            console.log(response.data)
+            console.log('Height and Weight is posted successfully!')
+            if (this.isEditing) {
+              this.toggleEdit() // to switch back to read-only mode
+            }
+            toast.success('Height and Weight saved successfully!')
+          })
+      } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           console.log(error.response)
           if (error.response) {
@@ -267,7 +270,7 @@ export default defineComponent({
       this.isEditing = !this.isEditing
       console.log(this.isEditing)
     },
-    preventNegative(event : any) {
+    preventNegative(event: any) {
       if (event.key === '-' || event.key === 'e') {
         event.preventDefault()
       }

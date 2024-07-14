@@ -20,14 +20,26 @@
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="tuberculosis" class="w-4 h-4" v-model="tuberculosis" :value="true"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="tuberculosis"
+                class="w-4 h-4"
+                v-model="tuberculosis"
+                :value="true"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="tuberculosis" class="w-4 h-4" v-model="tuberculosis" :value="false"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="tuberculosis"
+                class="w-4 h-4"
+                v-model="tuberculosis"
+                :value="false"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
         </div>
@@ -40,14 +52,26 @@
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="diabetes" class="w-4 h-4" v-model="diabetes" :value="true"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="diabetes"
+                class="w-4 h-4"
+                v-model="diabetes"
+                :value="true"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="diabetes" class="w-4 h-4" v-model="diabetes" :value="false"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="diabetes"
+                class="w-4 h-4"
+                v-model="diabetes"
+                :value="false"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
         </div>
@@ -60,14 +84,26 @@
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="hypertension" class="w-4 h-4" v-model="hypertension" :value="true"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="hypertension"
+                class="w-4 h-4"
+                v-model="hypertension"
+                :value="true"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="hypertension" class="w-4 h-4" v-model="hypertension" :value="false"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="hypertension"
+                class="w-4 h-4"
+                v-model="hypertension"
+                :value="false"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
         </div>
@@ -80,14 +116,26 @@
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="hyperlipidemia" class="w-4 h-4" v-model="hyperlipidemia" :value="true"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="hyperlipidemia"
+                class="w-4 h-4"
+                v-model="hyperlipidemia"
+                :value="true"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="hyperlipidemia" class="w-4 h-4" v-model="hyperlipidemia" :value="false"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="hyperlipidemia"
+                class="w-4 h-4"
+                v-model="hyperlipidemia"
+                :value="false"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
         </div>
@@ -100,14 +148,26 @@
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="chronic-joint-pains" class="w-4 h-4" v-model="chronicJointPains" :value="true"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="chronic-joint-pains"
+                class="w-4 h-4"
+                v-model="chronicJointPains"
+                :value="true"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="chronic-joint-pains" class="w-4 h-4" v-model="chronicJointPains" :value="false"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="chronic-joint-pains"
+                class="w-4 h-4"
+                v-model="chronicJointPains"
+                :value="false"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
         </div>
@@ -120,14 +180,26 @@
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="chronic-muscle-aches" class="w-4 h-4" v-model="chronicMuscleAches" :value="true"
-                :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="chronic-muscle-aches"
+                class="w-4 h-4"
+                v-model="chronicMuscleAches"
+                :value="true"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input type="radio" name="chronic-muscle-aches" class="w-4 h-4" v-model="chronicMuscleAches"
-                :value="false" :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="chronic-muscle-aches"
+                class="w-4 h-4"
+                v-model="chronicMuscleAches"
+                :value="false"
+                :disabled="!isEditing"
+              />
             </label>
           </div>
         </div>
@@ -158,7 +230,8 @@
       <!-- Remarks -->
       <div class="mt-4">
         <label>
-          <label for="" class="mb-2 block text-sm font-normal text-dark">If Y to STD, specify:
+          <label for="" class="mb-2 block text-sm font-normal text-dark"
+            >If Y to STD, specify:
           </label>
           <textarea rows="2" placeholder="Remarks"
             class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
@@ -170,28 +243,37 @@
       <div class="mt-2">
         <label>
           <label for="" class="mb-2 block text-sm font-normal text-dark">Others: </label>
-          <textarea rows="2" placeholder="Remarks"
-            class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
-            v-model="others" :disabled="!isEditing"></textarea>
+          <textarea
+            rows="2"
+            placeholder="Remarks"
+            class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            v-model="others"
+            :disabled="!isEditing"
+          ></textarea>
         </label>
       </div>
 
       <!-- Edit Button -->
       <div class="flex flex-row-reverse w-full mt-5">
-        <button v-if="!isEditing && !isAdd" @click="toggleEdit"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
+        <button
+          v-if="!isEditing && !isAdd"
+          @click="toggleEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+        >
           Edit
         </button>
       </div>
 
       <!-- Save Edits Button -->
       <div class="flex flex-row-reverse w-full mt-5">
-        <button v-if="isEditing && !isAdd" @click="submitData"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
+        <button
+          v-if="isEditing && !isAdd"
+          @click="submitData"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+        >
           Save Edits
         </button>
       </div>
-
     </div>
   </div>
 </template>
@@ -287,16 +369,16 @@ export default defineComponent({
           specifiedSTDs: this.specifiedSTDs,
           others: this.others
         }
-        await axios.patch(`${BaseURL}/patient/${this.patientId}`, {
-          pastMedicalHistory: pastMedicalHistory
-        }).then(response => {
-          console.log(response)
-          console.log('Past medical history posted successfully!')
-          if (!this.isEditing) {
+        await axios
+          .patch(`${BaseURL}/patient/${this.patientId}`, {
+            pastMedicalHistory: pastMedicalHistory
+          })
+          .then((response) => {
+            console.log(response)
+            console.log('Past medical history posted successfully!')
             this.toggleEdit() // to switch back to read-only mode
-          }
-          toast.success('Past medical history saved successfully!')
-        })
+            toast.success('Past medical history saved successfully!')
+          })
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           console.log(error.response)
@@ -316,7 +398,6 @@ export default defineComponent({
       this.isEditing = !this.isEditing
       console.log(this.isEditing)
     }
-
   }
 })
 </script>

@@ -16,7 +16,7 @@
                   :disabled="!isEditing && !isAdd"
                   type="text"
                   placeholder="Name"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/user.svg" width="20" height="20" />
@@ -33,7 +33,7 @@
                   :disabled="!isEditing && !isAdd"
                   type="text"
                   placeholder="Khmer Name"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/user.svg" width="20" height="20" />
@@ -51,7 +51,8 @@
                   v-model="dob"
                   :disabled="!isEditing && !isAdd"
                   type="date"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+                  :max="maxDate"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
                 />
               </div>
             </div>
@@ -66,8 +67,6 @@
                 placeholder=""
                 min="0"
                 step="1"
-                @input="validateAge"
-                @keydown="preventNegative"
                 class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
               />
             </div>
@@ -79,7 +78,7 @@
                 <select
                   v-model="gender"
                   :disabled="!isEditing && !isAdd"
-                  class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+                  class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 >
                   <option value="M">M</option>
                   <option value="F">F</option>
@@ -102,7 +101,7 @@
                   :disabled="!isEditing && !isAdd"
                   type="tel"
                   placeholder="Contact No."
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/phone.svg" width="20" height="20" />
@@ -118,7 +117,8 @@
                   v-model="regDate"
                   :disabled="!isEditing && !isAdd"
                   type="date"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+                  :max="maxDate"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
                 />
               </div>
             </div>
@@ -132,7 +132,12 @@
             <div class="w-full">
               <label class="mb-1 block text-sm font-medium text-dark"> Photo ID </label>
 
-              <div class="relative">
+              <div
+                :class="[
+                  'relative',
+                  { 'bg-gray-200': !isEditing && !isAdd, 'bg-white': isEditing || isAdd }
+                ]"
+              >
                 <label
                   for="file"
                   class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
@@ -143,6 +148,7 @@
                       name="file"
                       id="file"
                       class="sr-only"
+                      :disabled="!isEditing && !isAdd"
                       @change="handleFileChange"
                       accept=".jpg, .jpeg, .png"
                     />
@@ -177,7 +183,7 @@
               :disabled="!isEditing && !isAdd"
               type="text"
               placeholder="Village"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/house.svg" width="20" height="20" />
@@ -194,7 +200,7 @@
               :disabled="!isEditing && !isAdd"
               type="text"
               placeholder="Family Group"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/users.svg" width="20" height="20" />
@@ -215,7 +221,7 @@
             <select
               v-model="pregnant"
               :disabled="!isEditing && !isAdd"
-              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="true">Y</option>
               <option :value="false">N</option>
@@ -232,9 +238,10 @@
           <div class="relative z-20">
             <input
               v-model="lastMenstrualPeriod"
-              :disabled="!isEditing && !isAdd"
+              :disabled="(!isEditing && !isAdd) || isMale"
               type="date"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              :max="maxDate"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
             />
           </div>
         </div>
@@ -251,7 +258,7 @@
               :disabled="!isEditing && !isAdd"
               type="text"
               placeholder="Enter Drug Allergies"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/drug.svg" width="20" height="20" />
@@ -271,7 +278,7 @@
             <select
               v-model="sentToId"
               :disabled="!isEditing && !isAdd"
-              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="true">Y</option>
               <option :value="false">N</option>
@@ -320,13 +327,13 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue'
 
-import type Admin from '@/types/Admin';
+import type Admin from '@/types/Admin'
 
 import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@/types/Patient'
-import { BaseURL } from '@/main';
+import { BaseURL } from '@/main'
 
 export default defineComponent({
   props: {
@@ -344,8 +351,10 @@ export default defineComponent({
     }
   },
   watch: {
-    patientData: function(newVal : Patient, oldVal : Patient) { // watch it
-      if (!this.isAdd) { // In View / Edit Page
+    patientData: function (newVal: Patient, oldVal: Patient) {
+      // watch it
+      if (!this.isAdd) {
+        // In View / Edit Page
         const admin = this.patientData.admin
         if (!admin) return
         this.name = admin.name
@@ -358,16 +367,24 @@ export default defineComponent({
         this.village = admin.village
         this.familyGroup = admin.familyGroup
         this.pregnant = admin.pregnant
-        this.lastMenstrualPeriod = (admin.lastMenstrualPeriod != null) ? this.formatDateForInput(admin.lastMenstrualPeriod) : null
+        this.lastMenstrualPeriod =
+          admin.lastMenstrualPeriod != null
+            ? this.formatDateForInput(admin.lastMenstrualPeriod)
+            : null
         this.drugAllergies = admin.drugAllergies
         this.photo = admin.photo
         this.sentToId = admin.sentToId
 
-        this.selectedPhoto = (this.photo) ? `data:image/png;base64,${atob(this.photo)}` : ''
+        this.selectedPhoto = this.photo ? `data:image/png;base64,${atob(this.photo)}` : ''
       }
+    },
+    gender(newValue) {
+      // Set isMale based on the gender value
+      this.isMale = newValue === 'M'
     }
   },
-  data() { // Default values in the AddPatient page, types mirror Admin type except for booleans, which always take on boolean | null
+  data() {
+    // Default values in the AddPatient page, types mirror Admin type except for booleans, which always take on boolean | null
     return {
       name: '' as string,
       khmerName: '' as string,
@@ -384,31 +401,20 @@ export default defineComponent({
       selectedPhoto: '' as string,
       photo: '' as string | null, //base 64 string (for POST)
       sentToId: null as boolean | null,
-      isEditing: false
+      isEditing: false,
+      maxDate: new Date().toISOString().split('T')[0], // Set maxDate to today's date in YYYY-MM-DD format
+      isMale: false
     }
   },
   computed: {
     ageComputed() {
       if (this.dob) {
-        return new Date().getFullYear() - new Date(this.dob).getFullYear();
+        return new Date().getFullYear() - new Date(this.dob).getFullYear()
       }
       return null
     }
   },
   methods: {
-    validateAge() {
-      if (this.age < 0) {
-        this.age = 0
-      } else {
-        // Ensure the age is a whole number
-        this.age = Math.floor(this.age)
-      }
-    },
-    preventNegative(event : any) {
-      if (event.key === '-' || event.key === 'e' || event.key === '+') {
-        event.preventDefault()
-      }
-    },
     // POST request to add a new patient / PUT request to update an existing patient
     // If isAdd is true, do insert patient, otherwise do update patient
     async submitData() {
@@ -461,7 +467,8 @@ export default defineComponent({
           return
         }
 
-        const admin: Admin = { // need to define outside to catch missing fields
+        const admin: Admin = {
+          // need to define outside to catch missing fields
           name: this.name,
           khmerName: this.khmerName,
           dob: new Date(this.dob).toISOString(),
@@ -472,30 +479,46 @@ export default defineComponent({
           village: this.village,
           familyGroup: this.familyGroup,
           pregnant: this.pregnant,
-          lastMenstrualPeriod: (this.lastMenstrualPeriod) ? new Date(this.lastMenstrualPeriod).toISOString() : null,
+          lastMenstrualPeriod: this.lastMenstrualPeriod
+            ? new Date(this.lastMenstrualPeriod).toISOString()
+            : null,
           drugAllergies: this.drugAllergies ? this.drugAllergies : null,
           photo: this.photo ? this.photo : null,
           sentToId: this.sentToId
         }
 
-        if (this.isAdd && !this.isEditing) { // Add new patient
-          await axios.post(`${BaseURL}/patient`, {
-            admin: admin
-          }).then(response => {
-            toast.success('Admin Details created successfully!')
-            // Emit patient details to be rendered in sidebar
-            this.$emit('patientCreated', { id: response.data["Inserted userid"], name: this.name, age: this.ageComputed })
-          })
-        } else if (!this.isAdd && this.isEditing) { // Editing an existing patient
-          await axios.patch(`${BaseURL}/patient/${this.patientId}`, {
-            admin: admin
-          }).then(() => {
-            toast.success('Admin Details updated successfully!')
-            // Emit updated patient details to be rendered in sidebar
-            this.$emit('patientUpdated', { id: this.patientId, name: this.name, age: this.ageComputed })
-          })
+        if (this.isAdd && !this.isEditing) {
+          // Add new patient
+          await axios
+            .post(`${BaseURL}/patient`, {
+              admin: admin
+            })
+            .then((response) => {
+              toast.success('Admin Details created successfully!')
+              // Emit patient details to be rendered in sidebar
+              this.$emit('patientCreated', {
+                id: response.data['Inserted userid'],
+                name: this.name,
+                age: this.ageComputed
+              })
+            })
+        } else if (!this.isAdd && this.isEditing) {
+          // Editing an existing patient
+          await axios
+            .patch(`${BaseURL}/patient/${this.patientId}`, {
+              admin: admin
+            })
+            .then(() => {
+              toast.success('Admin Details updated successfully!')
+              // Emit updated patient details to be rendered in sidebar
+              this.$emit('patientUpdated', {
+                id: this.patientId,
+                name: this.name,
+                age: this.ageComputed
+              })
+            })
         }
-      } catch (error : unknown) {
+      } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           console.log(error.response)
           if (error.response) {
@@ -530,13 +553,13 @@ export default defineComponent({
       }
     },
 
-    formatDateForInput(dateString : string) {
-      const date = new Date(dateString);
-      const year = date.getUTCFullYear();
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0'); 
-      const day = String(date.getUTCDate()).padStart(2, '0');
+    formatDateForInput(dateString: string) {
+      const date = new Date(dateString)
+      const year = date.getUTCFullYear()
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+      const day = String(date.getUTCDate()).padStart(2, '0')
       // Return the formatted date string
-      return `${year}-${month}-${day}`;
+      return `${year}-${month}-${day}`
     },
 
     toggleEdit() {

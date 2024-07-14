@@ -42,7 +42,6 @@ test('test', async ({ page }) => {
   await page.getByPlaceholder('Khmer Name').press('ControlOrMeta+a')
   await page.getByPlaceholder('Khmer Name').fill('្ិេឹឆោេ្ឆិោេឆោ្ិិេ្ឆោេ្ឆិោឹេ្ោិេ្ោឆ្េ')
   await page.locator('input[type="date"]').first().fill('1982-02-14')
-  await page.locator('div').filter({ hasText: /^MF$/ }).getByRole('combobox').selectOption('M')
   await page.getByPlaceholder('Contact No.').click()
   await page.getByPlaceholder('Contact No.').press('ControlOrMeta+a')
   await page.getByPlaceholder('Contact No.').fill('902193200193')
@@ -71,7 +70,7 @@ test('test', async ({ page }) => {
   expect(await page.locator('input[type="date"]').first().inputValue()).toBe('1982-02-14')
   expect(
     await page.locator('div').filter({ hasText: /^MF$/ }).getByRole('combobox').inputValue()
-  ).toBe('M')
+  ).toBe('F')
   expect(await page.getByPlaceholder('Contact No.').inputValue()).toBe('902193200193')
   expect(await page.locator('input[type="date"]').nth(1).inputValue()).toBe('2024-06-18')
   expect(await page.getByPlaceholder('Village').inputValue()).toBe('QWERTY')

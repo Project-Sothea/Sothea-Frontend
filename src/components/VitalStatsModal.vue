@@ -14,7 +14,7 @@
               type="number"
               step="0.01"
               placeholder="Degree Celsius"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -29,7 +29,7 @@
               type="number"
               step="0.01"
               placeholder="%"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -47,7 +47,7 @@
               type="number"
               step="0.01"
               placeholder="mmHg"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -61,7 +61,7 @@
               type="number"
               step="0.01"
               placeholder="mmHg"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -92,7 +92,7 @@
               type="number"
               step="0.01"
               placeholder="mmHg"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -106,7 +106,7 @@
               type="number"
               step="0.01"
               placeholder="mmHg"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -139,7 +139,7 @@
               type="number"
               step="1"
               placeholder="BPM"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -153,7 +153,7 @@
               type="number"
               step="1"
               placeholder="BPM"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -186,7 +186,7 @@
               type="number"
               step="0.01"
               placeholder="mmol/L"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -203,7 +203,7 @@
               type="number"
               step="0.01"
               placeholder="mg/dL"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -238,14 +238,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, type PropType } from 'vue'
 
 import axios from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import type VitalStatistics from '@/types/VitalStatistics';
-import type Patient from '@/types/Patient';
-import { BaseURL } from '@/main';
+import type VitalStatistics from '@/types/VitalStatistics'
+import type Patient from '@/types/Patient'
+import { BaseURL } from '@/main'
 
 export default defineComponent({
   props: {
@@ -372,7 +372,8 @@ export default defineComponent({
           toast.error('Average HR cannot be empty')
           return
         }
-        const vitalStatistics: VitalStatistics = { // need to define outside to catch missing fields
+        const vitalStatistics: VitalStatistics = {
+          // need to define outside to catch missing fields
           temperature: this.temperature,
           spO2: this.spO2,
           systolicBP1: this.systolicBP1,
@@ -387,17 +388,19 @@ export default defineComponent({
           randomBloodGlucoseMmolL: this.randomBloodGlucoseMmolL,
           randomBloodGlucoseMmolLp: this.randomBloodGlucoseMmolLp
         }
-        await axios.patch(`${BaseURL}/patient/${this.patientId}`, {
-          vitalStatistics: vitalStatistics
-        }).then(response => {
-          console.log(response.data)
-          console.log('Vital Statistics posted successfully!')
-          if (this.isEditing) {
-            this.toggleEdit() // to switch back to read-only mode
-          }
-          toast.success('Vital Statistics saved successfully!')
-        })
-      } catch (error : unknown) {
+        await axios
+          .patch(`${BaseURL}/patient/${this.patientId}`, {
+            vitalStatistics: vitalStatistics
+          })
+          .then((response) => {
+            console.log(response.data)
+            console.log('Vital Statistics posted successfully!')
+            if (this.isEditing) {
+              this.toggleEdit() // to switch back to read-only mode
+            }
+            toast.success('Vital Statistics saved successfully!')
+          })
+      } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           console.log(error.response)
           if (error.response) {
@@ -416,7 +419,7 @@ export default defineComponent({
       this.isEditing = !this.isEditing
       console.log(this.isEditing)
     },
-    preventNegative(event : any) {
+    preventNegative(event: any) {
       if (event.key === '-' || event.key === 'e') {
         event.preventDefault()
       }

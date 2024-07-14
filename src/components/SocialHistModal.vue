@@ -108,20 +108,25 @@
 
       <!-- Edit Button -->
       <div class="flex flex-row-reverse w-full mt-5">
-        <button v-if="!isEditing && !isAdd" @click="toggleEdit"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
+        <button
+          v-if="!isEditing && !isAdd"
+          @click="toggleEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+        >
           Edit
         </button>
       </div>
 
       <!-- Save Edits Button -->
       <div class="flex flex-row-reverse w-full mt-5">
-        <button v-if="isEditing && !isAdd" @click="submitData"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
+        <button
+          v-if="isEditing && !isAdd"
+          @click="submitData"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+        >
           Save Edits
         </button>
       </div>
-
     </div>
   </div>
 </template>
@@ -228,17 +233,19 @@ export default defineComponent({
           alcoholHistory: this.alcoholHistory,
           howRegular: this.howRegular
         }
-        await axios.patch(`${BaseURL}/patient/${this.patientId}`, {
-          socialHistory: socialHistory
-        }).then(response => {
-          console.log(response)
-          console.log('Social history posted successfully!')
-          if (this.isEditing) {
-            this.toggleEdit(); // to switch back to read-only mode
-          }
-          toast.success('Social history saved successfully!')
-        })
-      } catch (error : unknown) {
+        await axios
+          .patch(`${BaseURL}/patient/${this.patientId}`, {
+            socialHistory: socialHistory
+          })
+          .then((response) => {
+            console.log(response)
+            console.log('Social history posted successfully!')
+            if (this.isEditing) {
+              this.toggleEdit() // to switch back to read-only mode
+            }
+            toast.success('Social history saved successfully!')
+          })
+      } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           console.log(error.response)
           if (error.response) {
@@ -255,8 +262,8 @@ export default defineComponent({
       console.log('toggleEdit')
       this.isEditing = !this.isEditing
       console.log(this.isEditing)
-    },
-  },
+    }
+  }
 })
 </script>
 

@@ -18,16 +18,10 @@
                         @keyup.enter="searchPatient"
                     />
                 </div>
-                <router-link active-class="active" to="/addpatient">
+                <router-link active-class="active">
                     <div class="flex items-center space-x-3">
-                        <Text style="font-size:medium" class="hover:text-gray-500">Add New Patient</Text>
-                        <span>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-                            </svg>
-                        </span>
+                        <Text style="font-size:medium" class="hover:text-gray-500"
+                        @click="getData()">Refresh List &#x21bb;</Text>
                     </div>
                 </router-link>
             </div>
@@ -40,9 +34,10 @@
                         <thead>
                             <tr>
                                 <th scope="col"
-                                    class="px-5 py-5 text-sm font-medium text-left text-gray-800 uppercase border-b border-gray-200"
-                                    style="background: rgba(63, 81, 181, 0.3);">
-                                    Patient ID
+                                    class="px-5 py-5 text-sm font-medium text-left text-gray-800 uppercase border-b border-gray-200 hover:cursor-pointer"
+                                    style="background: rgba(63, 81, 181, 0.3);"
+                                    @click="sortById">
+                                    Patient ID &udarr;
                                 </th>
                                 <th scope="col"
                                     class="px-10 py-5 text-sm font-medium text-left text-gray-800 uppercase bg-indigo-200 border-b border-gray-200"
@@ -77,10 +72,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <TableRow class="hover:cursor-pointer" v-for="patient in patients" :key="patient.id"
+                            <TableRow class="hover:cursor-pointer" v-for="(patient, index) in patients" :key="patient.id"
                                 :id="patient.id" :name="patient.name" :khmername="patient.khmerName"
                                 :gender="patient.gender" :DOB="patient.dob" :contactnumber="patient.contactNo"
-                                :queuedat="getMockQueuedAt()" />
+                                :queuedat="getMockQueuedAt()" 
+                                :class="{ 'even-row': index % 2 === 0, 'odd-row': index % 2 !== 0 }"/>
                         </tbody>
                     </table>
                 </div>
@@ -106,7 +102,8 @@ export default {
         return {
             patients: [],
             patientsFixed: [], // for searching patients 
-            token: null
+            token: null,
+            sortAscId: true,
         }
     },
     methods: {
@@ -148,6 +145,16 @@ export default {
                     patient.id.toString().includes(searchValue) ||
                     patient.khmerName.toLowerCase().includes(searchValue);
             });
+        },
+        sortById() {
+            this.patients.sort((a, b) => {
+                if (this.sortAscId) {
+                    return a.id - b.id;
+                } else {
+                    return b.id - a.id;
+                }
+            });
+            this.sortAscId = !this.sortAscId;
         }
     },
     created() {
@@ -159,7 +166,7 @@ export default {
 
 <style>
 .table {
-    width: 1200px;
+    width: 1240px;
 }
 
 .table-heading {
@@ -169,5 +176,13 @@ export default {
 .line {
     height: 1px;
     background: rgba(0, 0, 0, 0.17);
+}
+
+.even-row {
+    background-color: #ffffff;
+}
+
+.odd-row {
+    background-color: #f2f2f2;
 }
 </style>

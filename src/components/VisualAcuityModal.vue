@@ -11,9 +11,16 @@
             <label for="" class="mb-1 block text-sm font-medium text-dark">
               L eye vision (6/)
             </label>
-            <input v-model="lEyeVision" type="number" step="1" placeholder="" @keydown="preventNegative" min="0"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
-              :disabled="!isEditing" />
+            <input
+              v-model="lEyeVision"
+              type="number"
+              step="1"
+              placeholder=""
+              @keydown="preventNegative"
+              min="0"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+              :disabled="!isEditing"
+            />
           </div>
 
           <!-- R eye vision -->
@@ -21,33 +28,51 @@
             <label for="" class="mb-1 block text-sm font-medium text-dark">
               R eye vision (6/)
             </label>
-            <input v-model="rEyeVision" type="number" step="1" placeholder="" @keydown="preventNegative" min="0"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
-              :disabled="!isEditing" />
+            <input
+              v-model="rEyeVision"
+              type="number"
+              step="1"
+              placeholder=""
+              @keydown="preventNegative"
+              min="0"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+              :disabled="!isEditing"
+            />
           </div>
         </div>
 
         <!-- Additional Intervention -->
         <div class="mt-4">
-          <label for="" class="mb-2 block text-sm font-medium text-dark">Additional Intervention:
+          <label for="" class="mb-2 block text-sm font-medium text-dark"
+            >Additional Intervention:
           </label>
-          <textarea v-model="additionalIntervention" rows="3" placeholder="Remarks"
-            class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
-            :disabled="!isEditing"></textarea>
+          <textarea
+            v-model="additionalIntervention"
+            rows="3"
+            placeholder="Remarks"
+            class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            :disabled="!isEditing"
+          ></textarea>
         </div>
 
         <!-- Edit Button -->
         <div class="flex flex-row-reverse w-full mt-5">
-          <button v-if="!isEditing && !isAdd" @click="toggleEdit"
-            class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
+          <button
+            v-if="!isEditing && !isAdd"
+            @click="toggleEdit"
+            class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+          >
             Edit
           </button>
         </div>
 
         <!-- Save Edits Button -->
         <div class="flex flex-row-reverse w-full mt-5">
-          <button v-if="isEditing && !isAdd" @click="submitData"
-            class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
+          <button
+            v-if="isEditing && !isAdd"
+            @click="submitData"
+            class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+          >
             Save Edits
           </button>
         </div>
@@ -86,7 +111,7 @@ export default defineComponent({
       lEyeVision: null as number | null,
       rEyeVision: null as number | null,
       additionalIntervention: '' as string | null,
-      isEditing: false,
+      isEditing: false
     }
   },
   methods: {
@@ -101,22 +126,25 @@ export default defineComponent({
           toast.error('Please fill in R eye vision')
           return
         }
-        const visualAcuity: VisualAcuity = { // need to define outside to catch missing fields
+        const visualAcuity: VisualAcuity = {
+          // need to define outside to catch missing fields
           lEyeVision: this.lEyeVision,
           rEyeVision: this.rEyeVision,
           additionalIntervention: this.additionalIntervention
         }
-        await axios.patch(`${BaseURL}/patient/${this.patientId}`, {
-          visualAcuity: visualAcuity 
-        }).then((response) => {
-          console.log(response.data)
-          console.log('Visual Acuity posted successfully!')
-          if (this.isEditing) {
-            this.toggleEdit(); // to switch back to read-only mode
-          }
-          toast.success('Visual Acuity saved successfully!')
-        })
-      } catch (error : unknown) {
+        await axios
+          .patch(`${BaseURL}/patient/${this.patientId}`, {
+            visualAcuity: visualAcuity
+          })
+          .then((response) => {
+            console.log(response.data)
+            console.log('Visual Acuity posted successfully!')
+            if (this.isEditing) {
+              this.toggleEdit() // to switch back to read-only mode
+            }
+            toast.success('Visual Acuity saved successfully!')
+          })
+      } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           console.log(error.response)
           if (error.response) {
@@ -129,7 +157,7 @@ export default defineComponent({
         }
       }
     },
-    preventNegative(event : any) {
+    preventNegative(event: any) {
       if (event.key === '-' || event.key === 'e') {
         event.preventDefault()
       }
@@ -138,7 +166,7 @@ export default defineComponent({
       console.log('toggleEdit')
       this.isEditing = !this.isEditing
       console.log(this.isEditing)
-    },
+    }
   }
 })
 </script>
