@@ -130,8 +130,24 @@
         <div class="flex flex-row w-1/2 ml-2">
           <div class="flex flex-col w-full">
             <div class="w-full">
-              <label class="mb-1 block text-sm font-medium text-dark"> Photo ID </label>
+              <div class="flex justify-between items-center w-full mb-1">
+                <label class="block text-sm font-medium text-dark">Photo ID</label>
 
+                <!-- Button to Crop Image -->
+                <button
+                  v-if="selectedPhoto && (isEditing || isAdd)"
+                  @click="showCropperModal"
+                  class="btn btn-primary"
+                >
+                  <img
+                    src="../assets/cropicon.svg"
+                    alt="crop icon"
+                    height="15"
+                    width="15"
+                    fill="#3F51B5"
+                  />
+                </button>
+              </div>
               <div
                 :class="[
                   'relative',
@@ -167,6 +183,42 @@
                   </div>
                 </label>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cropper Modal -->
+        <div v-if="isCropperModalVisible" class="modal">
+          <div class="modal-content">
+            <div class="flex flex-row-reverse mb-2" style="cursor: pointer">
+              <span @click="hideCropperModal">
+                <img src="../assets/cross.svg" height="15" width="15" />
+              </span>
+            </div>
+            <cropper
+              ref="cropper"
+              :src="selectedPhoto"
+              :aspect-ratio="1"
+              style="width: 100%"
+              @change="change"
+              :stencil-props="{
+                handlers: {},
+                movable: false,
+                resizable: false
+              }"
+              :stencil-size="{
+                width: 208,
+                height: 160
+              }"
+              image-restriction="stencil"
+            ></cropper>
+            <div class="flex flex-row-reverse">
+              <button
+                @click="saveCroppedImage"
+                class="mt-2 px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>
@@ -327,6 +379,10 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue'
 
+import { Cropper } from 'vue-advanced-cropper'
+import 'vue-advanced-cropper/dist/style.css'
+import CropIcon from '../assets/cropicon.svg'
+
 import type Admin from '@/types/Admin'
 
 import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
@@ -336,6 +392,7 @@ import type Patient from '@/types/Patient'
 import { BaseURL } from '@/main'
 
 export default defineComponent({
+  components: { Cropper },
   props: {
     patientId: {
       type: String,
@@ -403,7 +460,14 @@ export default defineComponent({
       sentToId: null as boolean | null,
       isEditing: false,
       maxDate: new Date().toISOString().split('T')[0], // Set maxDate to today's date in YYYY-MM-DD format
-      isMale: false
+      isMale: false,
+      isCropperModalVisible: false,
+      coordinates: {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0
+      }
     }
   },
   computed: {
@@ -531,28 +595,55 @@ export default defineComponent({
         }
       }
     },
-
+    change({ coordinates, canvas }) {
+      console.log(coordinates, canvas)
+    },
+    showCropperModal() {
+      this.isCropperModalVisible = true
+    },
+    hideCropperModal() {
+      this.isCropperModalVisible = false
+    },
+    saveCroppedImage() {
+      const { coordinates, canvas } = this.$refs.cropper.getResult()
+      this.coordinates = coordinates
+      this.selectedPhoto = canvas.toDataURL()
+      this.photo = this.selectedPhoto.split(',')[1]
+      this.isCropperModalVisible = false
+    },
     handleFileChange(event: any) {
       const file = event.target.files[0]
-      if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          // Remove the data URL prefix to get just the base64 string
-          if (e.target != null && typeof e.target.result == 'string') {
-            this.selectedPhoto = e.target.result
-            this.photo = e.target.result.split(',')[1]
-          }
+      const maxSize = 4 * 1024 * 1024 // 4MB in bytes
+
+      const toast = useToast()
+
+      if (file) {
+        // Check file size
+        if (file.size > maxSize) {
+          toast.error('File size exceeds 4MB')
+          event.target.value = '' // Clear the input
+          return
         }
-        reader.readAsDataURL(file)
-        console.log(this.selectedPhoto)
-        console.log(this.photo)
-      } else {
-        // Reset selectedPhoto or show error message
-        this.selectedPhoto = ''
-        alert('Please select a JPEG, JPG, or PNG file.')
+
+        if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
+          const reader = new FileReader()
+          reader.onload = (e) => {
+            // Remove the data URL prefix to get just the base64 string
+            if (e.target != null && typeof e.target.result == 'string') {
+              this.selectedPhoto = e.target.result
+              this.photo = e.target.result.split(',')[1]
+            }
+          }
+          reader.readAsDataURL(file)
+          console.log(this.selectedPhoto)
+          console.log(this.photo)
+        } else {
+          // Reset selectedPhoto or show error message
+          this.selectedPhoto = ''
+          alert('Please select a JPEG, JPG, or PNG file.')
+        }
       }
     },
-
     formatDateForInput(dateString: string) {
       const date = new Date(dateString)
       const year = date.getUTCFullYear()
@@ -581,5 +672,33 @@ export default defineComponent({
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
+}
+.cropper {
+  height: 600px;
+  width: 600px;
+  background: #ddd;
+}
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 </style>
