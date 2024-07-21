@@ -381,7 +381,6 @@ import { defineComponent, type PropType } from 'vue'
 
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
-import CropIcon from '../assets/cropicon.svg'
 
 import type Admin from '@/types/Admin'
 
