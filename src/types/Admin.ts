@@ -4,8 +4,8 @@ export default interface Admin {
   regDate: string // ISO date string
   name: string
   khmerName: string
-  dob: string // ISO date string
-  age: number
+  dob: string | null // ISO date string
+  age: number | null
   gender: 'M' | 'F'
   village: string
   contactNo: string

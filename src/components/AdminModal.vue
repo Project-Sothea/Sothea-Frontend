@@ -415,8 +415,8 @@ export default defineComponent({
         if (!admin) return
         this.name = admin.name
         this.khmerName = admin.khmerName
-        this.dob = this.formatDateForInput(admin.dob)
-        this.age = admin.age
+        this.dob = admin.dob ? this.formatDateForInput(admin.dob) : null
+        this.age = admin.dob ? this.ageComputed : null
         this.gender = admin.gender
         this.contactNo = admin.contactNo
         this.regDate = this.formatDateForInput(admin.regDate)
@@ -444,8 +444,8 @@ export default defineComponent({
     return {
       name: '' as string,
       khmerName: '' as string,
-      dob: '' as string,
-      age: 0 as number,
+      dob: '' as string | null,
+      age: 0 as number | null ,
       gender: '' as 'M' | 'F' | '',
       contactNo: '' as string,
       regDate: '' as string,
@@ -493,10 +493,6 @@ export default defineComponent({
           toast.error('Khmer Name is required')
           return
         }
-        if (!this.dob) {
-          toast.error('Date of Birth is required')
-          return
-        }
         if (!this.gender) {
           toast.error('Gender is required')
           return
@@ -525,17 +521,13 @@ export default defineComponent({
           toast.error('Sent to Infectious Disease? is required')
           return
         }
-        if (this.ageComputed == null) {
-          toast.error('Please enter a valid Date of Birth')
-          return
-        }
 
         const admin: Admin = {
           // need to define outside to catch missing fields
           name: this.name,
           khmerName: this.khmerName,
-          dob: new Date(this.dob).toISOString(),
-          age: this.ageComputed,
+          dob: this.dob ? new Date(this.dob).toISOString() : null,
+          age: this.dob ? this.ageComputed : null,
           gender: this.gender,
           contactNo: this.contactNo,
           regDate: new Date(this.regDate).toISOString(),
@@ -562,7 +554,7 @@ export default defineComponent({
               this.$emit('patientCreated', {
                 id: response.data['Inserted userid'],
                 name: this.name,
-                age: this.ageComputed
+                age: this.ageComputed || null
               })
             })
         } else if (!this.isAdd && this.isEditing) {

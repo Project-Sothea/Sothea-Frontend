@@ -5,7 +5,7 @@
         <div class="flex flex-col items-start justify-start mx-6 mt-5">
           <h2 class="text-sm font-medium text-[#6675c9]">Name: {{ name }}</h2>
           <h2 class="text-sm font-medium text-[#6675c9]">ID: {{ id }}</h2>
-          <h2 class="text-sm font-medium text-[#6675c9]">Age: {{ age }}</h2>
+          <h2 class="text-sm font-medium text-[#6675c9]">Age: {{ age !== undefined ? age : 'N/A' }}</h2>
         </div>
         <nav class="mt-3 px-6">
           <a
