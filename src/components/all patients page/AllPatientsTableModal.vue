@@ -10,8 +10,8 @@
             <div class="flex justify-between items-center py-5">
                 <div class="relative flex-grow">
                     <input type="text" id="search-input"
-                        class="rounded-lg border-transparent appearance-none w-64 bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                        placeholder="Search by Name/Khmer Name/ID" @input="searchPatient"
+                        class="rounded-lg border-transparent appearance-none w-96 bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                        placeholder="Search by ID/Name/Khmer Name/DOB/Contact No." @input="searchPatient"
                         @keyup.enter="searchPatient" />
                 </div>
                 <div class="flex items-center space-x-3 mx-5 hover:cursor-pointer">
@@ -167,8 +167,17 @@ export default {
                 return patient.name.toLowerCase().includes(searchValue) ||
                     patient.name.includes(searchValue) ||
                     patient.id.toString().includes(searchValue) ||
-                    patient.khmerName.toLowerCase().includes(searchValue);
+                    patient.khmerName.toLowerCase().includes(searchValue) ||
+                    patient.contactNo.includes(searchValue) ||
+                    this.searchByDob(patient.dob, searchValue);
             });
+        },
+        searchByDob(dob, searchValue) {            
+            const dobString = dob.split('T')[0]; // Get YYYY-MM-DD part of the ISO string
+            const [year, month, day] = dobString.split('-');
+
+            const dobFormatted = `${day}/${month}/${year}`; 
+            return dobFormatted.includes(searchValue);
         },
         sortById() {
             this.patients.sort((a, b) => {
