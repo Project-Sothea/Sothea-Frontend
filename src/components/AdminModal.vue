@@ -207,8 +207,8 @@
                 resizable: false
               }"
               :stencil-size="{
-                width: 208,
-                height: 160
+                width: 416,
+                height: 320
               }"
               image-restriction="stencil"
             ></cropper>
@@ -673,8 +673,8 @@ h1 {
   font-weight: 500;
 }
 .cropper {
-  height: 600px;
-  width: 600px;
+  height: 400px;
+  width: 400px;
   background: #ddd;
 }
 .modal {
