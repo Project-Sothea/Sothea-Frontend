@@ -204,11 +204,8 @@
               :stencil-props="{
                 handlers: {},
                 movable: false,
-                resizable: false
-              }"
-              :stencil-size="{
-                width: 416,
-                height: 320
+                resizable: true,
+                aspectRatio: 1.33
               }"
               image-restriction="stencil"
             ></cropper>
