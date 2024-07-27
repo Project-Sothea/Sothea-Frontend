@@ -2,10 +2,11 @@ export default interface Admin {
   id?: number
   familyGroup: string
   regDate: string // ISO date string
+  queueNo: string
   name: string
   khmerName: string
-  dob: string // ISO date string
-  age: number
+  dob: string | null // ISO date string
+  age: number | null
   gender: 'M' | 'F'
   village: string
   contactNo: string

@@ -42,7 +42,7 @@
             </div>
           </div>
           <!-- Row 2 -->
-          <div class="flex flex-row w-full">
+          <div class="flex flex-row w-full mb-2">
             <!-- DOB Input -->
             <div class="w-1/2">
               <label class="mb-1 block text-sm font-medium text-dark"> DOB </label>
@@ -67,7 +67,7 @@
                 placeholder=""
                 min="0"
                 step="1"
-                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 h-[40px] text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
               />
             </div>
 
@@ -93,7 +93,7 @@
           <!-- Row 3 -->
           <div class="flex flex-row w-full mb-2">
             <!-- Contact No. Input -->
-            <div class="w-1/2">
+            <div class="w-full">
               <label class="mb-1 block text-sm font-medium text-dark"> Contact No. </label>
               <div class="relative">
                 <input
@@ -106,6 +106,23 @@
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/phone.svg" width="20" height="20" />
                 </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 4 -->
+          <div class="flex flex-row w-full mb-2">
+            <!-- Contact No. Input -->
+            <div class="w-1/2">
+              <label class="mb-1 block text-sm font-medium text-dark"> Queue No. </label>
+              <div class="relative z-20">
+                <input
+                  v-model="queueNo"
+                  :disabled="!isEditing && !isAdd"
+                  type="text"
+                  placeholder="Queue No."
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+                />
               </div>
             </div>
 
@@ -126,12 +143,27 @@
         </div>
 
         <!-- Photo Input -->
-
         <div class="flex flex-row w-1/2 ml-2">
           <div class="flex flex-col w-full">
             <div class="w-full">
-              <label class="mb-1 block text-sm font-medium text-dark"> Photo ID </label>
+              <div class="flex justify-between items-center w-full mb-1">
+                <label class="block text-sm font-medium text-dark">Photo ID</label>
 
+                <!-- Button to Crop Image -->
+                <button
+                  v-if="selectedPhoto && (isEditing || isAdd)"
+                  @click="showCropperModal"
+                  class="btn btn-primary"
+                >
+                  <img
+                    src="../assets/cropicon.svg"
+                    alt="crop icon"
+                    height="15"
+                    width="15"
+                    fill="#3F51B5"
+                  />
+                </button>
+              </div>
               <div
                 :class="[
                   'relative',
@@ -140,7 +172,7 @@
               >
                 <label
                   for="file"
-                  class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
+                  class="flex w-full h-[252px] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
                 >
                   <div>
                     <input
@@ -167,6 +199,39 @@
                   </div>
                 </label>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cropper Modal -->
+        <div v-if="isCropperModalVisible" class="modal">
+          <div class="modal-content">
+            <div class="flex flex-row-reverse mb-2" style="cursor: pointer">
+              <span @click="hideCropperModal">
+                <img src="../assets/cross.svg" height="15" width="15" />
+              </span>
+            </div>
+            <cropper
+              ref="cropper"
+              :src="selectedPhoto"
+              :aspect-ratio="1"
+              style="width: 100%"
+              @change="change"
+              :stencil-props="{
+                handlers: {},
+                movable: false,
+                resizable: true,
+                aspectRatio: 1.33
+              }"
+              image-restriction="stencil"
+            ></cropper>
+            <div class="flex flex-row-reverse">
+              <button
+                @click="saveCroppedImage"
+                class="mt-2 px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>
@@ -327,6 +392,9 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue'
 
+import { Cropper } from 'vue-advanced-cropper'
+import 'vue-advanced-cropper/dist/style.css'
+
 import type Admin from '@/types/Admin'
 
 import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
@@ -336,6 +404,7 @@ import type Patient from '@/types/Patient'
 import { BaseURL } from '@/main'
 
 export default defineComponent({
+  components: { Cropper },
   props: {
     patientId: {
       type: String,
@@ -359,11 +428,12 @@ export default defineComponent({
         if (!admin) return
         this.name = admin.name
         this.khmerName = admin.khmerName
-        this.dob = this.formatDateForInput(admin.dob)
-        this.age = admin.age
+        this.dob = admin.dob ? this.formatDateForInput(admin.dob) : null
+        this.age = admin.dob ? this.ageComputed : null
         this.gender = admin.gender
-        this.contactNo = admin.contactNo
+        this.queueNo = admin.queueNo
         this.regDate = this.formatDateForInput(admin.regDate)
+        this.contactNo = admin.contactNo
         this.village = admin.village
         this.familyGroup = admin.familyGroup
         this.pregnant = admin.pregnant
@@ -388,11 +458,12 @@ export default defineComponent({
     return {
       name: '' as string,
       khmerName: '' as string,
-      dob: '' as string,
-      age: 0 as number,
+      dob: '' as string | null,
+      age: 0 as number | null ,
       gender: '' as 'M' | 'F' | '',
-      contactNo: '' as string,
+      queueNo: '' as string,
       regDate: '' as string,
+      contactNo: '' as string,
       village: '' as string,
       familyGroup: '' as string,
       pregnant: null as boolean | null,
@@ -403,7 +474,14 @@ export default defineComponent({
       sentToId: null as boolean | null,
       isEditing: false,
       maxDate: new Date().toISOString().split('T')[0], // Set maxDate to today's date in YYYY-MM-DD format
-      isMale: false
+      isMale: false,
+      isCropperModalVisible: false,
+      coordinates: {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0
+      }
     }
   },
   computed: {
@@ -430,20 +508,20 @@ export default defineComponent({
           toast.error('Khmer Name is required')
           return
         }
-        if (!this.dob) {
-          toast.error('Date of Birth is required')
-          return
-        }
         if (!this.gender) {
           toast.error('Gender is required')
           return
         }
-        if (!this.contactNo) {
-          toast.error('Contact No. is required')
+        if (!this.queueNo) {
+          toast.error('Queue No. is required')
           return
         }
         if (!this.regDate) {
           toast.error('Date Registered is required')
+          return
+        }
+        if (!this.contactNo) {
+          toast.error('Contact No. is required')
           return
         }
         if (!this.village) {
@@ -462,20 +540,17 @@ export default defineComponent({
           toast.error('Sent to Infectious Disease? is required')
           return
         }
-        if (this.ageComputed == null) {
-          toast.error('Please enter a valid Date of Birth')
-          return
-        }
 
         const admin: Admin = {
           // need to define outside to catch missing fields
           name: this.name,
           khmerName: this.khmerName,
-          dob: new Date(this.dob).toISOString(),
-          age: this.ageComputed,
+          dob: this.dob ? new Date(this.dob).toISOString() : null,
+          age: this.dob ? this.ageComputed : null,
           gender: this.gender,
-          contactNo: this.contactNo,
+          queueNo: this.queueNo,
           regDate: new Date(this.regDate).toISOString(),
+          contactNo: this.contactNo,
           village: this.village,
           familyGroup: this.familyGroup,
           pregnant: this.pregnant,
@@ -499,7 +574,7 @@ export default defineComponent({
               this.$emit('patientCreated', {
                 id: response.data['Inserted userid'],
                 name: this.name,
-                age: this.ageComputed
+                age: this.ageComputed || null
               })
             })
         } else if (!this.isAdd && this.isEditing) {
@@ -531,28 +606,55 @@ export default defineComponent({
         }
       }
     },
-
+    change({ coordinates, canvas }) {
+      console.log(coordinates, canvas)
+    },
+    showCropperModal() {
+      this.isCropperModalVisible = true
+    },
+    hideCropperModal() {
+      this.isCropperModalVisible = false
+    },
+    saveCroppedImage() {
+      const { coordinates, canvas } = this.$refs.cropper.getResult()
+      this.coordinates = coordinates
+      this.selectedPhoto = canvas.toDataURL()
+      this.photo = this.selectedPhoto.split(',')[1]
+      this.isCropperModalVisible = false
+    },
     handleFileChange(event: any) {
       const file = event.target.files[0]
-      if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          // Remove the data URL prefix to get just the base64 string
-          if (e.target != null && typeof e.target.result == 'string') {
-            this.selectedPhoto = e.target.result
-            this.photo = e.target.result.split(',')[1]
-          }
+      const maxSize = 4 * 1024 * 1024 // 4MB in bytes
+
+      const toast = useToast()
+
+      if (file) {
+        // Check file size
+        if (file.size > maxSize) {
+          toast.error('File size exceeds 4MB')
+          event.target.value = '' // Clear the input
+          return
         }
-        reader.readAsDataURL(file)
-        console.log(this.selectedPhoto)
-        console.log(this.photo)
-      } else {
-        // Reset selectedPhoto or show error message
-        this.selectedPhoto = ''
-        alert('Please select a JPEG, JPG, or PNG file.')
+
+        if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
+          const reader = new FileReader()
+          reader.onload = (e) => {
+            // Remove the data URL prefix to get just the base64 string
+            if (e.target != null && typeof e.target.result == 'string') {
+              this.selectedPhoto = e.target.result
+              this.photo = e.target.result.split(',')[1]
+            }
+          }
+          reader.readAsDataURL(file)
+          console.log(this.selectedPhoto)
+          console.log(this.photo)
+        } else {
+          // Reset selectedPhoto or show error message
+          this.selectedPhoto = ''
+          alert('Please select a JPEG, JPG, or PNG file.')
+        }
       }
     },
-
     formatDateForInput(dateString: string) {
       const date = new Date(dateString)
       const year = date.getUTCFullYear()
@@ -581,5 +683,33 @@ export default defineComponent({
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
+}
+.cropper {
+  height: 400px;
+  width: 400px;
+  background: #ddd;
+}
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 </style>
