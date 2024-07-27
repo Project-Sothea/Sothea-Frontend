@@ -8,7 +8,7 @@
           <h2 class="text-sm font-medium text-[#6675c9]">Age: {{ age !== undefined ? age : 'N/A' }}</h2>
         </div>
         <nav class="mt-3 px-6">
-          <a
+          <a 
             class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'admin',

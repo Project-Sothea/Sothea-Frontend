@@ -42,7 +42,7 @@
             </div>
           </div>
           <!-- Row 2 -->
-          <div class="flex flex-row w-full">
+          <div class="flex flex-row w-full mb-2">
             <!-- DOB Input -->
             <div class="w-1/2">
               <label class="mb-1 block text-sm font-medium text-dark"> DOB </label>
@@ -67,7 +67,7 @@
                 placeholder=""
                 min="0"
                 step="1"
-                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 h-[40px] text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
               />
             </div>
 
@@ -93,7 +93,7 @@
           <!-- Row 3 -->
           <div class="flex flex-row w-full mb-2">
             <!-- Contact No. Input -->
-            <div class="w-1/2">
+            <div class="w-full">
               <label class="mb-1 block text-sm font-medium text-dark"> Contact No. </label>
               <div class="relative">
                 <input
@@ -106,6 +106,23 @@
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/phone.svg" width="20" height="20" />
                 </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 4 -->
+          <div class="flex flex-row w-full mb-2">
+            <!-- Contact No. Input -->
+            <div class="w-1/2">
+              <label class="mb-1 block text-sm font-medium text-dark"> Queue No. </label>
+              <div class="relative z-20">
+                <input
+                  v-model="queueNo"
+                  :disabled="!isEditing && !isAdd"
+                  type="text"
+                  placeholder="Queue No."
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+                />
               </div>
             </div>
 
@@ -126,7 +143,6 @@
         </div>
 
         <!-- Photo Input -->
-
         <div class="flex flex-row w-1/2 ml-2">
           <div class="flex flex-col w-full">
             <div class="w-full">
@@ -156,7 +172,7 @@
               >
                 <label
                   for="file"
-                  class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
+                  class="flex w-full h-[252px] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
                 >
                   <div>
                     <input
@@ -418,8 +434,9 @@ export default defineComponent({
         this.dob = admin.dob ? this.formatDateForInput(admin.dob) : null
         this.age = admin.dob ? this.ageComputed : null
         this.gender = admin.gender
-        this.contactNo = admin.contactNo
+        this.queueNo = admin.queueNo
         this.regDate = this.formatDateForInput(admin.regDate)
+        this.contactNo = admin.contactNo
         this.village = admin.village
         this.familyGroup = admin.familyGroup
         this.pregnant = admin.pregnant
@@ -447,8 +464,9 @@ export default defineComponent({
       dob: '' as string | null,
       age: 0 as number | null ,
       gender: '' as 'M' | 'F' | '',
-      contactNo: '' as string,
+      queueNo: '' as string,
       regDate: '' as string,
+      contactNo: '' as string,
       village: '' as string,
       familyGroup: '' as string,
       pregnant: null as boolean | null,
@@ -497,12 +515,16 @@ export default defineComponent({
           toast.error('Gender is required')
           return
         }
-        if (!this.contactNo) {
-          toast.error('Contact No. is required')
+        if (!this.queueNo) {
+          toast.error('Queue No. is required')
           return
         }
         if (!this.regDate) {
           toast.error('Date Registered is required')
+          return
+        }
+        if (!this.contactNo) {
+          toast.error('Contact No. is required')
           return
         }
         if (!this.village) {
@@ -529,8 +551,9 @@ export default defineComponent({
           dob: this.dob ? new Date(this.dob).toISOString() : null,
           age: this.dob ? this.ageComputed : null,
           gender: this.gender,
-          contactNo: this.contactNo,
+          queueNo: this.queueNo,
           regDate: new Date(this.regDate).toISOString(),
+          contactNo: this.contactNo,
           village: this.village,
           familyGroup: this.familyGroup,
           pregnant: this.pregnant,
