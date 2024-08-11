@@ -212,26 +212,16 @@
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input
-                type="radio"
-                name="std"
-                class="w-4 h-4"
-                v-model="sexuallyTransmittedDisease"
-                :value="true"
-                :disabled="!isEditing"
-              />
+              <input type="radio" name="std" class="w-4 h-4" v-model="sexuallyTransmittedDisease" :value="true"
+                :disabled="!isEditing" 
+                @click="yStd=true"/>
             </label>
           </div>
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
-              <input
-                type="radio"
-                name="std"
-                class="w-4 h-4"
-                v-model="sexuallyTransmittedDisease"
-                :value="false"
-                :disabled="!isEditing"
-              />
+              <input type="radio" name="std" class="w-4 h-4" v-model="sexuallyTransmittedDisease" :value="false"
+                :disabled="!isEditing" 
+                @click="yStd=false"/>
             </label>
           </div>
         </div>
@@ -243,13 +233,9 @@
           <label for="" class="mb-2 block text-sm font-normal text-dark"
             >If Y to STD, specify:
           </label>
-          <textarea
-            rows="2"
-            placeholder="Remarks"
-            class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
-            v-model="specifiedSTDs"
-            :disabled="!isEditing"
-          ></textarea>
+          <textarea rows="2" placeholder="Remarks"
+            class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+            v-model="specifiedSTDs" :disabled="!isEditing || !yStd" :required="yStd"></textarea>
         </label>
       </div>
 
@@ -331,6 +317,7 @@ export default defineComponent({
       this.sexuallyTransmittedDisease = pastMedHist.sexuallyTransmittedDisease
       this.specifiedSTDs = pastMedHist.specifiedSTDs
       this.others = pastMedHist.others
+      this.yStd = this.sexuallyTransmittedDisease
     }
   },
   data() {
@@ -344,7 +331,8 @@ export default defineComponent({
       sexuallyTransmittedDisease: null as boolean | null,
       specifiedSTDs: '' as string | null,
       others: '' as string | null,
-      isEditing: false
+      isEditing: false,
+      yStd: false
     }
   },
   methods: {
@@ -363,8 +351,14 @@ export default defineComponent({
           toast.error('Please select yes/no for all fields')
           return
         }
-        const pastMedicalHistory: PastMedicalHistory = {
-          // need to define outside to catch missing fields
+        if (this.yStd && !this.specifiedSTDs) {
+          toast.error('Please specify the sexually transmitted disease')
+          return
+        }
+        if (!this.yStd) { // clear specifiedSTDs if STD is no
+          this.specifiedSTDs = ''
+        }
+        const pastMedicalHistory: PastMedicalHistory = { // need to define outside to catch missing fields
           tuberculosis: this.tuberculosis,
           diabetes: this.diabetes,
           hypertension: this.hypertension,

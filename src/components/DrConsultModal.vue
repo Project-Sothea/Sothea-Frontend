@@ -327,7 +327,7 @@
           <div class="w-1/3"></div>
           <div class="font-medium text-sm pr-5">Yes</div>
           <div class="font-medium text-sm">No</div>
-          <div class="font-medium text-sm w-1/3 pl-11">Location</div>
+          <div class="font-medium text-sm w-1/3" style="padding-left: 4.3rem;">Location</div>
         </div>
       </div>
 
@@ -339,38 +339,24 @@
           <div class="flex w-1/6">
             <div class="flex items-center pr-7">
               <label class="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="ref-needed"
-                  class="w-4 h-4"
-                  v-model="referralNeeded"
-                  :value="true"
-                  :disabled="!isEditing"
-                />
+                <input type="radio" name="ref-needed" class="w-4 h-4" v-model="referralNeeded" :value="true"
+                  :disabled="!isEditing" 
+                  @click="yLocation=true"/>
               </label>
             </div>
             <div class="flex items-center">
               <label class="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="ref-needed"
-                  class="w-4 h-4"
-                  v-model="referralNeeded"
-                  :value="false"
-                  :disabled="!isEditing"
-                />
+                <input type="radio" name="ref-needed" class="w-4 h-4" v-model="referralNeeded" :value="false"
+                  :disabled="!isEditing" 
+                  @click="yLocation=false"/>
               </label>
             </div>
           </div>
 
           <div class="flex w-1/3 grow">
-            <textarea
-              v-model="referralLoc"
-              rows="1"
-              placeholder="Enter Location"
-              class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
-              :disabled="!isEditing"
-            ></textarea>
+            <textarea v-model="referralLoc" rows="1" placeholder="Enter Location"
+              class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2"
+              :disabled="!isEditing || !yLocation" :required="yLocation"></textarea>
           </div>
         </div>
       </div>
@@ -442,28 +428,30 @@ export default defineComponent({
       referralNeeded: null as boolean | null,
       referralLoc: '' as string | null,
       remarks: 'remarks' as string | null,
-      isEditing: false
+      isEditing: false,
+      yLocation: false,
     }
   },
   created() {
     if (!this.isAdd) {
-      const drConsult = this.patientData.doctorsconsultation
-      if (!drConsult) return
-      this.healthy = drConsult.healthy
-      this.msk = drConsult.msk
-      this.cvs = drConsult.cvs
-      this.respi = drConsult.respi
-      this.gu = drConsult.gu
-      this.git = drConsult.git
-      this.eye = drConsult.eye
-      this.derm = drConsult.derm
-      this.others = drConsult.others
-      this.consultationNotes = drConsult.consultationNotes
-      this.diagnosis = drConsult.diagnosis
-      this.treatment = drConsult.treatment
-      this.referralNeeded = drConsult.referralNeeded
-      this.referralLoc = drConsult.referralLoc
-      this.remarks = drConsult.remarks
+      const drConsult = this.patientData.doctorsconsultation;
+      if (!drConsult) return;
+      this.healthy = drConsult.healthy;
+      this.msk = drConsult.msk;
+      this.cvs = drConsult.cvs;
+      this.respi = drConsult.respi;
+      this.gu = drConsult.gu;
+      this.git = drConsult.git;
+      this.eye = drConsult.eye;
+      this.derm = drConsult.derm;
+      this.others = drConsult.others;
+      this.consultationNotes = drConsult.consultationNotes;
+      this.diagnosis = drConsult.diagnosis;
+      this.treatment = drConsult.treatment;
+      this.referralNeeded = drConsult.referralNeeded;
+      this.referralLoc = drConsult.referralLoc;
+      this.remarks = drConsult.remarks;
+      this.yLocation = this.referralNeeded;
     }
   },
   methods: {
@@ -510,8 +498,14 @@ export default defineComponent({
           toast.error('Please indicate if patient needs referral')
           return
         }
-        const doctorsConsultation: DoctorsConsultation = {
-          // need to define outside to catch missing fields
+        if (this.referralNeeded && this.referralLoc === '') {
+          toast.error('Please enter referral location')
+          return
+        }
+        if (!this.referralNeeded) { // if referral not needed, set referralLoc to null
+          this.referralLoc = null
+        }
+        const doctorsConsultation: DoctorsConsultation = { // need to define outside to catch missing fields
           healthy: this.healthy,
           msk: this.msk,
           cvs: this.cvs,
