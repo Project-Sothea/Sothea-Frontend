@@ -280,6 +280,8 @@
               placeholder="Specify"
               class="w-full bg-transparent rounded-md border border-stroke py-2 px-2 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
+              ref="others"
+              @input="removeHighlight('others')"
             />
           </div>
         </div>
@@ -470,44 +472,22 @@ export default defineComponent({
     async submitData() {
       const toast = useToast()
       try {
-        if (this.healthy === null) {
-          toast.error('Please indicate if patient is healthy')
+        if (
+          this.healthy === null ||
+          this.msk === null ||
+          this.cvs === null ||
+          this.respi === null ||
+          this.gu === null ||
+          this.git === null ||
+          this.eye === null ||
+          this.derm === null ||
+          this.referralNeeded === null
+        ) {
+          toast.error('Please select yes/no for all fields')
           return
-        }
-        if (this.msk === null) {
-          toast.error('Please indicate if patient has MSK')
-          return
-        }
-        if (this.cvs === null) {
-          toast.error('Please indicate if patient has CVS')
-          return
-        }
-        if (this.respi === null) {
-          toast.error('Please indicate if patient has Respi')
-          return
-        }
-        if (this.gu === null) {
-          toast.error('Please indicate if patient has GU')
-          return
-        }
-        if (this.git === null) {
-          toast.error('Please indicate if patient has GIT')
-          return
-        }
-        if (this.eye === null) {
-          toast.error('Please indicate if patient has Eye')
-          return
-        }
-        if (this.derm === null) {
-          toast.error('Please indicate if patient has Derm')
-          return
-        }
-        if (this.others === '') {
-          toast.error('Please indicate if patient has Others')
-          return
-        }
-        if (this.referralNeeded === null) {
-          toast.error('Please indicate if patient needs referral')
+        } else if (this.others === '') {
+          (this.$refs.others as HTMLElement).classList.add('input-error')
+          toast.error('Please fill out the others field')
           return
         }
         const doctorsConsultation: DoctorsConsultation = {
@@ -553,7 +533,9 @@ export default defineComponent({
         }
       }
     },
-
+    removeHighlight(ref: string) {
+      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+    },
     toggleEdit() {
       console.log('toggleEdit')
       this.isEditing = !this.isEditing
@@ -567,5 +549,8 @@ export default defineComponent({
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
+}
+.input-error {
+  border: 1px solid red;
 }
 </style>

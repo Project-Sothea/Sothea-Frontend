@@ -18,6 +18,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="temperature"
+              @input="removeHighlight('temperature')"
             />
           </div>
 
@@ -33,6 +35,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="spO2"
+              @input="removeHighlight('spO2')"
             />
           </div>
         </div>
@@ -51,6 +55,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="systolicBP1"
+              @input="removeHighlight('systolicBP1')"
             />
           </div>
           <!-- Systolic BP2 -->
@@ -65,6 +71,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="systolicBP2"
+              @input="removeHighlight('systolicBP2')"
             />
           </div>
 
@@ -78,6 +86,8 @@
               step="0.01"
               placeholder=""
               class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              ref="avgSystolicBP"
+              @input="removeHighlight('avgSystolicBP')"
             />
           </div>
         </div>
@@ -96,6 +106,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="diastolicBP1"
+              @input="removeHighlight('diastolicBP1')"
             />
           </div>
           <!-- Diastolic BP2 -->
@@ -110,6 +122,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="diastolicBP2"
+              @input="removeHighlight('diastolicBP2')"
             />
           </div>
 
@@ -125,6 +139,8 @@
               step="0.01"
               placeholder=""
               class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              ref="avgDiastolicBP"
+              @input="removeHighlight('avgDiastolicBP')"
             />
           </div>
         </div>
@@ -143,6 +159,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="hr1"
+              @input="removeHighlight('hr1')"
             />
           </div>
           <!-- HR2 -->
@@ -157,6 +175,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="hr2"
+              @input="removeHighlight('hr2')"
             />
           </div>
 
@@ -170,6 +190,8 @@
               step="1"
               placeholder=""
               class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              ref="avgHR"
+              @input="removeHighlight('avgHR')"
             />
           </div>
         </div>
@@ -190,6 +212,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="randomBloodGlucoseMmolL"
+              @input="removeHighlight('randomBloodGlucoseMmolL')"
             />
           </div>
 
@@ -207,6 +231,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="randomBloodGlucoseMmolLp"
+              @input="removeHighlight('randomBloodGlucoseMmolLp')"
             />
           </div>
         </div>
@@ -320,58 +346,55 @@ export default defineComponent({
     async submitData() {
       const toast = useToast()
       try {
+        let hasError = false
+        // Check for missing fields
         if (this.temperature === null) {
-          toast.error('Please enter temperature')
-          return
+          (this.$refs.temperature as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.spO2 === null) {
-          toast.error('Please enter SpO2')
-          return
+          (this.$refs.spO2 as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.systolicBP1 === null) {
-          toast.error('Please enter Systolic BP1')
-          return
+          (this.$refs.systolicBP1 as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.systolicBP2 === null) {
-          toast.error('Please enter Systolic BP2')
-          return
+          (this.$refs.systolicBP2 as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.diastolicBP1 === null) {
-          toast.error('Please enter Diastolic BP1')
-          return
+          (this.$refs.diastolicBP1 as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.diastolicBP2 === null) {
-          toast.error('Please enter Diastolic BP2')
-          return
+          (this.$refs.diastolicBP2 as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.hr1 === null) {
-          toast.error('Please enter HR1')
-          return
+          (this.$refs.hr1 as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.hr2 === null) {
-          toast.error('Please enter HR2')
-          return
+          (this.$refs.hr2 as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.randomBloodGlucoseMmolL === null) {
-          toast.error('Please enter Random Blood Glucose (mmol/L)')
-          return
+          (this.$refs.randomBloodGlucoseMmolL as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.randomBloodGlucoseMmolLp === null) {
-          toast.error('Please enter Random Blood Glucose (mg/dL)')
+          (this.$refs.randomBloodGlucoseMmolLp as HTMLElement).classList.add('input-error')
+          hasError = true
+        }
+
+        // If any field is missing, display error message and return
+        if (hasError) {
+          toast.error('Please fill out the highlighted fields');
           return
         }
-        if (this.avgSystolicBP === null) {
-          toast.error('Average Systolic BP cannot be empty')
-          return
-        }
-        if (this.avgDiastolicBP === null) {
-          toast.error('Average Diastolic BP cannot be empty')
-          return
-        }
-        if (this.avgHR === null) {
-          toast.error('Average HR cannot be empty')
-          return
-        }
+
         const vitalStatistics: VitalStatistics = {
           // need to define outside to catch missing fields
           temperature: this.temperature,
@@ -413,7 +436,9 @@ export default defineComponent({
         }
       }
     },
-
+    removeHighlight(ref: string) {
+      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+    },
     toggleEdit() {
       console.log('toggleEdit')
       this.isEditing = !this.isEditing
@@ -431,5 +456,8 @@ export default defineComponent({
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
+}
+.input-error {
+  border: 1px solid red;
 }
 </style>

@@ -249,6 +249,8 @@
             class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             v-model="specifiedSTDs"
             :disabled="!isEditing"
+            ref="specifiedSTDs"
+            @input="removeHighlight('specifiedSTDs')"
           ></textarea>
         </label>
       </div>
@@ -351,6 +353,11 @@ export default defineComponent({
     async submitData() {
       const toast = useToast()
       try {
+        // Reset error highlights
+        Object.keys(this.$refs).forEach((ref) => {
+          (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+        })
+        
         if (
           this.tuberculosis === null ||
           this.diabetes === null ||
@@ -361,6 +368,11 @@ export default defineComponent({
           this.sexuallyTransmittedDisease === null
         ) {
           toast.error('Please select yes/no for all fields')
+          return
+        }
+        if (this.sexuallyTransmittedDisease && !this.specifiedSTDs) {
+          (this.$refs.specifiedSTDs as HTMLElement).classList.add('input-error')
+          toast.error('Please specify the STD')
           return
         }
         const pastMedicalHistory: PastMedicalHistory = {
@@ -398,7 +410,9 @@ export default defineComponent({
         }
       }
     },
-
+    removeHighlight(ref: string) {
+      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+    },
     toggleEdit() {
       console.log('toggleEdit')
       this.isEditing = !this.isEditing
@@ -412,5 +426,8 @@ export default defineComponent({
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
+}
+.input-error {
+  border: 1px solid red;
 }
 </style>

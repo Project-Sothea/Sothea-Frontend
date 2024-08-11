@@ -5,7 +5,7 @@
       <br />
       <div class="flex flex-row w-full">
         <div class="flex flex-col">
-          <!-- Row 1 -->
+          <!-- Row 1 --> 
           <div class="flex flex-row mb-2">
             <!-- Name Input -->
             <div class="w-1/2">
@@ -14,7 +14,9 @@
                 <input
                   v-model="name"
                   :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('name')"
                   type="text"
+                  ref="name"
                   placeholder="Name"
                   class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 />
@@ -31,7 +33,9 @@
                 <input
                   v-model="khmerName"
                   :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('khmerName')"
                   type="text"
+                  ref="khmerName"
                   placeholder="Khmer Name"
                   class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 />
@@ -77,6 +81,8 @@
               <div class="relative z-20">
                 <select
                   v-model="gender"
+                  @change="removeHighlight('gender')"
+                  ref="gender"
                   :disabled="!isEditing && !isAdd"
                   class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 >
@@ -99,7 +105,9 @@
                 <input
                   v-model="contactNo"
                   :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('contactNo')"
                   type="tel"
+                  ref="contactNo"
                   placeholder="Contact No."
                   class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 />
@@ -119,7 +127,9 @@
                 <input
                   v-model="queueNo"
                   :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('queueNo')"
                   type="text"
+                  ref="queueNo"
                   placeholder="Queue No."
                   class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
                 />
@@ -133,7 +143,9 @@
                 <input
                   v-model="regDate"
                   :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('regDate')"
                   type="date"
+                  ref="regDate"
                   :max="maxDate"
                   class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
                 />
@@ -246,7 +258,9 @@
             <input
               v-model="village"
               :disabled="!isEditing && !isAdd"
+              @input="removeHighlight('village')"
               type="text"
+              ref="village"
               placeholder="Village"
               class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             />
@@ -263,7 +277,9 @@
             <input
               v-model="familyGroup"
               :disabled="!isEditing && !isAdd"
+              @input="removeHighlight('familyGroup')"
               type="text"
+              ref="familyGroup"
               placeholder="Family Group"
               class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             />
@@ -286,6 +302,8 @@
             <select
               v-model="pregnant"
               :disabled="!isEditing && !isAdd"
+              @change="removeHighlight('pregnant')"
+              ref="pregnant"
               class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="true">Y</option>
@@ -343,6 +361,8 @@
             <select
               v-model="sentToId"
               :disabled="!isEditing && !isAdd"
+              @change="removeHighlight('sentToId')"
+              ref="sentToId"
               class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="true">Y</option>
@@ -499,46 +519,54 @@ export default defineComponent({
       const toast = useToast()
 
       try {
-        // Perform validation checks
+        let hasError = false;
+
+        // Perform validation checks and highlight missing compulsory fields
         if (!this.name) {
-          toast.error('Name is required')
-          return
+          (this.$refs.name as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.khmerName) {
-          toast.error('Khmer Name is required')
-          return
+          (this.$refs.khmerName as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.gender) {
-          toast.error('Gender is required')
-          return
+          (this.$refs.gender as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.queueNo) {
-          toast.error('Queue No. is required')
-          return
+          (this.$refs.queueNo as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.regDate) {
-          toast.error('Date Registered is required')
-          return
+          (this.$refs.regDate as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.contactNo) {
-          toast.error('Contact No. is required')
-          return
+          (this.$refs.contactNo as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.village) {
-          toast.error('Village is required')
-          return
+          (this.$refs.village as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (this.familyGroup == null) {
-          toast.error('Family Group is required')
-          return
+          (this.$refs.familyGroup as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (this.pregnant == null) {
-          toast.error('Pregnant? is required')
-          return
+          (this.$refs.pregnant as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (this.sentToId == null) {
-          toast.error('Sent to Infectious Disease? is required')
-          return
+          (this.$refs.sentToId as HTMLElement).classList.add('input-error');
+          hasError = true;
+        }
+
+        // If there are errors, show a toast notification to get user to fill out the highlighted fields
+        if (hasError) {
+          toast.error('Please fill out the highlighted fields');
+          return;
         }
 
         const admin: Admin = {
@@ -604,6 +632,12 @@ export default defineComponent({
           console.log(error)
           toast.error('An internal server error occurred.')
         }
+      }
+    },
+    removeHighlight(field: string) {
+      const element = this.$refs[field] as HTMLElement;
+      if (element && element.classList.contains('input-error')) {
+        element.classList.remove('input-error');
       }
     },
     change({ coordinates, canvas }) {
@@ -711,5 +745,8 @@ h1 {
   max-width: 500px;
   border-radius: 10px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+.input-error {
+  border: 1px solid red;
 }
 </style>

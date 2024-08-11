@@ -54,6 +54,8 @@
               v-model="numberOfYears"
               class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
               :disabled="!isEditing"
+              ref="numberOfYears"
+              @input="removeHighlight('numberOfYears')"
             ></textarea>
           </div>
         </div>
@@ -101,6 +103,8 @@
               v-model="cigarettesPerDay"
               class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
               :disabled="!isEditing"
+              ref="cigarettesPerDay"
+              @input="removeHighlight('cigarettesPerDay')"
             ></textarea>
           </div>
         </div>
@@ -145,6 +149,8 @@
               v-model="howRegular"
               class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
               :disabled="!isEditing"
+              ref="howRegular"
+              @input="removeHighlight('howRegular')"
             ></textarea>
           </div>
         </div>
@@ -227,18 +233,37 @@ export default defineComponent({
     async submitData() {
       const toast = useToast()
       try {
-        if (this.pastSmokingHistory === null) {
-          toast.error('Please indicate past smoking history')
+        // Check if all Yes/No fields are filled
+        if (this.pastSmokingHistory === null || this.currentSmokingHistory === null || this.alcoholHistory === null) {
+          toast.error('Please select yes/no for all fields')
           return
         }
-        if (this.currentSmokingHistory === null) {
-          toast.error('Please indicate current smoking history')
+
+        // Reset error highlighting
+        Object.keys(this.$refs).forEach((ref) => {
+          (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+        })
+        
+        // If Yes is selected, its corresponding field should not be empty
+        let hasError = false
+        if (this.pastSmokingHistory === true && this.numberOfYears === null) {
+          (this.$refs.numberOfYears as HTMLElement).classList.add('input-error')
+          hasError = true
+        }
+        if (this.currentSmokingHistory === true && this.cigarettesPerDay === null) {
+          (this.$refs.cigarettesPerDay as HTMLElement).classList.add('input-error')
+          hasError = true
+        }
+        if (this.alcoholHistory === true && this.howRegular === '') {
+          (this.$refs.howRegular as HTMLElement).classList.add('input-error')
+          hasError = true
+        }
+
+        if (hasError) {
+          toast.error('Please fill out the highlighted fields');
           return
         }
-        if (this.alcoholHistory === null) {
-          toast.error('Please indicate alcohol history')
-          return
-        }
+
         const socialHistory: SocialHistory = {
           // need to define outside to catch missing fields
           pastSmokingHistory: this.pastSmokingHistory,
@@ -273,6 +298,9 @@ export default defineComponent({
         }
       }
     },
+    removeHighlight(ref: string) {
+      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+    },
     toggleEdit() {
       console.log('toggleEdit')
       this.isEditing = !this.isEditing
@@ -286,5 +314,8 @@ export default defineComponent({
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
+}
+.input-error {
+  border: 1px solid red;
 }
 </style>
