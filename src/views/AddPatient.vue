@@ -1,7 +1,5 @@
 <template>
   <NavBar />
-  <!-- <SideBar /> -->
-
   <div class="flex">
     <SideBar
       :activeSection="activeSection"
@@ -10,21 +8,30 @@
       :name="undefined"
       :age="undefined"
     />
-    <div class="content flex-grow p-6">
-      <keep-alive>
-        <component
-          :is="activeComponent"
-          :patientId="patientId"
-          @patientCreated="handlePatientCreated"
-        ></component>
-      </keep-alive>
+    <div class="main-content flex-grow">
+      <SubNavBar @openModal="openRecords" />
+
+      <div class="content p-6">
+        <keep-alive>
+          <component
+            :is="activeComponent"
+            :patientId="patientId"
+            @patientCreated="handlePatientCreated"
+          ></component>
+        </keep-alive>
+      </div>
     </div>
+
+    <!-- Records Modal -->
+    <RecordsModal :isOpen="showRecords" @close="closeRecords"> </RecordsModal>
   </div>
 </template>
 
 <script lang="ts">
 import NavBar from '../components/NavBar.vue'
 import SideBar from '../components/SideBar.vue'
+import SubNavBar from '../components/SubNavBar.vue'
+import RecordsModal from '../components/RecordsModal.vue'
 
 import AdminModal from '../components/AdminModal.vue'
 import PastMedHistModal from '../components/PastMedHistModal.vue'
@@ -40,6 +47,8 @@ export default {
   components: {
     NavBar,
     SideBar,
+    SubNavBar,
+    RecordsModal,
     AdminModal,
     PastMedHistModal,
     SocialHistModal,
@@ -54,6 +63,7 @@ export default {
       patientId: '', // Empty value passed to the Sidebar since it is not needed
       name: '' as string, // Empty value passed to the Sidebar since it is not needed
       age: null, // Empty value passed to the Sidebar since it is not needed
+      showRecords: false
     }
   },
   computed: {
@@ -82,16 +92,22 @@ export default {
     this.getIsValidToken()
   },
   methods: {
-    setActiveSection(section : string) {
+    setActiveSection(section: string) {
       this.activeSection = section
     },
     async getIsValidToken() {
       await axios.get('/login/is-valid-token')
     },
-    handlePatientCreated(event : any) {
+    handlePatientCreated(event: any) {
       const { id, name, age } = event
       console.log(`Patient Created Wth ID: ${id}, Name: ${name}, Age: ${age}`)
-      this.$router.push("/patient/" + id)
+      this.$router.push('/patient/' + id)
+    },
+    openRecords() {
+      this.showRecords = true
+    },
+    closeRecords() {
+      this.showRecords = false
     }
   }
 }
