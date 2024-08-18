@@ -5,7 +5,7 @@
       <br />
       <div class="flex flex-row w-full">
         <div class="flex flex-col">
-          <!-- Row 1 -->
+          <!-- Row 1 --> 
           <div class="flex flex-row mb-2">
             <!-- Name Input -->
             <div class="w-1/2">
@@ -14,7 +14,9 @@
                 <input
                   v-model="name"
                   :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('name')"
                   type="text"
+                  ref="name"
                   placeholder="Name"
                   class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 />
@@ -31,7 +33,9 @@
                 <input
                   v-model="khmerName"
                   :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('khmerName')"
                   type="text"
+                  ref="khmerName"
                   placeholder="Khmer Name"
                   class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 />
@@ -42,7 +46,7 @@
             </div>
           </div>
           <!-- Row 2 -->
-          <div class="flex flex-row w-full">
+          <div class="flex flex-row w-full mb-2">
             <!-- DOB Input -->
             <div class="w-1/2">
               <label class="mb-1 block text-sm font-medium text-dark"> DOB </label>
@@ -67,7 +71,7 @@
                 placeholder=""
                 min="0"
                 step="1"
-                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 h-[40px] text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
               />
             </div>
 
@@ -77,6 +81,8 @@
               <div class="relative z-20">
                 <select
                   v-model="gender"
+                  @change="removeHighlight('gender')"
+                  ref="gender"
                   :disabled="!isEditing && !isAdd"
                   class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 >
@@ -93,19 +99,40 @@
           <!-- Row 3 -->
           <div class="flex flex-row w-full mb-2">
             <!-- Contact No. Input -->
-            <div class="w-1/2">
+            <div class="w-full">
               <label class="mb-1 block text-sm font-medium text-dark"> Contact No. </label>
               <div class="relative">
                 <input
                   v-model="contactNo"
                   :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('contactNo')"
                   type="tel"
+                  ref="contactNo"
                   placeholder="Contact No."
                   class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
                 />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/phone.svg" width="20" height="20" />
                 </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 4 -->
+          <div class="flex flex-row w-full mb-2">
+            <!-- Contact No. Input -->
+            <div class="w-1/2">
+              <label class="mb-1 block text-sm font-medium text-dark"> Queue No. </label>
+              <div class="relative z-20">
+                <input
+                  v-model="queueNo"
+                  :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('queueNo')"
+                  type="text"
+                  ref="queueNo"
+                  placeholder="Queue No."
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+                />
               </div>
             </div>
 
@@ -116,7 +143,9 @@
                 <input
                   v-model="regDate"
                   :disabled="!isEditing && !isAdd"
+                  @input="removeHighlight('regDate')"
                   type="date"
+                  ref="regDate"
                   :max="maxDate"
                   class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
                 />
@@ -126,7 +155,6 @@
         </div>
 
         <!-- Photo Input -->
-
         <div class="flex flex-row w-1/2 ml-2">
           <div class="flex flex-col w-full">
             <div class="w-full">
@@ -156,7 +184,7 @@
               >
                 <label
                   for="file"
-                  class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
+                  class="flex w-full h-[252px] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
                 >
                   <div>
                     <input
@@ -230,7 +258,9 @@
             <input
               v-model="village"
               :disabled="!isEditing && !isAdd"
+              @input="removeHighlight('village')"
               type="text"
+              ref="village"
               placeholder="Village"
               class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             />
@@ -247,7 +277,9 @@
             <input
               v-model="familyGroup"
               :disabled="!isEditing && !isAdd"
+              @input="removeHighlight('familyGroup')"
               type="text"
+              ref="familyGroup"
               placeholder="Family Group"
               class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             />
@@ -270,6 +302,8 @@
             <select
               v-model="pregnant"
               :disabled="!isEditing && !isAdd"
+              @change="removeHighlight('pregnant')"
+              ref="pregnant"
               class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="true">Y</option>
@@ -327,6 +361,8 @@
             <select
               v-model="sentToId"
               :disabled="!isEditing && !isAdd"
+              @change="removeHighlight('sentToId')"
+              ref="sentToId"
               class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="true">Y</option>
@@ -412,11 +448,12 @@ export default defineComponent({
         if (!admin) return
         this.name = admin.name
         this.khmerName = admin.khmerName
-        this.dob = this.formatDateForInput(admin.dob)
-        this.age = admin.age
+        this.dob = admin.dob ? this.formatDateForInput(admin.dob) : null
+        this.age = admin.dob ? this.ageComputed : null
         this.gender = admin.gender
-        this.contactNo = admin.contactNo
+        this.queueNo = admin.queueNo
         this.regDate = this.formatDateForInput(admin.regDate)
+        this.contactNo = admin.contactNo
         this.village = admin.village
         this.familyGroup = admin.familyGroup
         this.pregnant = admin.pregnant
@@ -441,11 +478,12 @@ export default defineComponent({
     return {
       name: '' as string,
       khmerName: '' as string,
-      dob: '' as string,
-      age: 0 as number,
+      dob: '' as string | null,
+      age: 0 as number | null ,
       gender: '' as 'M' | 'F' | '',
-      contactNo: '' as string,
+      queueNo: '' as string,
       regDate: '' as string,
+      contactNo: '' as string,
       village: '' as string,
       familyGroup: '' as string,
       pregnant: null as boolean | null,
@@ -481,61 +519,66 @@ export default defineComponent({
       const toast = useToast()
 
       try {
-        // Perform validation checks
+        let hasError = false;
+
+        // Perform validation checks and highlight missing compulsory fields
         if (!this.name) {
-          toast.error('Name is required')
-          return
+          (this.$refs.name as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.khmerName) {
-          toast.error('Khmer Name is required')
-          return
-        }
-        if (!this.dob) {
-          toast.error('Date of Birth is required')
-          return
+          (this.$refs.khmerName as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.gender) {
-          toast.error('Gender is required')
-          return
+          (this.$refs.gender as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
-        if (!this.contactNo) {
-          toast.error('Contact No. is required')
-          return
+        if (!this.queueNo) {
+          (this.$refs.queueNo as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.regDate) {
-          toast.error('Date Registered is required')
-          return
+          (this.$refs.regDate as HTMLElement).classList.add('input-error');
+          hasError = true;
+        }
+        if (!this.contactNo) {
+          (this.$refs.contactNo as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (!this.village) {
-          toast.error('Village is required')
-          return
+          (this.$refs.village as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (this.familyGroup == null) {
-          toast.error('Family Group is required')
-          return
+          (this.$refs.familyGroup as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (this.pregnant == null) {
-          toast.error('Pregnant? is required')
-          return
+          (this.$refs.pregnant as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
         if (this.sentToId == null) {
-          toast.error('Sent to Infectious Disease? is required')
-          return
+          (this.$refs.sentToId as HTMLElement).classList.add('input-error');
+          hasError = true;
         }
-        if (this.ageComputed == null) {
-          toast.error('Please enter a valid Date of Birth')
-          return
+
+        // If there are errors, show a toast notification to get user to fill out the highlighted fields
+        if (hasError) {
+          toast.error('Please fill out the highlighted fields');
+          return;
         }
 
         const admin: Admin = {
           // need to define outside to catch missing fields
           name: this.name,
           khmerName: this.khmerName,
-          dob: new Date(this.dob).toISOString(),
-          age: this.ageComputed,
+          dob: this.dob ? new Date(this.dob).toISOString() : null,
+          age: this.dob ? this.ageComputed : null,
           gender: this.gender,
-          contactNo: this.contactNo,
+          queueNo: this.queueNo,
           regDate: new Date(this.regDate).toISOString(),
+          contactNo: this.contactNo,
           village: this.village,
           familyGroup: this.familyGroup,
           pregnant: this.pregnant,
@@ -559,7 +602,7 @@ export default defineComponent({
               this.$emit('patientCreated', {
                 id: response.data['Inserted userid'],
                 name: this.name,
-                age: this.ageComputed
+                age: this.ageComputed || null
               })
             })
         } else if (!this.isAdd && this.isEditing) {
@@ -589,6 +632,12 @@ export default defineComponent({
           console.log(error)
           toast.error('An internal server error occurred.')
         }
+      }
+    },
+    removeHighlight(field: string) {
+      const element = this.$refs[field] as HTMLElement;
+      if (element && element.classList.contains('input-error')) {
+        element.classList.remove('input-error');
       }
     },
     change({ coordinates, canvas }) {
@@ -696,5 +745,8 @@ h1 {
   max-width: 500px;
   border-radius: 10px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+.input-error {
+  border: 1px solid red;
 }
 </style>

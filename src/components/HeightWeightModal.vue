@@ -18,6 +18,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="height"
+              @input="removeHighlight('height')"
             />
           </div>
 
@@ -33,6 +35,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="weight"
+              @input="removeHighlight('weight')"
             />
           </div>
         </div>
@@ -55,6 +59,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="paedsHeight"
+              @input="removeHighlight('paedsHeight')"
             />
           </div>
 
@@ -74,6 +80,8 @@
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
+              ref="paedsWeight"
+              @input="removeHighlight('paedsWeight')"
             />
           </div>
         </div>
@@ -234,39 +242,56 @@ export default defineComponent({
     async submitData() {
       const toast = useToast()
       try {
+        let hasError = false
+        // Check for missing fields
         if (this.height === null) {
-          toast.error('Please enter height')
-          return
+          (this.$refs.height as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.weight === null) {
-          toast.error('Please enter weight')
+          (this.$refs.weight as HTMLElement).classList.add('input-error')
+          hasError = true
+        }
+        if (this.paedsHeight === null) {
+          (this.$refs.paedsHeight as HTMLElement).classList.add('input-error')
+          hasError = true
+        }
+        if (this.paedsWeight === null) {
+          (this.$refs.paedsWeight as HTMLElement).classList.add('input-error')
+          hasError = true
+        }
+
+        // Show error message if any field is missing
+        if (hasError) {
+          toast.error('Please fill out the highlighted fields');
           return
-        } else if (this.weight < 0) {
+        }
+
+        // Checks for negative values
+        if (this.weight !== null && this.weight < 0) {
+          (this.$refs.weight as HTMLElement).classList.add('input-error')
           toast.error('Weight cannot be negative')
           return
         }
-        if (this.paedsHeight === null) {
-          toast.error('Please enter Paeds: Height %')
-          return
-        } else if (this.paedsHeight < 0) {
-          toast.error('Paeds: Height % cannot be negative')
+
+        if (this.height !== null && this.height < 0) {
+          (this.$refs.height as HTMLElement).classList.add('input-error')
+          toast.error('Height cannot be negative')
           return
         }
-        if (this.paedsWeight === null) {
-          toast.error('Please enter Paeds: Weight %')
-          return
-        } else if (this.paedsWeight < 0) {
+
+        if (this.paedsWeight !== null && this.paedsWeight < 0) {
+          (this.$refs.paedsWeight as HTMLElement).classList.add('input-error')
           toast.error('Paeds: Weight % cannot be negative')
           return
         }
-        if (this.bmi === null) {
-          toast.error('Please enter height and weight to calculate BMI')
+
+        if (this.paedsHeight !== null && this.paedsHeight < 0) {
+          (this.$refs.paedsHeight as HTMLElement).classList.add('input-error')
+          toast.error('Paeds: Height % cannot be negative')
           return
         }
-        if (this.bmianalysis === null) {
-          toast.error('Please enter height and weight to calculate BMI Analysis')
-          return
-        }
+
         const heightAndWeight: HeightAndWeight = {
           // need to define outside to catch missing fields
           height: this.height,
@@ -301,7 +326,9 @@ export default defineComponent({
         }
       }
     },
-
+    removeHighlight(ref: string) {
+      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+    },
     toggleEdit() {
       console.log('toggleEdit')
       this.isEditing = !this.isEditing
@@ -320,5 +347,8 @@ export default defineComponent({
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
+}
+.input-error {
+  border: 1px solid red;
 }
 </style>
