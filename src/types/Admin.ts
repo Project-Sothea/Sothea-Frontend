@@ -1,5 +1,6 @@
 export default interface Admin {
   id?: number
+  vid?: number
   familyGroup: string
   regDate: string // ISO date string
   queueNo: string

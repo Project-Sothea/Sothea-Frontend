@@ -21,6 +21,8 @@ test('test', async ({ page }) => {
   await page.locator('input[type="date"]').nth(1).fill('2024-06-14')
   await page.getByPlaceholder('Village').click()
   await page.getByPlaceholder('Village').fill('SR')
+  await page.getByPlaceholder('Queue Number').click();
+  await page.getByPlaceholder('Queue Number').fill('2B');
   await page.getByPlaceholder('Family Group').click()
   await page.getByPlaceholder('Family Group').fill('S01')
   await page.getByRole('combobox').nth(1).selectOption('true')
@@ -48,6 +50,8 @@ test('test', async ({ page }) => {
   await page.locator('input[type="date"]').nth(1).fill('2024-06-18')
   await page.getByPlaceholder('Village').click()
   await page.getByPlaceholder('Village').fill('QWERTY')
+  await page.getByPlaceholder('Queue Number').click();
+  await page.getByPlaceholder('Queue Number').fill('5D');
   await page.getByPlaceholder('Family Group').click()
   await page.getByPlaceholder('Family Group').fill('S02')
   await page.getByRole('combobox').nth(1).selectOption('false')
@@ -75,6 +79,7 @@ test('test', async ({ page }) => {
   expect(await page.locator('input[type="date"]').nth(1).inputValue()).toBe('2024-06-18')
   expect(await page.getByPlaceholder('Village').inputValue()).toBe('QWERTY')
   expect(await page.getByPlaceholder('Family Group').inputValue()).toBe('S02')
+  expect(await page.getByPlaceholder('Queue Number').inputValue()).toBe('5D')
   expect(await page.getByRole('combobox').nth(1).inputValue()).toBe('false')
   expect(await page.locator('input[type="date"]').nth(2).inputValue()).toBe('2024-06-08')
   expect(await page.getByPlaceholder('Enter Drug Allergies').inputValue()).toBe('Aspirin');

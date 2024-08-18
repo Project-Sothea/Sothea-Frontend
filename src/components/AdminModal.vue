@@ -5,7 +5,7 @@
       <br />
       <div class="flex flex-row w-full">
         <div class="flex flex-col">
-          <!-- Row 1 --> 
+          <!-- Row 1 -->
           <div class="flex flex-row mb-2">
             <!-- Name Input -->
             <div class="w-1/2">
@@ -453,7 +453,6 @@ export default defineComponent({
         this.gender = admin.gender
         this.queueNo = admin.queueNo
         this.regDate = this.formatDateForInput(admin.regDate)
-        this.contactNo = admin.contactNo
         this.village = admin.village
         this.familyGroup = admin.familyGroup
         this.pregnant = admin.pregnant
@@ -478,12 +477,13 @@ export default defineComponent({
     return {
       name: '' as string,
       khmerName: '' as string,
-      dob: '' as string | null,
-      age: 0 as number | null ,
+      dob: '' as string,
+      age: 0 as number,
       gender: '' as 'M' | 'F' | '',
       queueNo: '' as string,
       regDate: '' as string,
       contactNo: '' as string,
+      regDate: '' as string,
       village: '' as string,
       familyGroup: '' as string,
       pregnant: null as boolean | null,
@@ -494,14 +494,7 @@ export default defineComponent({
       sentToId: null as boolean | null,
       isEditing: false,
       maxDate: new Date().toISOString().split('T')[0], // Set maxDate to today's date in YYYY-MM-DD format
-      isMale: false,
-      isCropperModalVisible: false,
-      coordinates: {
-        width: 0,
-        height: 0,
-        left: 0,
-        top: 0
-      }
+      isMale: false
     }
   },
   computed: {
@@ -519,54 +512,50 @@ export default defineComponent({
       const toast = useToast()
 
       try {
-        let hasError = false;
-
-        // Perform validation checks and highlight missing compulsory fields
+        // Perform validation checks
         if (!this.name) {
-          (this.$refs.name as HTMLElement).classList.add('input-error');
-          hasError = true;
+          toast.error('Name is required')
+          return
         }
         if (!this.khmerName) {
-          (this.$refs.khmerName as HTMLElement).classList.add('input-error');
-          hasError = true;
+          toast.error('Khmer Name is required')
+          return
+        }
+        if (!this.dob) {
+          toast.error('Date of Birth is required')
+          return
         }
         if (!this.gender) {
-          (this.$refs.gender as HTMLElement).classList.add('input-error');
-          hasError = true;
-        }
-        if (!this.queueNo) {
-          (this.$refs.queueNo as HTMLElement).classList.add('input-error');
-          hasError = true;
-        }
-        if (!this.regDate) {
-          (this.$refs.regDate as HTMLElement).classList.add('input-error');
-          hasError = true;
+          toast.error('Gender is required')
+          return
         }
         if (!this.contactNo) {
-          (this.$refs.contactNo as HTMLElement).classList.add('input-error');
-          hasError = true;
+          toast.error('Contact No. is required')
+          return
+        }
+        if (!this.regDate) {
+          toast.error('Date Registered is required')
+          return
         }
         if (!this.village) {
-          (this.$refs.village as HTMLElement).classList.add('input-error');
-          hasError = true;
+          toast.error('Village is required')
+          return
         }
         if (this.familyGroup == null) {
-          (this.$refs.familyGroup as HTMLElement).classList.add('input-error');
-          hasError = true;
+          toast.error('Family Group is required')
+          return
         }
         if (this.pregnant == null) {
-          (this.$refs.pregnant as HTMLElement).classList.add('input-error');
-          hasError = true;
+          toast.error('Pregnant? is required')
+          return
         }
         if (this.sentToId == null) {
-          (this.$refs.sentToId as HTMLElement).classList.add('input-error');
-          hasError = true;
+          toast.error('Sent to Infectious Disease? is required')
+          return
         }
-
-        // If there are errors, show a toast notification to get user to fill out the highlighted fields
-        if (hasError) {
-          toast.error('Please fill out the highlighted fields');
-          return;
+        if (this.ageComputed == null) {
+          toast.error('Please enter a valid Date of Birth')
+          return
         }
 
         const admin: Admin = {
@@ -578,7 +567,6 @@ export default defineComponent({
           gender: this.gender,
           queueNo: this.queueNo,
           regDate: new Date(this.regDate).toISOString(),
-          contactNo: this.contactNo,
           village: this.village,
           familyGroup: this.familyGroup,
           pregnant: this.pregnant,
@@ -634,28 +622,7 @@ export default defineComponent({
         }
       }
     },
-    removeHighlight(field: string) {
-      const element = this.$refs[field] as HTMLElement;
-      if (element && element.classList.contains('input-error')) {
-        element.classList.remove('input-error');
-      }
-    },
-    change({ coordinates, canvas }) {
-      console.log(coordinates, canvas)
-    },
-    showCropperModal() {
-      this.isCropperModalVisible = true
-    },
-    hideCropperModal() {
-      this.isCropperModalVisible = false
-    },
-    saveCroppedImage() {
-      const { coordinates, canvas } = this.$refs.cropper.getResult()
-      this.coordinates = coordinates
-      this.selectedPhoto = canvas.toDataURL()
-      this.photo = this.selectedPhoto.split(',')[1]
-      this.isCropperModalVisible = false
-    },
+
     handleFileChange(event: any) {
       const file = event.target.files[0]
       const maxSize = 4 * 1024 * 1024 // 4MB in bytes

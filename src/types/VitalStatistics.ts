@@ -1,5 +1,6 @@
 export default interface VitalStatistics {
   id?: number
+  vid?: number
   temperature: number
   spO2: number
   systolicBP1: number

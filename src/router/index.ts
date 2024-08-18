@@ -29,7 +29,7 @@ const router = createRouter({
       component: SideBar
     },
     {
-      path: '/patient/:id',
+      path: '/patient/:id/:vid',
       name: 'patient',
       component: ViewEditPatient,
       props: true,

@@ -1,46 +1,40 @@
-# Sothea-Frontend
+# Sothea Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+This is the frontend of the **Sothea Patient Management System**, developed to assist in managing patients during health screenings as part of Project Sothea. The frontend is built using Vue.js and is designed to be used in conjunction with the Sothea Backend.
 
 ## Project Setup
 
-```sh
-npm install
-```
+To set up the project on your local machine, follow these steps:
 
-### Compile and Hot-Reload for Development
+1. Clone the repository:
 
-```sh
-npm run dev
-```
+    ```sh
+    git clone https://github.com/Project-Sothea/Sothea-Frontend.git
+    cd sothea-frontend
+    ```
 
-### Type-Check, Compile and Minify for Production
+2. Install dependencies:
 
-```sh
-npm run build
-```
+    ```sh
+    npm install
+    ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+3. Compiles and hot-reloads for development
 
-```sh
-npm run test:unit
-```
+    ```sh
+    npm run serve -- --host
+    ```
 
-### Lint with [ESLint](https://eslint.org/)
+This should launch a development server, typically available at [http://localhost:5173](http://localhost:5173).
+Note: Remember to comment / uncomment the BaseURL lines in `src/main.ts` to change the backend endpoint pointed to 
+depending on whether you are in dev or prod!
 
-```sh
-npm run lint
-```
-"# Sothea-Frontend" 
+## Development
+
+The project is structured as a basic Vue.js application. You can make changes to the code inside the `src` directory.
+
+## Project Screenshots
+<div style="display: flex; justify-content: space-around;">
+  <img src="https://github.com/Project-Sothea/Sothea-Frontend/blob/main/public/screenshot_home.png?raw=true" alt="Home Screenshot" width="45%" />
+  <img src="https://github.com/Project-Sothea/Sothea-Frontend/blob/main/public/screenshot_addpatient.png?raw=true" alt="Add Patient Screenshot" width="45%" />
+</div>
