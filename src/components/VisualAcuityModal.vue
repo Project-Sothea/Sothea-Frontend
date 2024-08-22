@@ -20,6 +20,8 @@
               min="0"
               class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
+              ref="lEyeVision"
+              @input="removeHighlight('lEyeVision')"
             />
           </div>
 
@@ -37,6 +39,8 @@
               min="0"
               class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
               :disabled="!isEditing"
+              ref="rEyeVision"
+              @input="removeHighlight('rEyeVision')"
             />
           </div>
         </div>
@@ -104,6 +108,10 @@ export default defineComponent({
     isAdd: {
       type: Boolean,
       default: true
+    },
+    patientVid: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -118,14 +126,22 @@ export default defineComponent({
     async submitData() {
       const toast = useToast()
       try {
+        let hasError = false
+
         if (this.lEyeVision === null) {
-          toast.error('Please fill in L eye vision')
-          return
+          ;(this.$refs.lEyeVision as HTMLElement).classList.add('input-error')
+          hasError = true
         }
         if (this.rEyeVision === null) {
-          toast.error('Please fill in R eye vision')
+          ;(this.$refs.rEyeVision as HTMLElement).classList.add('input-error')
+          hasError = true
+        }
+
+        if (hasError) {
+          toast.error('Please fill out the highlighted fields')
           return
         }
+
         const visualAcuity: VisualAcuity = {
           // need to define outside to catch missing fields
           lEyeVision: this.lEyeVision,
@@ -133,7 +149,7 @@ export default defineComponent({
           additionalIntervention: this.additionalIntervention
         }
         await axios
-          .patch(`${BaseURL}/patient/${this.patientId}`, {
+          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
             visualAcuity: visualAcuity
           })
           .then((response) => {
@@ -157,6 +173,9 @@ export default defineComponent({
         }
       }
     },
+    removeHighlight(ref: string) {
+      ;(this.$refs[ref] as HTMLElement).classList.remove('input-error')
+    },
     preventNegative(event: any) {
       if (event.key === '-' || event.key === 'e') {
         event.preventDefault()
@@ -175,5 +194,8 @@ export default defineComponent({
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
+}
+.input-error {
+  border: 1px solid red;
 }
 </style>

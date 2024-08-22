@@ -3,24 +3,43 @@
     <NavBar />
 
     <div class="flex">
-      <SideBar :activeSection="activeSection" :id="id" :name="name" :age="age"
-        @update:activeSection="setActiveSection" />
-      <div class="content flex-grow p-6">
-        <keep-alive>
-          <component :is="activeComponent" :patientId="id" :patientData="patient" :isAdd="false"
-            @reload="loadPatientData" @patientUpdated="handlePatientUpdated">
-          </component>
-        </keep-alive>
+      <SideBar
+        :activeSection="activeSection"
+        :id="id"
+        :name="name"
+        :age="age ? age : undefined"
+        @update:activeSection="setActiveSection"
+      />
+      <div class="main-content flex-grow">
+        <SubNavBar @openModal="openRecords" />
+        <div class="content flex-grow p-6">
+          <keep-alive>
+            <component
+              :is="activeComponent"
+              :patientId="id"
+              :patientData="patient"
+              :patientVid="vid"
+              :isAdd="false"
+              @reload="loadPatientData"
+              @patientUpdated="handlePatientUpdated"
+            >
+            </component>
+          </keep-alive>
+        </div>
       </div>
     </div>
+    <!-- Records Modal -->
+    <RecordsModal :isOpen="showRecords" @close="closeRecords"> </RecordsModal>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
 import SideBar from '../components/SideBar.vue'
 import NavBar from '../components/NavBar.vue'
+import SubNavBar from '../components/SubNavBar.vue'
+import RecordsModal from '@/components/RecordsModal.vue'
 
 import AdminModal from '../components/AdminModal.vue'
 import PastMedHistModal from '../components/PastMedHistModal.vue'
@@ -35,12 +54,14 @@ import type Patient from '@/types/Patient'
 import axios, { type AxiosResponse } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import { BaseURL } from '@/main';
+import { BaseURL } from '@/main'
 
 export default defineComponent({
   components: {
     SideBar,
     NavBar,
+    SubNavBar,
+    RecordsModal,
     AdminModal,
     PastMedHistModal,
     SocialHistModal,
@@ -53,6 +74,12 @@ export default defineComponent({
     id: {
       type: String,
       required: true
+    },
+    vid: {
+      // Default vid to '1' FOR NOW
+      type: String,
+      required: true
+      // default: '1'
     }
   },
   data() {
@@ -60,7 +87,8 @@ export default defineComponent({
       activeSection: 'admin',
       patient: null as Patient | null,
       name: '' as string,
-      age: 0 as number,
+      age: 0 as number | null,
+      showRecords: false
     }
   },
   computed: {
@@ -91,20 +119,21 @@ export default defineComponent({
       this.activeSection = section
     },
 
-    async getPatientData(id: string) {
-      axios.get(`${BaseURL}/patient/${id}`)
-        .then((response: AxiosResponse) => {
-          console.log(response)
-          const { data } = response
-          this.patient = JSON.parse(JSON.stringify(data)) as Patient
-          this.age = new Date().getFullYear() - new Date(this.patient.admin.dob).getFullYear()
-          this.name = this.patient.admin.name
-        })
+    async getPatientData(id: string, vid: string) {
+      axios.get(`${BaseURL}/patient/${id}/${vid}`).then((response: AxiosResponse) => {
+        console.log(response)
+        const { data } = response
+        this.patient = JSON.parse(JSON.stringify(data)) as Patient
+        this.age = this.patient.admin.dob
+          ? new Date().getFullYear() - new Date(this.patient.admin.dob).getFullYear()
+          : null
+        this.name = this.patient.admin.name
+      })
     },
     async loadPatientData() {
       const toast = useToast()
       try {
-        await this.getPatientData(this.id);
+        await this.getPatientData(this.id, this.vid)
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           console.log(error.response)
@@ -123,11 +152,17 @@ export default defineComponent({
       console.log(`Patient Updated With ID: ${id}, Name: ${name}, Age: ${age}`)
       this.name = name
       this.age = age
+    },
+    openRecords() {
+      this.showRecords = true
+    },
+    closeRecords() {
+      this.showRecords = false
     }
   },
   created() {
     this.loadPatientData()
-  },
+  }
 })
 </script>
 

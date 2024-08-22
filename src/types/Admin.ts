@@ -6,8 +6,8 @@ export default interface Admin {
   queueNo: string
   name: string
   khmerName: string
-  dob: string // ISO date string
-  age: number
+  dob: string | null // ISO date string
+  age: number | null
   gender: 'M' | 'F'
   village: string
   contactNo: string
