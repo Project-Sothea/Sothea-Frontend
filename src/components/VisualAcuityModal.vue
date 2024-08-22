@@ -108,6 +108,10 @@ export default defineComponent({
     isAdd: {
       type: Boolean,
       default: true
+    },
+    patientVid: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -125,16 +129,16 @@ export default defineComponent({
         let hasError = false
 
         if (this.lEyeVision === null) {
-          (this.$refs.lEyeVision as HTMLElement).classList.add('input-error')
+          ;(this.$refs.lEyeVision as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.rEyeVision === null) {
-          (this.$refs.rEyeVision as HTMLElement).classList.add('input-error')
+          ;(this.$refs.rEyeVision as HTMLElement).classList.add('input-error')
           hasError = true
         }
 
         if (hasError) {
-          toast.error('Please fill out the highlighted fields');
+          toast.error('Please fill out the highlighted fields')
           return
         }
 
@@ -145,7 +149,7 @@ export default defineComponent({
           additionalIntervention: this.additionalIntervention
         }
         await axios
-          .patch(`${BaseURL}/patient/${this.patientId}`, {
+          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
             visualAcuity: visualAcuity
           })
           .then((response) => {
@@ -170,7 +174,7 @@ export default defineComponent({
       }
     },
     removeHighlight(ref: string) {
-      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+      ;(this.$refs[ref] as HTMLElement).classList.remove('input-error')
     },
     preventNegative(event: any) {
       if (event.key === '-' || event.key === 'e') {

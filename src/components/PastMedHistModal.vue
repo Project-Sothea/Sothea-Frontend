@@ -317,6 +317,10 @@ export default defineComponent({
     isAdd: {
       type: Boolean,
       default: true
+    },
+    patientVid: {
+      type: String,
+      default: null
     }
   },
   created() {
@@ -355,9 +359,9 @@ export default defineComponent({
       try {
         // Reset error highlights
         Object.keys(this.$refs).forEach((ref) => {
-          (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+          ;(this.$refs[ref] as HTMLElement).classList.remove('input-error')
         })
-        
+
         if (
           this.tuberculosis === null ||
           this.diabetes === null ||
@@ -371,7 +375,7 @@ export default defineComponent({
           return
         }
         if (this.sexuallyTransmittedDisease && !this.specifiedSTDs) {
-          (this.$refs.specifiedSTDs as HTMLElement).classList.add('input-error')
+          ;(this.$refs.specifiedSTDs as HTMLElement).classList.add('input-error')
           toast.error('Please specify the STD')
           return
         }
@@ -388,7 +392,7 @@ export default defineComponent({
           others: this.others
         }
         await axios
-          .patch(`${BaseURL}/patient/${this.patientId}`, {
+          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
             pastMedicalHistory: pastMedicalHistory
           })
           .then((response) => {
@@ -411,7 +415,7 @@ export default defineComponent({
       }
     },
     removeHighlight(ref: string) {
-      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+      ;(this.$refs[ref] as HTMLElement).classList.remove('input-error')
     },
     toggleEdit() {
       console.log('toggleEdit')

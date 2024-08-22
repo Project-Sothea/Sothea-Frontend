@@ -204,6 +204,10 @@ export default defineComponent({
     isAdd: {
       type: Boolean,
       default: true
+    },
+    patientVid: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -234,33 +238,37 @@ export default defineComponent({
       const toast = useToast()
       try {
         // Check if all Yes/No fields are filled
-        if (this.pastSmokingHistory === null || this.currentSmokingHistory === null || this.alcoholHistory === null) {
+        if (
+          this.pastSmokingHistory === null ||
+          this.currentSmokingHistory === null ||
+          this.alcoholHistory === null
+        ) {
           toast.error('Please select yes/no for all fields')
           return
         }
 
         // Reset error highlighting
         Object.keys(this.$refs).forEach((ref) => {
-          (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+          ;(this.$refs[ref] as HTMLElement).classList.remove('input-error')
         })
-        
+
         // If Yes is selected, its corresponding field should not be empty
         let hasError = false
         if (this.pastSmokingHistory === true && this.numberOfYears === null) {
-          (this.$refs.numberOfYears as HTMLElement).classList.add('input-error')
+          ;(this.$refs.numberOfYears as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.currentSmokingHistory === true && this.cigarettesPerDay === null) {
-          (this.$refs.cigarettesPerDay as HTMLElement).classList.add('input-error')
+          ;(this.$refs.cigarettesPerDay as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.alcoholHistory === true && this.howRegular === '') {
-          (this.$refs.howRegular as HTMLElement).classList.add('input-error')
+          ;(this.$refs.howRegular as HTMLElement).classList.add('input-error')
           hasError = true
         }
 
         if (hasError) {
-          toast.error('Please fill out the highlighted fields');
+          toast.error('Please fill out the highlighted fields')
           return
         }
 
@@ -274,7 +282,7 @@ export default defineComponent({
           howRegular: this.howRegular
         }
         await axios
-          .patch(`${BaseURL}/patient/${this.patientId}`, {
+          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
             socialHistory: socialHistory
           })
           .then((response) => {
@@ -299,7 +307,7 @@ export default defineComponent({
       }
     },
     removeHighlight(ref: string) {
-      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+      ;(this.$refs[ref] as HTMLElement).classList.remove('input-error')
     },
     toggleEdit() {
       console.log('toggleEdit')

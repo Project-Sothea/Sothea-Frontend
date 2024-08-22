@@ -286,6 +286,10 @@ export default defineComponent({
     isAdd: {
       type: Boolean,
       default: true
+    },
+    patientVid: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -349,49 +353,49 @@ export default defineComponent({
         let hasError = false
         // Check for missing fields
         if (this.temperature === null) {
-          (this.$refs.temperature as HTMLElement).classList.add('input-error')
+          ;(this.$refs.temperature as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.spO2 === null) {
-          (this.$refs.spO2 as HTMLElement).classList.add('input-error')
+          ;(this.$refs.spO2 as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.systolicBP1 === null) {
-          (this.$refs.systolicBP1 as HTMLElement).classList.add('input-error')
+          ;(this.$refs.systolicBP1 as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.systolicBP2 === null) {
-          (this.$refs.systolicBP2 as HTMLElement).classList.add('input-error')
+          ;(this.$refs.systolicBP2 as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.diastolicBP1 === null) {
-          (this.$refs.diastolicBP1 as HTMLElement).classList.add('input-error')
+          ;(this.$refs.diastolicBP1 as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.diastolicBP2 === null) {
-          (this.$refs.diastolicBP2 as HTMLElement).classList.add('input-error')
+          ;(this.$refs.diastolicBP2 as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.hr1 === null) {
-          (this.$refs.hr1 as HTMLElement).classList.add('input-error')
+          ;(this.$refs.hr1 as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.hr2 === null) {
-          (this.$refs.hr2 as HTMLElement).classList.add('input-error')
+          ;(this.$refs.hr2 as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.randomBloodGlucoseMmolL === null) {
-          (this.$refs.randomBloodGlucoseMmolL as HTMLElement).classList.add('input-error')
+          ;(this.$refs.randomBloodGlucoseMmolL as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.randomBloodGlucoseMmolLp === null) {
-          (this.$refs.randomBloodGlucoseMmolLp as HTMLElement).classList.add('input-error')
+          ;(this.$refs.randomBloodGlucoseMmolLp as HTMLElement).classList.add('input-error')
           hasError = true
         }
 
         // If any field is missing, display error message and return
         if (hasError) {
-          toast.error('Please fill out the highlighted fields');
+          toast.error('Please fill out the highlighted fields')
           return
         }
 
@@ -412,7 +416,7 @@ export default defineComponent({
           randomBloodGlucoseMmolLp: this.randomBloodGlucoseMmolLp
         }
         await axios
-          .patch(`${BaseURL}/patient/${this.patientId}`, {
+          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
             vitalStatistics: vitalStatistics
           })
           .then((response) => {
@@ -437,7 +441,7 @@ export default defineComponent({
       }
     },
     removeHighlight(ref: string) {
-      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+      ;(this.$refs[ref] as HTMLElement).classList.remove('input-error')
     },
     toggleEdit() {
       console.log('toggleEdit')

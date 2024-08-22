@@ -46,10 +46,16 @@
           <!-- Paeds: Height % -->
           <div class="w-1/2">
             <div class="flex flex-row content-center">
-              <button @click="showHeightModal = true" class="mr-1.5 mb-1.5" title="Paeds Height Charts">
+              <button
+                @click="showHeightModal = true"
+                class="mr-1.5 mb-1.5"
+                title="Paeds Height Charts"
+              >
                 <img src="../assets/info.svg" alt="chart" class="w-6 h-6" />
               </button>
-              <label for="" class="mb-1 pt-0.5 block text-sm font-medium text-dark"> Paeds: Height % </label>
+              <label for="" class="mb-1 pt-0.5 block text-sm font-medium text-dark">
+                Paeds: Height %
+              </label>
             </div>
             <input
               v-model="paedsHeight"
@@ -67,10 +73,16 @@
           <!-- Paeds: Weight % -->
           <div class="ml-3 w-1/2">
             <div class="flex flex-row">
-              <button @click="showWeightModal = true" class="mr-1.5 mb-1.5" title="Paeds Weight Charts">
+              <button
+                @click="showWeightModal = true"
+                class="mr-1.5 mb-1.5"
+                title="Paeds Weight Charts"
+              >
                 <img src="../assets/info.svg" alt="chart" class="w-6 h-6" />
               </button>
-              <label for="" class="mb-1 pt-0.5 block text-sm font-medium text-dark"> Paeds: Weight % </label>
+              <label for="" class="mb-1 pt-0.5 block text-sm font-medium text-dark">
+                Paeds: Weight %
+              </label>
             </div>
             <input
               v-model="paedsWeight"
@@ -139,29 +151,60 @@
           </button>
         </div>
       </div>
-
     </div>
   </div>
 
   <!-- Height Percentile Modal -->
-  <div v-if="showHeightModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75 max-h-full max-w-full">
-    <div class="bg-white rounded-lg p-5 max-w-full overflow-y-auto" style="max-height: 95%; max-width: 60%;">
+  <div
+    v-if="showHeightModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75 max-h-full max-w-full"
+  >
+    <div
+      class="bg-white rounded-lg p-5 max-w-full overflow-y-auto"
+      style="max-height: 95%; max-width: 60%"
+    >
       <div class="flex justify-end">
-        <button @click="showHeightModal = false" class="text-gray-700 hover:text-gray-900">Close</button>
+        <button @click="showHeightModal = false" class="text-gray-700 hover:text-gray-900">
+          Close
+        </button>
       </div>
-      <img src="../assets/height-percentile-boys.jpg" alt="height percentile boys" class="w-full mb-4" />
-      <img src="../assets/height-percentile-girls.jpg" alt="height percentile girls" class="w-full" />
+      <img
+        src="../assets/height-percentile-boys.jpg"
+        alt="height percentile boys"
+        class="w-full mb-4"
+      />
+      <img
+        src="../assets/height-percentile-girls.jpg"
+        alt="height percentile girls"
+        class="w-full"
+      />
     </div>
   </div>
 
   <!-- Weight Percentile Modal -->
-  <div v-if="showWeightModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75 max-h-full max-w-full">
-    <div class="bg-white rounded-lg p-5 max-w-full overflow-y-auto" style="max-height: 95%; max-width: 60%;">
+  <div
+    v-if="showWeightModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-75 max-h-full max-w-full"
+  >
+    <div
+      class="bg-white rounded-lg p-5 max-w-full overflow-y-auto"
+      style="max-height: 95%; max-width: 60%"
+    >
       <div class="flex justify-end">
-        <button @click="showWeightModal = false" class="text-gray-700 hover:text-gray-900">Close</button>
+        <button @click="showWeightModal = false" class="text-gray-700 hover:text-gray-900">
+          Close
+        </button>
       </div>
-      <img src="../assets/weight-percentile-boys.jpg" alt="weight percentile boys" class="w-full mb-4" />
-      <img src="../assets/weight-percentile-girls.jpg" alt="weight percentile girls" class="w-full" />
+      <img
+        src="../assets/weight-percentile-boys.jpg"
+        alt="weight percentile boys"
+        class="w-full mb-4"
+      />
+      <img
+        src="../assets/weight-percentile-girls.jpg"
+        alt="weight percentile girls"
+        class="w-full"
+      />
     </div>
   </div>
 </template>
@@ -189,6 +232,10 @@ export default defineComponent({
     isAdd: {
       type: Boolean,
       default: true
+    },
+    patientVid: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -245,49 +292,49 @@ export default defineComponent({
         let hasError = false
         // Check for missing fields
         if (this.height === null) {
-          (this.$refs.height as HTMLElement).classList.add('input-error')
+          ;(this.$refs.height as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.weight === null) {
-          (this.$refs.weight as HTMLElement).classList.add('input-error')
+          ;(this.$refs.weight as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.paedsHeight === null) {
-          (this.$refs.paedsHeight as HTMLElement).classList.add('input-error')
+          ;(this.$refs.paedsHeight as HTMLElement).classList.add('input-error')
           hasError = true
         }
         if (this.paedsWeight === null) {
-          (this.$refs.paedsWeight as HTMLElement).classList.add('input-error')
+          ;(this.$refs.paedsWeight as HTMLElement).classList.add('input-error')
           hasError = true
         }
 
         // Show error message if any field is missing
         if (hasError) {
-          toast.error('Please fill out the highlighted fields');
+          toast.error('Please fill out the highlighted fields')
           return
         }
 
         // Checks for negative values
         if (this.weight !== null && this.weight < 0) {
-          (this.$refs.weight as HTMLElement).classList.add('input-error')
+          ;(this.$refs.weight as HTMLElement).classList.add('input-error')
           toast.error('Weight cannot be negative')
           return
         }
 
         if (this.height !== null && this.height < 0) {
-          (this.$refs.height as HTMLElement).classList.add('input-error')
+          ;(this.$refs.height as HTMLElement).classList.add('input-error')
           toast.error('Height cannot be negative')
           return
         }
 
         if (this.paedsWeight !== null && this.paedsWeight < 0) {
-          (this.$refs.paedsWeight as HTMLElement).classList.add('input-error')
+          ;(this.$refs.paedsWeight as HTMLElement).classList.add('input-error')
           toast.error('Paeds: Weight % cannot be negative')
           return
         }
 
         if (this.paedsHeight !== null && this.paedsHeight < 0) {
-          (this.$refs.paedsHeight as HTMLElement).classList.add('input-error')
+          ;(this.$refs.paedsHeight as HTMLElement).classList.add('input-error')
           toast.error('Paeds: Height % cannot be negative')
           return
         }
@@ -302,7 +349,7 @@ export default defineComponent({
           paedsWeight: this.paedsWeight
         }
         await axios
-          .patch(`${BaseURL}/patient/${this.patientId}`, {
+          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
             heightAndWeight: heightAndWeight
           })
           .then((response) => {
@@ -327,7 +374,7 @@ export default defineComponent({
       }
     },
     removeHighlight(ref: string) {
-      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+      ;(this.$refs[ref] as HTMLElement).classList.remove('input-error')
     },
     toggleEdit() {
       console.log('toggleEdit')

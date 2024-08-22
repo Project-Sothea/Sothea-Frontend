@@ -425,6 +425,10 @@ export default defineComponent({
     isAdd: {
       type: Boolean,
       default: true
+    },
+    patientVid: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -486,7 +490,7 @@ export default defineComponent({
           toast.error('Please select yes/no for all fields')
           return
         } else if (this.others === '') {
-          (this.$refs.others as HTMLElement).classList.add('input-error')
+          ;(this.$refs.others as HTMLElement).classList.add('input-error')
           toast.error('Please fill out the others field')
           return
         }
@@ -509,7 +513,7 @@ export default defineComponent({
           remarks: this.remarks
         }
         await axios
-          .patch(`${BaseURL}/patient/${this.patientId}`, {
+          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
             doctorsConsultation: doctorsConsultation
           })
           .then((response) => {
@@ -534,7 +538,7 @@ export default defineComponent({
       }
     },
     removeHighlight(ref: string) {
-      (this.$refs[ref] as HTMLElement).classList.remove('input-error')
+      ;(this.$refs[ref] as HTMLElement).classList.remove('input-error')
     },
     toggleEdit() {
       console.log('toggleEdit')

@@ -417,7 +417,7 @@ import 'vue-advanced-cropper/dist/style.css'
 
 import type Admin from '@/types/Admin'
 
-import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
+import axios from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@/types/Patient'
@@ -437,6 +437,10 @@ export default defineComponent({
     isAdd: {
       type: Boolean,
       default: true
+    },
+    patientVid: {
+      type: String,
+      default: null
     }
   },
   watch: {
@@ -448,11 +452,12 @@ export default defineComponent({
         if (!admin) return
         this.name = admin.name
         this.khmerName = admin.khmerName
-        this.dob = admin.dob ? this.formatDateForInput(admin.dob) : null
-        this.age = admin.dob ? this.ageComputed : null
+        this.dob = this.formatDateForInput(admin.dob)
+        this.age = admin.age
         this.gender = admin.gender
-        this.queueNo = admin.queueNo
+        this.contactNo = admin.contactNo
         this.regDate = this.formatDateForInput(admin.regDate)
+        this.queueNo = admin.queueNo
         this.village = admin.village
         this.familyGroup = admin.familyGroup
         this.pregnant = admin.pregnant
@@ -483,7 +488,6 @@ export default defineComponent({
       queueNo: '' as string,
       regDate: '' as string,
       contactNo: '' as string,
-      regDate: '' as string,
       village: '' as string,
       familyGroup: '' as string,
       pregnant: null as boolean | null,
@@ -494,7 +498,14 @@ export default defineComponent({
       sentToId: null as boolean | null,
       isEditing: false,
       maxDate: new Date().toISOString().split('T')[0], // Set maxDate to today's date in YYYY-MM-DD format
-      isMale: false
+      isMale: false,
+      isCropperModalVisible: false,
+      coordinates: {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0
+      }
     }
   },
   computed: {
@@ -541,7 +552,7 @@ export default defineComponent({
           toast.error('Village is required')
           return
         }
-        if (this.familyGroup == null) {
+        if (this.familyGroup == '') {
           toast.error('Family Group is required')
           return
         }
@@ -558,45 +569,43 @@ export default defineComponent({
           return
         }
 
-        const admin: Admin = {
-          // need to define outside to catch missing fields
+        // Create payload
+        const admin = {
+          familyGroup: this.familyGroup,
+          regDate: new Date(this.regDate).toISOString(),
+          queueNo: this.queueNo || null,
           name: this.name,
           khmerName: this.khmerName,
-          dob: this.dob ? new Date(this.dob).toISOString() : null,
-          age: this.dob ? this.ageComputed : null,
+          dob: new Date(this.dob).toISOString(),
+          age: this.ageComputed,
           gender: this.gender,
-          queueNo: this.queueNo,
-          regDate: new Date(this.regDate).toISOString(),
           village: this.village,
-          familyGroup: this.familyGroup,
+          contactNo: this.contactNo,
           pregnant: this.pregnant,
           lastMenstrualPeriod: this.lastMenstrualPeriod
             ? new Date(this.lastMenstrualPeriod).toISOString()
             : null,
-          drugAllergies: this.drugAllergies ? this.drugAllergies : null,
-          photo: this.photo ? this.photo : null,
-          sentToId: this.sentToId
+          drugAllergies: this.drugAllergies || null,
+          sentToId: this.sentToId,
+          photo: this.photo || null
         }
-
         if (this.isAdd && !this.isEditing) {
           // Add new patient
-          await axios
-            .post(`${BaseURL}/patient`, {
-              admin: admin
+          await axios.post(`${BaseURL}/patient`, admin).then((response) => {
+            console.log(response.data)
+            toast.success('Admin Details created successfully!')
+            // Emit patient details to be rendered in sidebar
+            this.$emit('patientCreated', {
+              id: response.data.id,
+              name: this.name,
+              age: this.ageComputed || null,
+              vid: 1 // Newly created
             })
-            .then((response) => {
-              toast.success('Admin Details created successfully!')
-              // Emit patient details to be rendered in sidebar
-              this.$emit('patientCreated', {
-                id: response.data['Inserted userid'],
-                name: this.name,
-                age: this.ageComputed || null
-              })
-            })
+          })
         } else if (!this.isAdd && this.isEditing) {
           // Editing an existing patient
           await axios
-            .patch(`${BaseURL}/patient/${this.patientId}`, {
+            .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
               admin: admin
             })
             .then(() => {
@@ -605,7 +614,8 @@ export default defineComponent({
               this.$emit('patientUpdated', {
                 id: this.patientId,
                 name: this.name,
-                age: this.ageComputed
+                age: this.ageComputed,
+                vid: this.patientVid
               })
             })
         }
@@ -622,7 +632,28 @@ export default defineComponent({
         }
       }
     },
-
+    removeHighlight(field: string) {
+      const element = this.$refs[field] as HTMLElement
+      if (element && element.classList.contains('input-error')) {
+        element.classList.remove('input-error')
+      }
+    },
+    change({ coordinates, canvas }) {
+      console.log(coordinates, canvas)
+    },
+    showCropperModal() {
+      this.isCropperModalVisible = true
+    },
+    hideCropperModal() {
+      this.isCropperModalVisible = false
+    },
+    saveCroppedImage() {
+      const { coordinates, canvas } = this.$refs.cropper.getResult()
+      this.coordinates = coordinates
+      this.selectedPhoto = canvas.toDataURL()
+      this.photo = this.selectedPhoto.split(',')[1]
+      this.isCropperModalVisible = false
+    },
     handleFileChange(event: any) {
       const file = event.target.files[0]
       const maxSize = 4 * 1024 * 1024 // 4MB in bytes
@@ -668,7 +699,6 @@ export default defineComponent({
     toggleEdit() {
       console.log('toggleEdit')
       this.isEditing = !this.isEditing
-      console.log(this.isEditing)
     },
 
     saveChanges() {

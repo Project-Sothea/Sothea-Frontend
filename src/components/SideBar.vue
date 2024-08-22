@@ -5,10 +5,12 @@
         <div class="flex flex-col items-start justify-start mx-6 mt-5">
           <h2 class="text-sm font-medium text-[#6675c9]">Name: {{ name }}</h2>
           <h2 class="text-sm font-medium text-[#6675c9]">ID: {{ id }}</h2>
-          <h2 class="text-sm font-medium text-[#6675c9]">Age: {{ age !== undefined ? age : 'N/A' }}</h2>
+          <h2 class="text-sm font-medium text-[#6675c9]">
+            Age: {{ age !== undefined ? age : 'N/A' }}
+          </h2>
         </div>
         <nav class="mt-3 px-6">
-          <a 
+          <a
             class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'admin',
@@ -325,13 +327,21 @@
             <span class="flex-grow text-right"> </span>
           </a>
         </nav>
+        <button
+          @click="addRecord"
+          class="m-7 w-1/2 pt-2 px-5 py-2 flex items-center transition ease-in duration-200 rounded-lg text-sm font-medium text-white hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+        >
+          Add Record
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
+import axios from 'axios'
+import { BaseURL } from '@/main'
 
 export default defineComponent({
   props: {
@@ -353,11 +363,27 @@ export default defineComponent({
     }
   },
   methods: {
-    setActiveSection(section : string) {
+    setActiveSection(section: string) {
       this.$emit('update:activeSection', section)
-    }
+    },
+    addRecord() {}
+    // async addRecord() {
+    //   if (this.id) {
+    //     try {
+    //       const response = await axios.post(`${BaseURL}/patient/${this.id}`, {})
+    //       if (response.status === 200) {
+    //         const { vid } = response.data
+    //         // Handle successful creation of visit here (e.g., show a success message)
+    //         console.log(`New visit created with ID: ${this.id} and VID: ${vid}`)
+    //       }
+    //     } catch (error) {
+    //       // Handle error here (e.g., show an error message)
+    //       console.error('Error creating visit:', error)
+    //     }
+    //   } else {
+    //     console.error('Patient ID is required')
+    //   }
+    // }
   }
 })
 </script>
-
-<style></style>

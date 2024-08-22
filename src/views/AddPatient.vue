@@ -1,21 +1,23 @@
 <template>
-  <NavBar />
+  <NavBar class="navbar" />
   <div class="flex">
     <SideBar
+      class="sidebar"
       :activeSection="activeSection"
       @update:activeSection="setActiveSection"
-      :id="undefined"
+      :id="patientId"
       :name="undefined"
       :age="undefined"
     />
-    <div class="main-content flex-grow">
+    <div class="flex-grow content-wrapper">
       <SubNavBar @openModal="openRecords" />
 
-      <div class="content p-6">
+      <div class="content scrollable-content p-6">
         <keep-alive>
           <component
             :is="activeComponent"
             :patientId="patientId"
+            :patientVid="patientVid"
             @patientCreated="handlePatientCreated"
           ></component>
         </keep-alive>
@@ -23,7 +25,8 @@
     </div>
 
     <!-- Records Modal -->
-    <RecordsModal :isOpen="showRecords" @close="closeRecords"> </RecordsModal>
+    <RecordsModal :isOpen="showRecords" @close="closeRecords" :patientId="patientId">
+    </RecordsModal>
   </div>
 </template>
 
@@ -42,6 +45,7 @@ import VisualAcuityModal from '../components/VisualAcuityModal.vue'
 import DrConsultModal from '../components/DrConsultModal.vue'
 
 import axios from 'axios'
+import { patch } from 'node_modules/axios/index.cjs'
 
 export default {
   components: {
@@ -63,7 +67,8 @@ export default {
       patientId: '', // Empty value passed to the Sidebar since it is not needed
       name: '' as string, // Empty value passed to the Sidebar since it is not needed
       age: null, // Empty value passed to the Sidebar since it is not needed
-      showRecords: false
+      showRecords: false,
+      patientVid: ''
     }
   },
   computed: {
@@ -99,9 +104,9 @@ export default {
       await axios.get('/login/is-valid-token')
     },
     handlePatientCreated(event: any) {
-      const { id, name, age } = event
-      console.log(`Patient Created Wth ID: ${id}, Name: ${name}, Age: ${age}`)
-      this.$router.push('/patient/' + id)
+      const { id, name, age, vid } = event
+      console.log(`Patient Created Wth ID: ${id}, Name: ${name}, Age: ${age}, VID: ${vid}`)
+      this.$router.push('/patient/' + id + '/' + vid)
     },
     openRecords() {
       this.showRecords = true
@@ -112,3 +117,33 @@ export default {
   }
 }
 </script>
+
+<style>
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 57px;
+  z-index: 20;
+}
+
+.sidebar {
+  position: fixed;
+  top: 57px;
+  left: 0;
+  width: 250px;
+  height: calc(100vh - 60px);
+  z-index: 10;
+}
+
+.content-wrapper {
+  margin-left: 250px;
+  padding-top: 57px;
+}
+
+.scrollable-content {
+  height: calc(100vh - 57px);
+  overflow-y: auto;
+}
+</style>
