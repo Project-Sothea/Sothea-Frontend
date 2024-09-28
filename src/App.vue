@@ -14,12 +14,10 @@ axios.interceptors.response.use(
     return response
   },
   (error) => {
-    if (error.response) {
-      if (error.response.status === 401) {
-        // Redirect to login page
-        router.push('/signin')
-        toast.error("Timed out, please log in again.")
-      }
+    if (error.response && error.response.status === 401) {
+      // Redirect to login page
+      router.push('/signin')
+      toast.error("Timed out, please log in again.")
     }
     return Promise.reject(error);  // Propagate the error
   },

@@ -329,6 +329,7 @@ export default defineComponent({
       this.isMale = newValue === 'M'
     }
   },
+  emits: ['patientVisitCreated'],
   data() {
     // Default values in the AddPatient page, types mirror Admin type except for booleans, which always take on boolean | null
     return {
@@ -486,9 +487,19 @@ export default defineComponent({
         })
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          console.log(error.response)
-          if (error.response) {
-            toast.error(error.response.data.error)
+          const axiosError = error as AxiosError; // Safe casting
+          if (axiosError.response) {
+            // The request was made and server responded with a status code out of range 2xx
+            console.log(axiosError.response.data)
+            toast.error(axiosError.message)
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request)
+            toast.error('No server response received, check your connection.')
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', axiosError.message);
+            toast.error('An internal server error occurred.')
           }
         } else {
           // No response received at all

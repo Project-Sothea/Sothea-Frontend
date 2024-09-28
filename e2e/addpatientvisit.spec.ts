@@ -38,9 +38,7 @@ test('test', async ({ page }) => {
   // Toggle between visits and go back to created visit
   await page.getByRole('button', { name: 'Save' }).click();
   await page.getByRole('button', { name: 'More Visits' }).click();
-  await page.getByRole('button', { name: '03-10-2023' }).click();
   await page.getByRole('button', { name: '27-08-1950' }).click();
-  await page.getByRole('button', { name: '×' }).click();
 
   // Update Past Medical History of visit
   await page.getByRole('link', { name: 'Past Medical History' }).click();

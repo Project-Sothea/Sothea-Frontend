@@ -71,10 +71,9 @@
                         <tbody>
                             <TableRow class="hover:cursor-pointer" v-for="(patientVisit, index) in patientVisits"
                                 :key="patientVisit.id" :id="String(patientVisit.id)" :vid="String(patientVisit.vid)"
-                                :regDate="patientVisit.regDate" 
-                                :name="patientVisit.name" :khmerName="patientVisit.khmerName"
-                                :gender="patientVisit.gender" :familyGroup="patientVisit.familyGroup"
-                                :contactNumber="patientVisit.contactNo"
+                                :regDate="patientVisit.regDate" :name="patientVisit.name"
+                                :khmerName="patientVisit.khmerName" :gender="patientVisit.gender"
+                                :familyGroup="patientVisit.familyGroup" :contactNumber="patientVisit.contactNo"
                                 :class="{ 'even-row': index % 2 === 0, 'odd-row': index % 2 !== 0 }" />
                         </tbody>
                     </table>
@@ -84,14 +83,15 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, type PropType } from 'vue'
 import TableRow from './TableRow.vue';
 import axios from 'axios';
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { BaseURL } from '@/main';
 
-export default {
+export default defineComponent({
     components: {
         TableRow
     },
@@ -110,12 +110,26 @@ export default {
                 const { data } = await axios.get(`${BaseURL}/all-patient-visit-meta/default`);
                 this.patientVisits = data;  // Store the fetched data in the patientVisits array
                 this.patientVisitsFixed = data;
-                console.log(this.patientVisits);
             } catch (error) {
-                if (error.response) {
-                    toast.error(error.response.data.error)
-                } else { // No response received at all
-                    toast.error("An internal server error occurred.")
+                if (axios.isAxiosError(error)) {
+                    const axiosError = error as AxiosError; // Safe casting
+                    if (axiosError.response) {
+                        // The request was made and server responded with a status code out of range 2xx
+                        console.log(axiosError.response.data)
+                        toast.error(axiosError.message)
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        console.log(error.request)
+                        toast.error('No server response received, check your connection.')
+                    } else {
+                        // Something happened in setting up the request that triggered an Error
+                        console.log('Error', axiosError.message);
+                        toast.error('An internal server error occurred.')
+                    }
+                } else {
+                    // No response received at all
+                    console.log(error)
+                    toast.error('An internal server error occurred.')
                 }
             }
         },
@@ -164,11 +178,11 @@ export default {
                     this.searchByRegDate(patientVisit.regDate, searchValue);
             });
         },
-        searchByRegDate(regDate, searchValue) {            
+        searchByRegDate(regDate, searchValue) {
             const regDateString = regDate.split('T')[0]; // Get YYYY-MM-DD part of the ISO string
             const [year, month, day] = regDateString.split('-');
 
-            const regDateFormatted = `${day}/${month}/${year}`; 
+            const regDateFormatted = `${day}/${month}/${year}`;
             return regDateFormatted.includes(searchValue);
         },
         sortById() {
@@ -185,7 +199,7 @@ export default {
     created() {
         this.getData();
     }
-}
+})
 
 </script>
 

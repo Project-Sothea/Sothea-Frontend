@@ -9,12 +9,13 @@
       <button @click="$emit('close')" class="close-btn">×</button>
       <div class="pt-2 pl-2">
         <RecordSection
-          v-for="(regDate, visitId) in patientMeta.visits"
-          :key="visitId"
+          v-for="visit in sortedVisits"
+          :key="visit.visitId"
           :id="id"
-          :vid="visitId.toString()"
-          :date="regDate"
-          @close-modal="handleCloseModal"
+          :vid="visit.visitId"
+          :currVisit="visit.visitId === vid"
+          :date="visit.regDate"
+          @close="$emit('close')"
         />
       </div>
     </div>
@@ -39,6 +40,10 @@ export default defineComponent({
       type: String,
       default: null
     },
+    vid: {
+      type: String,
+      default: null
+    },
     isOpen: {
       type: Boolean,
       required: true
@@ -57,22 +62,47 @@ export default defineComponent({
       }
     }
   },
+  emits: ['close'],
+  computed: {
+    sortedVisits() {
+      if (this.patientMeta && this.patientMeta.visits) {
+        return Object.entries(this.patientMeta.visits)
+          .sort(([ , regDateA], [ , regDateB]) => {
+            const dateA = new Date(regDateA as string);
+            const dateB = new Date(regDateB as string);
+            return dateB.getTime() - dateA.getTime();
+          })
+          .map(([visitId, regDate]) => ({ regDate: regDate as string, visitId: visitId.toString() }));
+      }
+      return [];
+    }
+  },
   methods: {
     async getPatientMeta() {
       const toast = useToast()
 
       try {
-        await axios.get(`${BaseURL}/patient-meta/${this.id}`).then((response) => {
-          // Assuming the response data matches the structure of PatientMeta
-          this.patientMeta = response.data as PatientMeta
-
-          console.log(this.patientMeta) // You can log this to verify the structure
-        })
+        await axios
+          .get(`${BaseURL}/patient-meta/${this.id}`)
+          .then((response) => {
+            // Assuming the response data matches the structure of PatientMeta
+            this.patientMeta = response.data as PatientMeta;
+          })
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          console.log(error.response)
-          if (error.response) {
-            toast.error(error.response.data.error)
+          const axiosError = error as AxiosError; // Safe casting
+          if (axiosError.response) {
+            // The request was made and server responded with a status code out of range 2xx
+            console.log(axiosError.response.data)
+            toast.error(axiosError.message)
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request)
+            toast.error('No server response received, check your connection.')
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', axiosError.message);
+            toast.error('An internal server error occurred.')
           }
         } else {
           // No response received at all

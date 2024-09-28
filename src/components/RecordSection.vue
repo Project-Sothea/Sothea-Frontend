@@ -1,10 +1,8 @@
 <template>
   <div>
-    <div>
-      <button
-        class="custom-btn flex items-center align-center justify-between w-full rounded-md px-4 py-2 font-normal text-sm text-white mb-2 mt-2"
-        @click="handleClick"
-      >
+    <div :class="currVisit ? 'bg-[#3F51B5] text-white rounded-md' : 'bg-[#c3ccff] text-[#3F51B5] rounded-md'">
+      <button class="flex items-center align-center justify-between w-full rounded-md px-4 py-2 font-normal text-sm mb-2
+        mt-2" @click="handleClick">
         <span>{{ formattedDate }}</span>
       </button>
     </div>
@@ -19,6 +17,7 @@ export default defineComponent({
   props: {
     id: String,
     vid: String,
+    currVisit: Boolean,
     date: String
   },
   computed: {
@@ -33,8 +32,8 @@ export default defineComponent({
   },
   methods: {
     handleClick() {
-      this.$router.push({ name: 'patient', params: { id: this.id, vid: this.vid } })
-      this.$emit('close-modal')
+      this.$router.push({ name: 'patient', params: { id: this.id, vid: this.vid } });
+      this.$emit('close')
     }
   }
 })

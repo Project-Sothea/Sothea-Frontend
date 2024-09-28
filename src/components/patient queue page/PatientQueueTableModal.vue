@@ -18,17 +18,16 @@
                     <div>
                         <input type="date" id="date-input"
                             class="rounded-lg border-transparent appearance-none w-48 bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                            v-model="dateInput"
-                            @input="filterPatientsByDate(this)"/>
+                            v-model="dateInput" @input="filterPatientsByDate(this)" />
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 mx-5 hover:cursor-pointer">
-                    <Text style="font-size:medium" class="hover:text-gray-500" @click="exportPatientData()">Export
-                        Patient Data &#x2913;</Text>
+                    <p style="font-size:medium" class="hover:text-gray-500" @click="exportPatientData()">Export
+                        Patient Data &#x2913;</p>
                 </div>
                 <div class="flex items-center space-x-3 hover:cursor-pointer">
-                    <Text style="font-size:medium" class="hover:text-gray-500" @click="getData()">Refresh List
-                        &#x21bb;</Text>
+                    <p style="font-size:medium" class="hover:text-gray-500" @click="getData()">Refresh List
+                        &#x21bb;</p>
                 </div>
             </div>
 
@@ -78,9 +77,10 @@
                         </thead>
                         <tbody>
                             <TableRow class="hover:cursor-pointer" v-for="(patientVisit, index) in patientVisits"
-                                :key="patientVisit.id" :queueNo="patientVisit.queueNo" 
-                                :id="String(patientVisit.id)"  :vid="String(patientVisit.vid)" :name="patientVisit.name" :khmername="patientVisit.khmerName"
-                                :gender="patientVisit.gender" :allergies="patientVisit.drugAllergies" :referralneeded="patientVisit.referralNeeded"
+                                :key="patientVisit.id" :queueNo="patientVisit.queueNo" :id="String(patientVisit.id)"
+                                :vid="String(patientVisit.vid)" :name="patientVisit.name"
+                                :khmername="patientVisit.khmerName" :gender="patientVisit.gender"
+                                :allergies="patientVisit.drugAllergies" :referralneeded="patientVisit.referralNeeded"
                                 :class="{ 'even-row': index % 2 === 0, 'odd-row': index % 2 !== 0 }" />
                         </tbody>
                     </table>
@@ -92,14 +92,15 @@
 
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, type PropType } from 'vue'
 import TableRow from './PatientQueueTableRow.vue';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { BaseURL } from '@/main';
 
-export default {
+export default defineComponent({
     components: {
         TableRow
     },
@@ -128,10 +129,25 @@ export default {
                 this.patientVisits = data;  // Store the fetched data in the patients array
                 this.patientVisitsFixed = data;
             } catch (error) {
-                if (error.response) {
-                    toast.error(error.response.data.error)
-                } else { // No response received at all
-                    toast.error("An internal server error occurred.")
+                if (axios.isAxiosError(error)) {
+                    const axiosError = error as AxiosError; // Safe casting
+                    if (axiosError.response) {
+                        // The request was made and server responded with a status code out of range 2xx
+                        console.log(axiosError.response.data)
+                        toast.error(axiosError.message)
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        console.log(error.request)
+                        toast.error('No server response received, check your connection.')
+                    } else {
+                        // Something happened in setting up the request that triggered an Error
+                        console.log('Error', axiosError.message);
+                        toast.error('An internal server error occurred.')
+                    }
+                } else {
+                    // No response received at all
+                    console.log(error)
+                    toast.error('An internal server error occurred.')
                 }
             }
         },
@@ -175,8 +191,8 @@ export default {
                     patient.name.includes(searchValue) ||
                     patient.id.toString().includes(searchValue) ||
                     patient.khmerName.toLowerCase().includes(searchValue) ||
-                    (patient.drugAllergies !== undefined && patient.drugAllergies !== null) ? patient.drugAllergies.toLowerCase().includes(searchValue) : false;                
-                });
+                    (patient.drugAllergies !== undefined && patient.drugAllergies !== null) ? patient.drugAllergies.toLowerCase().includes(searchValue) : false;
+            });
         },
         async filterPatientsByDate() {
             const toast = useToast()
@@ -184,7 +200,7 @@ export default {
                 const date = document.getElementById('date-input').value;
                 localStorage.setItem('date-input', date);
                 const { data } = await axios.get(`${BaseURL}/all-patient-visit-meta/${date}`);
-                this.patientVisits = data; 
+                this.patientVisits = data;
                 this.patientVisitsFixed = data;
             } catch (error) {
                 if (error.response) {
@@ -210,7 +226,7 @@ export default {
                 const referralB = (b.referralNeeded !== undefined && b.referralNeeded !== null) ? b.referralNeeded : null;
 
                 if (referralA === referralB) return 0;
-                
+
                 if (this.sortAscReferral) {
                     return referralA === null ? 1 : referralB === null ? -1 : referralA < referralB ? -1 : 1;
                 } else {
@@ -223,7 +239,7 @@ export default {
     created() {
         this.getData();
     }
-}
+})
 
 </script>
 

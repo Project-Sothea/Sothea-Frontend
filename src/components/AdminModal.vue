@@ -516,14 +516,19 @@ export default defineComponent({
 
         if (this.isAdd && !this.isEditing) {
           // Add new patient
-          await axios.post(`${BaseURL}/patient`, admin).then((response) => {
-            toast.success('New Patient created successfully!')
-            // Emit patient details to be rendered in sidebar
-            this.$emit('patientCreated', {
-              id: response.data['id'],
-              name: this.name,
-              age: this.ageComputed,
-              vid: 1 // newly created patient will always have a visit id of 1
+          await axios
+            .post(`${BaseURL}/patient`, admin)
+            .then((response) => {
+              toast.success('New Patient created successfully!')
+              // Emit patient details to be rendered in sidebar
+              this.$emit('patientCreated', {
+                id: response.data['id'],
+                name: this.name,
+                age: this.ageComputed,
+                vid: 1, // newly created patient will always have a visit id of 1
+                regDate: this.regDate,
+                queueNo: this.queueNo
+              })
             })
           })
         } else if (!this.isAdd && this.isEditing) {
@@ -539,15 +544,28 @@ export default defineComponent({
                 id: this.patientId,
                 name: this.name,
                 age: this.ageComputed,
-                vid: this.patientVid
+                vid: this.patientVid,
+                regDate: this.regDate,
+                queueNo: this.queueNo
               })
+              // TODO: update visit date and queue number
             })
         }
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          console.log(error.response)
-          if (error.response) {
-            toast.error(error.response.data.error)
+          const axiosError = error as AxiosError; // Safe casting
+          if (axiosError.response) {
+            // The request was made and server responded with a status code out of range 2xx
+            console.log(axiosError.response.data)
+            toast.error(axiosError.message) 
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request)
+            toast.error('No server response received, check your connection.')
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', axiosError.message);
+            toast.error('An internal server error occurred.')
           }
         } else {
           // No response received at all
@@ -588,13 +606,13 @@ export default defineComponent({
     },
 
     toggleEdit() {
-      console.log('toggleEdit')
+      // console.log('toggleEdit')
       this.isEditing = !this.isEditing
-      console.log(this.isEditing)
+      // console.log(this.isEditing)
     },
 
     saveChanges() {
-      console.log('saving changes....')
+      // console.log('saving changes....')
       this.submitData()
       this.toggleEdit()
     }

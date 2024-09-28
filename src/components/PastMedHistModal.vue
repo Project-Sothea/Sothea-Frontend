@@ -196,7 +196,7 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue'
 
-import axios, { type AxiosResponse } from 'axios'
+import axios, { AxiosError, type AxiosResponse } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@/types/Patient'
@@ -320,9 +320,19 @@ export default defineComponent({
           })
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          console.log(error.response)
-          if (error.response) {
-            toast.error(error.response.data.error)
+          const axiosError = error as AxiosError; // Safe casting
+          if (axiosError.response) {
+            // The request was made and server responded with a status code out of range 2xx
+            console.log(axiosError.response.data)
+            toast.error(axiosError.message)
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request)
+            toast.error('No server response received, check your connection.')
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', axiosError.message);
+            toast.error('An internal server error occurred.')
           }
         } else {
           // No response received at all
