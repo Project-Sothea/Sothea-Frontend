@@ -27,7 +27,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import { BaseURL } from '@/main'
 import { defineComponent } from 'vue'
 import RecordSection from './RecordSection.vue'
-import type PatientMeta from '@/types/PatientMeta';
+import type PatientMeta from '@/types/PatientMeta'
 export default defineComponent({
   name: 'RecordsModal',
   components: {
@@ -41,12 +41,13 @@ export default defineComponent({
     isOpen: {
       type: Boolean,
       required: true
-    },
+    }
   },
+  emits: ['close'],
   data() {
     return {
-      patientMeta: {} as PatientMeta, // Define an empty patientMeta object
-    };
+      patientMeta: {} as PatientMeta // Define an empty patientMeta object
+    }
   },
   watch: {
     isOpen(newValue) {
@@ -60,14 +61,12 @@ export default defineComponent({
       const toast = useToast()
 
       try {
-        await axios
-          .get(`${BaseURL}/patient-meta/${this.id}`)
-          .then((response) => {
-            // Assuming the response data matches the structure of PatientMeta
-            this.patientMeta = response.data as PatientMeta;
+        await axios.get(`${BaseURL}/patient-meta/${this.id}`).then((response) => {
+          // Assuming the response data matches the structure of PatientMeta
+          this.patientMeta = response.data as PatientMeta
 
-            console.log(this.patientMeta); // You can log this to verify the structure
-          })
+          console.log(this.patientMeta) // You can log this to verify the structure
+        })
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           console.log(error.response)
@@ -80,7 +79,7 @@ export default defineComponent({
           toast.error('An internal server error occurred.')
         }
       }
-    },
+    }
   }
 })
 </script>

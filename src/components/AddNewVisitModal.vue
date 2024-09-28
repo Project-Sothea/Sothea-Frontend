@@ -11,8 +11,12 @@
             <div class="w-1/2">
               <label class="mb-1 block text-sm font-medium text-dark"> Name </label>
               <div class="relative">
-                <input v-model="name" type="text" placeholder="Name"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+                <input
+                  v-model="name"
+                  type="text"
+                  placeholder="Name"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/user.svg" width="20" height="20" />
                 </span>
@@ -23,8 +27,12 @@
             <div class="ml-2 w-1/2">
               <label class="mb-1 block text-sm font-medium text-dark"> Khmer Name </label>
               <div class="relative">
-                <input v-model="khmerName" type="text" placeholder="Khmer Name"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+                <input
+                  v-model="khmerName"
+                  type="text"
+                  placeholder="Khmer Name"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/user.svg" width="20" height="20" />
                 </span>
@@ -37,24 +45,37 @@
             <div class="w-1/2">
               <label class="mb-1 block text-sm font-medium text-dark"> DOB </label>
               <div class="relative z-20">
-                <input v-model="dob" type="date" :max="maxDate"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2" />
+                <input
+                  v-model="dob"
+                  type="date"
+                  :max="maxDate"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+                />
               </div>
             </div>
 
             <!-- Age Input -->
             <div class="ml-2 w-1/4">
               <label for="" class="mb-1 block text-sm font-medium text-dark"> Age </label>
-              <input :value="ageComputed" disabled type="number" placeholder="" min="0" step="1"
-                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2" />
+              <input
+                :value="ageComputed"
+                disabled
+                type="number"
+                placeholder=""
+                min="0"
+                step="1"
+                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              />
             </div>
 
             <!-- Gender Input -->
             <div class="ml-2 w-1/4">
               <label for="" class="mb-1 block text-sm font-medium text-dark"> Gender </label>
               <div class="relative z-20">
-                <select v-model="gender"
-                  class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200">
+                <select
+                  v-model="gender"
+                  class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                >
                   <option value="M">M</option>
                   <option value="F">F</option>
                 </select>
@@ -71,8 +92,12 @@
             <div class="w-1/2">
               <label class="mb-1 block text-sm font-medium text-dark"> Contact No. </label>
               <div class="relative">
-                <input v-model="contactNo" type="tel" placeholder="Contact No."
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+                <input
+                  v-model="contactNo"
+                  type="tel"
+                  placeholder="Contact No."
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/phone.svg" width="20" height="20" />
                 </span>
@@ -83,8 +108,12 @@
             <div class="ml-2 w-1/2">
               <label class="mb-1 block text-sm font-medium text-dark"> Date Registered </label>
               <div class="relative z-20">
-                <input v-model="regDate" type="date" :max="maxDate"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2" />
+                <input
+                  v-model="regDate"
+                  type="date"
+                  :max="maxDate"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+                />
               </div>
             </div>
           </div>
@@ -97,17 +126,26 @@
             <div class="w-full">
               <label class="mb-1 block text-sm font-medium text-dark"> Photo ID </label>
 
-              <div :class="[
-                'relative',
-                'bg-white'
-              ]">
-                <label for="file"
-                  class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2">
+              <div :class="['relative', 'bg-white']">
+                <label
+                  for="file"
+                  class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
+                >
                   <div>
-                    <input type="file" name="file" id="file" class="sr-only" @change="handleFileChange"
-                      accept=".jpg, .jpeg, .png" />
-                    <img v-if="selectedPhoto" :src="selectedPhoto" alt="Selected Image"
-                      class="object-cover rounded-lg w-52 h-40" />
+                    <input
+                      type="file"
+                      name="file"
+                      id="file"
+                      class="sr-only"
+                      @change="handleFileChange"
+                      accept=".jpg, .jpeg, .png"
+                    />
+                    <img
+                      v-if="selectedPhoto"
+                      :src="selectedPhoto"
+                      alt="Selected Image"
+                      class="object-cover rounded-lg w-52 h-40"
+                    />
                     <template v-else>
                       <span class="flex items-center justify-center">
                         <img src="../assets/camera.svg" height="20" width="20" />
@@ -128,8 +166,12 @@
         <div class="mr-2 w-1/3">
           <label class="mb-1 block text-sm font-medium text-dark"> Queue Number </label>
           <div class="relative">
-            <input v-model="queueNo" type="text" placeholder="Queue Number"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+            <input
+              v-model="queueNo"
+              type="text"
+              placeholder="Queue Number"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/queueno.svg" width="20" height="20" />
             </span>
@@ -139,8 +181,12 @@
         <div class="w-1/3">
           <label class="mb-1 block text-sm font-medium text-dark"> Village </label>
           <div class="relative">
-            <input v-model="village" type="text" placeholder="Village"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+            <input
+              v-model="village"
+              type="text"
+              placeholder="Village"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/house.svg" width="20" height="20" />
             </span>
@@ -151,8 +197,12 @@
         <div class="ml-2 w-1/3">
           <label class="mb-1 block text-sm font-medium text-dark"> Family Group </label>
           <div class="relative">
-            <input v-model="familyGroup" type="text" placeholder="Family Group"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+            <input
+              v-model="familyGroup"
+              type="text"
+              placeholder="Family Group"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/users.svg" width="20" height="20" />
             </span>
@@ -169,8 +219,10 @@
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/pregnantwoman.svg" width="25" height="25" />
             </span>
-            <select v-model="pregnant"
-              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200">
+            <select
+              v-model="pregnant"
+              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            >
               <option :value="true">Y</option>
               <option :value="false">N</option>
             </select>
@@ -184,8 +236,13 @@
         <div class="ml-2 w-1/2">
           <label class="mb-1 block text-sm font-medium text-dark"> Last Menstrual Period </label>
           <div class="relative z-20">
-            <input v-model="lastMenstrualPeriod" :disabled="isMale" type="date" :max="maxDate"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2" />
+            <input
+              v-model="lastMenstrualPeriod"
+              :disabled="isMale"
+              type="date"
+              :max="maxDate"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+            />
           </div>
         </div>
       </div>
@@ -196,8 +253,12 @@
         <div class="w-1/2">
           <label class="mb-1 block text-sm font-medium text-dark"> Drug Allergies </label>
           <div class="relative">
-            <input v-model="drugAllergies" type="text" placeholder="Enter Drug Allergies"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+            <input
+              v-model="drugAllergies"
+              type="text"
+              placeholder="Enter Drug Allergies"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/drug.svg" width="20" height="20" />
             </span>
@@ -213,8 +274,10 @@
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/mask.svg" width="25" height="25" />
             </span>
-            <select v-model="sentToId"
-              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200">
+            <select
+              v-model="sentToId"
+              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            >
               <option :value="true">Y</option>
               <option :value="false">N</option>
             </select>
@@ -227,8 +290,10 @@
 
       <!-- Save Button -->
       <div class="flex flex-row-reverse w-full mt-5">
-        <button @click="submitData"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
+        <button
+          @click="submitData"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+        >
           Save
         </button>
       </div>
@@ -297,9 +362,40 @@ export default defineComponent({
       return null
     }
   },
+  mounted() {
+    if (this.patientId) {
+      this.fetchPatientData()
+    }
+  },
   methods: {
-    // POST request to add a new patient / PUT request to update an existing patient
-    // If isAdd is true, do insert patient, otherwise do update patient
+    // Preloads existing patient data
+    async fetchPatientData() {
+      const toast = useToast()
+      try {
+        const response = await axios.get(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`)
+        const patientData = response.data.admin
+        console.log(patientData)
+
+        // Preload for fields with the fetched data
+        this.name = patientData.name
+        this.khmerName = patientData.khmerName || ''
+        this.dob = patientData.dob != null ? this.formatDateForInput(patientData.dob) : null
+        this.gender = patientData.gender || ''
+        this.contactNo = patientData.contactNo || ''
+        this.regDate = this.formatDateForInput(new Date().toISOString()) //prefill with current date
+        this.queueNo = patientData.queueNo || ''
+        this.village = patientData.village || ''
+        this.familyGroup = patientData.familyGroup || ''
+        // this.pregnant = patientData.pregnant || null
+        // this.lastMenstrualPeriod = patientData.lastMenstrualPeriod || ''
+        this.drugAllergies = patientData.drugAllergies || ''
+        // this.sentToId = patientData.sentToId || null
+        this.selectedPhoto = patientData.photo || ''
+        this.age = this.ageComputed
+      } catch (error) {
+        toast.error("Failed to fetch patient's data.")
+      }
+    },
     async submitData() {
       const toast = useToast()
 
@@ -376,20 +472,18 @@ export default defineComponent({
         }
 
         // Add new patient visit
-        await axios
-          .post(`${BaseURL}/patient/${this.patientId}`, admin)
-          .then((response) => {
-            toast.success('New Patient Visit created successfully!')
-            // Emit patient details to be rendered in sidebar
-            this.$emit('patientVisitCreated', {
-              id: this.patientId,
-              name: this.name,
-              age: this.ageComputed,
-              vid: response.data['vid'],
-            });
-            // Reset all the fields
-            this.resetFields();
+        await axios.post(`${BaseURL}/patient/${this.patientId}`, admin).then((response) => {
+          toast.success('New Patient Visit created successfully!')
+          // Emit patient details to be rendered in sidebar
+          this.$emit('patientVisitCreated', {
+            id: this.patientId,
+            name: this.name,
+            age: this.ageComputed,
+            vid: response.data['vid']
           })
+          // Reset all the fields
+          this.resetFields()
+        })
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           console.log(error.response)
@@ -424,26 +518,34 @@ export default defineComponent({
         alert('Please select a JPEG, JPG, or PNG file.')
       }
     },
-    resetFields() {
-      this.name = '';
-      this.khmerName = '';
-      this.dob = null;
-      this.age = null;
-      this.gender = '';
-      this.contactNo = '';
-      this.regDate = '';
-      this.queueNo = '';
-      this.village = '';
-      this.familyGroup = '';
-      this.pregnant = null;
-      this.lastMenstrualPeriod = null;
-      this.drugAllergies = '';
-      this.selectedPhoto = '';
-      this.photo = null;
-      this.sentToId = null;
-      this.isEditing = false;
-      this.isMale = false;
+    formatDateForInput(dateString: string) {
+      const date = new Date(dateString)
+      const year = date.getUTCFullYear()
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+      const day = String(date.getUTCDate()).padStart(2, '0')
+      // Return the formatted date string
+      return `${year}-${month}-${day}`
     },
+    resetFields() {
+      this.name = ''
+      this.khmerName = ''
+      this.dob = null
+      this.age = null
+      this.gender = ''
+      this.contactNo = ''
+      this.regDate = ''
+      this.queueNo = ''
+      this.village = ''
+      this.familyGroup = ''
+      this.pregnant = null
+      this.lastMenstrualPeriod = null
+      this.drugAllergies = ''
+      this.selectedPhoto = ''
+      this.photo = null
+      this.sentToId = null
+      this.isEditing = false
+      this.isMale = false
+    }
   }
 })
 </script>
