@@ -14,6 +14,7 @@
           :id="id"
           :vid="visitId.toString()"
           :date="regDate"
+          @close-modal="handleCloseModal"
         />
       </div>
     </div>
@@ -79,6 +80,9 @@ export default defineComponent({
           toast.error('An internal server error occurred.')
         }
       }
+    },
+    handleCloseModal() {
+      this.$emit('close')
     }
   }
 })

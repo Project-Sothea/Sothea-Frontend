@@ -69,7 +69,7 @@
       </div>
     </div>
     <!-- Records Modal -->
-    <RecordsModal :isOpen="showRecords" @close="closeRecords"> </RecordsModal>
+    <RecordsModal :id="id" :isOpen="showRecords" @close="closeRecords"> </RecordsModal>
   </div>
 </template>
 
