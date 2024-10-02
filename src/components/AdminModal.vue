@@ -344,6 +344,7 @@
 import { defineComponent, type PropType } from 'vue'
 
 import type Admin from '@/types/Admin'
+// import imageCompression from 'browser-image-compression'
 
 import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
 import { useToast } from 'vue-toast-notification'
@@ -516,19 +517,14 @@ export default defineComponent({
 
         if (this.isAdd && !this.isEditing) {
           // Add new patient
-          await axios
-            .post(`${BaseURL}/patient`, admin)
-            .then((response) => {
-              toast.success('New Patient created successfully!')
-              // Emit patient details to be rendered in sidebar
-              this.$emit('patientCreated', {
-                id: response.data['id'],
-                name: this.name,
-                age: this.ageComputed,
-                vid: 1, // newly created patient will always have a visit id of 1
-                regDate: this.regDate,
-                queueNo: this.queueNo
-              })
+          await axios.post(`${BaseURL}/patient`, admin).then((response) => {
+            toast.success('New Patient created successfully!')
+            // Emit patient details to be rendered in sidebar
+            this.$emit('patientCreated', {
+              id: response.data['id'],
+              name: this.name,
+              age: this.ageComputed,
+              vid: 1 // newly created patient will always have a visit id of 1
             })
           })
         } else if (!this.isAdd && this.isEditing) {
@@ -544,28 +540,15 @@ export default defineComponent({
                 id: this.patientId,
                 name: this.name,
                 age: this.ageComputed,
-                vid: this.patientVid,
-                regDate: this.regDate,
-                queueNo: this.queueNo
+                vid: this.patientVid
               })
-              // TODO: update visit date and queue number
             })
         }
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError; // Safe casting
-          if (axiosError.response) {
-            // The request was made and server responded with a status code out of range 2xx
-            console.log(axiosError.response.data)
-            toast.error(axiosError.message) 
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request)
-            toast.error('No server response received, check your connection.')
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message);
-            toast.error('An internal server error occurred.')
+          console.log(error.response)
+          if (error.response) {
+            toast.error(error.response.data.error)
           }
         } else {
           // No response received at all
@@ -574,7 +557,6 @@ export default defineComponent({
         }
       }
     },
-
     handleFileChange(event: any) {
       const file = event.target.files[0]
       if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
@@ -595,7 +577,35 @@ export default defineComponent({
         alert('Please select a JPEG, JPG, or PNG file.')
       }
     },
+    // async handleImageUpload(event: any) {
+    //   const imageFile = event.target.files[0]
+    //   console.log('originalFile instanceof Blob', imageFile instanceof Blob) // true
+    //   console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`)
 
+    //   const options = {
+    //     maxSizeMB: 1,
+    //     maxWidthOrHeight: 1920,
+    //     useWebWorker: true
+    //   }
+    //   try {
+    //     const compressedFile = await imageCompression(imageFile, options)
+    //     console.log('compressedFile instanceof Blob', compressedFile instanceof Blob) // true
+    //     console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`) // smaller than maxSizeMB
+    //     const reader = new FileReader()
+    //     reader.onload = (e) => {
+    //       // Remove the data URL prefix to get just the base64 string
+    //       if (e.target != null && typeof e.target.result == 'string') {
+    //         this.selectedPhoto = e.target.result
+    //         this.photo = e.target.result.split(',')[1]
+    //       }
+    //     }
+    //     reader.readAsDataURL(compressedFile)
+    //   } catch (error) {
+    //     console.log(error)
+    //     this.selectedPhoto = ''
+    //     alert('Please select a JPEG, JPG, or PNG file.')
+    //   }
+    // },
     formatDateForInput(dateString: string) {
       const date = new Date(dateString)
       const year = date.getUTCFullYear()
@@ -606,13 +616,13 @@ export default defineComponent({
     },
 
     toggleEdit() {
-      // console.log('toggleEdit')
+      console.log('toggleEdit')
       this.isEditing = !this.isEditing
-      // console.log(this.isEditing)
+      console.log(this.isEditing)
     },
 
     saveChanges() {
-      // console.log('saving changes....')
+      console.log('saving changes....')
       this.submitData()
       this.toggleEdit()
     }

@@ -13,8 +13,12 @@
         :isAdd="false"
       />
       <div class="flex-grow">
-        <SubNavBar :id="id" :regDate="regDate" :queueNo="queueNo"
-          @openModal="openRecords" />
+        <SubNavBar
+          :id="id"
+          :regDate="patient?.admin.regDate"
+          :queueNo="patient?.admin.queueNo"
+          @openModal="openRecords"
+        />
         <keep-alive>
           <component
             :is="activeComponent"
@@ -161,13 +165,13 @@ export default defineComponent({
     },
 
     async getPatientData(id: string, vid: string) {
-      const response: AxiosResponse = await axios.get(`${BaseURL}/patient/${id}/${vid}`);
-      const { data } = response;
-      this.patient = JSON.parse(JSON.stringify(data)) as Patient;
+      const response: AxiosResponse = await axios.get(`${BaseURL}/patient/${id}/${vid}`)
+      const { data } = response
+      this.patient = JSON.parse(JSON.stringify(data)) as Patient
       this.age = this.patient.admin.dob
         ? new Date().getFullYear() - new Date(this.patient.admin.dob).getFullYear()
-        : null;
-      this.name = this.patient.admin.name;
+        : null
+      this.name = this.patient.admin.name
     },
     async loadPatientData() {
       const toast = useToast()
@@ -175,7 +179,7 @@ export default defineComponent({
         await this.getPatientData(this.id, this.vid)
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError; // Safe casting
+          const axiosError = error as AxiosError // Safe casting
           if (axiosError.response) {
             // The request was made and server responded with a status code out of range 2xx
             console.log(axiosError.response.data)
@@ -186,7 +190,7 @@ export default defineComponent({
             toast.error('No server response received, check your connection.')
           } else {
             // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message);
+            console.log('Error', axiosError.message)
             toast.error('An internal server error occurred.')
           }
         } else {
@@ -197,7 +201,9 @@ export default defineComponent({
     },
     handlePatientUpdated(event: any) {
       const { id, name, age, vid, regDate, queueNo } = event
-      console.log(`Patient Updated With ID: ${id}, Name: ${name}, Age: ${age}, VID: ${vid}, Reg Date: ${regDate}, Queue No: ${queueNo}`)
+      console.log(
+        `Patient Updated With ID: ${id}, Name: ${name}, Age: ${age}, VID: ${vid}, Reg Date: ${regDate}, Queue No: ${queueNo}`
+      )
       this.name = name
       this.age = age
       this.regDate = regDate
@@ -216,33 +222,33 @@ export default defineComponent({
       this.showRecords = false
     },
     async handleDeleteVisit() {
-      const toast = useToast();
+      const toast = useToast()
       try {
-        await axios.delete(`${BaseURL}/patient/${this.id}/${this.vid}`);
-        this.$router.push('/allpatients');
-        toast.success('Patient Visit deleted successfully.');
+        await axios.delete(`${BaseURL}/patient/${this.id}/${this.vid}`)
+        this.$router.push('/allpatients')
+        toast.success('Patient Visit deleted successfully.')
       } catch (error: unknown) {
         // Handle axios errors
         if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError; // Safe casting
+          const axiosError = error as AxiosError // Safe casting
 
           if (axiosError.response) {
             // Server responded with a status code outside of the 2xx range
-            console.log(axiosError.response.data);
-            toast.error(axiosError.message || 'Failed to delete the visit');
+            console.log(axiosError.response.data)
+            toast.error(axiosError.message || 'Failed to delete the visit')
           } else if (axiosError.request) {
             // Request was made but no response received (e.g., server is down)
-            console.log(axiosError.request);
-            toast.error('No server response received, check your connection.');
+            console.log(axiosError.request)
+            toast.error('No server response received, check your connection.')
           } else {
             // Error occurred in setting up the request
-            console.log('Error', axiosError.message);
-            toast.error('An internal server error occurred.');
+            console.log('Error', axiosError.message)
+            toast.error('An internal server error occurred.')
           }
         } else {
           // Handle unknown errors (not axios related)
-          console.log(error);
-          toast.error('An internal server error occurred.');
+          console.log(error)
+          toast.error('An internal server error occurred.')
         }
       }
     }

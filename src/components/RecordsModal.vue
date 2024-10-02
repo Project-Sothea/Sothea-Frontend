@@ -62,19 +62,21 @@ export default defineComponent({
       }
     }
   },
-  emits: ['close'],
   computed: {
     sortedVisits() {
       if (this.patientMeta && this.patientMeta.visits) {
         return Object.entries(this.patientMeta.visits)
-          .sort(([ , regDateA], [ , regDateB]) => {
-            const dateA = new Date(regDateA as string);
-            const dateB = new Date(regDateB as string);
-            return dateB.getTime() - dateA.getTime();
+          .sort(([, regDateA], [, regDateB]) => {
+            const dateA = new Date(regDateA as string)
+            const dateB = new Date(regDateB as string)
+            return dateB.getTime() - dateA.getTime()
           })
-          .map(([visitId, regDate]) => ({ regDate: regDate as string, visitId: visitId.toString() }));
+          .map(([visitId, regDate]) => ({
+            regDate: regDate as string,
+            visitId: visitId.toString()
+          }))
       }
-      return [];
+      return []
     }
   },
   methods: {
@@ -82,15 +84,13 @@ export default defineComponent({
       const toast = useToast()
 
       try {
-        await axios
-          .get(`${BaseURL}/patient-meta/${this.id}`)
-          .then((response) => {
-            // Assuming the response data matches the structure of PatientMeta
-            this.patientMeta = response.data as PatientMeta;
-          })
+        await axios.get(`${BaseURL}/patient-meta/${this.id}`).then((response) => {
+          // Assuming the response data matches the structure of PatientMeta
+          this.patientMeta = response.data as PatientMeta
+        })
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError; // Safe casting
+          const axiosError = error as AxiosError // Safe casting
           if (axiosError.response) {
             // The request was made and server responded with a status code out of range 2xx
             console.log(axiosError.response.data)
@@ -101,7 +101,7 @@ export default defineComponent({
             toast.error('No server response received, check your connection.')
           } else {
             // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message);
+            console.log('Error', axiosError.message)
             toast.error('An internal server error occurred.')
           }
         } else {
@@ -110,9 +110,6 @@ export default defineComponent({
           toast.error('An internal server error occurred.')
         }
       }
-    },
-    handleCloseModal() {
-      this.$emit('close')
     }
   }
 })
