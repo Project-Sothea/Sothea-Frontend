@@ -163,8 +163,8 @@ export default defineComponent({
       this.patient = JSON.parse(JSON.stringify(data)) as Patient
       this.age = this.patient.admin.dob
         ? new Date().getFullYear() - new Date(this.patient.admin.dob).getFullYear()
-        : null
-      this.name = this.patient.admin.name
+        : null;
+      this.name = this.patient.admin.name;
       this.regDate = this.patient.admin.regDate
       this.queueNo = this.patient.admin.queueNo
     },
