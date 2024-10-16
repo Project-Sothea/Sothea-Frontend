@@ -6,7 +6,7 @@
       "
     >
       <button
-        class="custom-btn flex items-center align-center justify-between w-full rounded-md px-4 py-2 font-normal text-sm mb-2 mt-2"
+        class="flex items-center align-center justify-between w-full rounded-md px-4 py-2 font-normal text-sm mb-2 mt-2"
         @click="handleClick"
       >
         <span>{{ formattedDate }}</span>
@@ -26,6 +26,11 @@ export default defineComponent({
     currVisit: Boolean,
     date: String
   },
+  data() {
+    return {
+      dropdownOpen: false
+    }
+  },
   computed: {
     formattedDate(): string | null {
       if (!this.date) return null
@@ -37,6 +42,9 @@ export default defineComponent({
     }
   },
   methods: {
+    toggleDropdown() {
+      this.dropdownOpen = !this.dropdownOpen
+    },
     handleClick() {
       this.$router.push({ name: 'patient', params: { id: this.id, vid: this.vid } })
       this.$emit('close')
@@ -44,16 +52,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped>
-.custom-btn {
-  border: 2px solid #3f51b5;
-  background-color: transparent;
-  color: #3f51b5;
-}
-
-.custom-btn:hover {
-  background-color: #3f51b5;
-  color: white;
-}
-</style>

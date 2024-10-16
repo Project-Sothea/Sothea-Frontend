@@ -321,6 +321,10 @@ export default defineComponent({
     patientVid: {
       type: String,
       default: null
+    },
+    patientData: {
+      type: Object as PropType<Patient>,
+      default: null
     }
   },
   watch: {
@@ -364,39 +368,33 @@ export default defineComponent({
     }
   },
   mounted() {
-    if (this.patientId) {
-      this.fetchPatientData()
+    if (this.patientData) {
+      const admin = this.patientData.admin
+      if (!admin) return
+      this.name = admin.name
+      this.khmerName = admin.khmerName
+      this.dob = admin.dob != null ? this.formatDateForInput(admin.dob) : null
+      this.age = admin.age
+      this.gender = admin.gender
+      this.contactNo = admin.contactNo
+      this.regDate = this.formatDateForInput(new Date().toISOString())
+      this.queueNo = admin.queueNo
+      this.village = admin.village
+      this.familyGroup = admin.familyGroup
+      // this.pregnant = admin.pregnant
+      // this.lastMenstrualPeriod =
+      //   admin.lastMenstrualPeriod != null
+      //     ? this.formatDateForInput(admin.lastMenstrualPeriod)
+      //     : null
+      this.drugAllergies = admin.drugAllergies
+      this.photo = admin.photo
+      // this.sentToId = admin.sentToId
+      this.selectedPhoto = this.photo ? `data:image/png;base64,${atob(this.photo)}` : ''
     }
   },
   methods: {
-    // Preloads existing patient data
-    async fetchPatientData() {
-      const toast = useToast()
-      try {
-        const response = await axios.get(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`)
-        const patientData = response.data.admin
-        console.log(patientData)
-
-        // Preload for fields with the fetched data
-        this.name = patientData.name
-        this.khmerName = patientData.khmerName || ''
-        this.dob = patientData.dob != null ? this.formatDateForInput(patientData.dob) : null
-        this.gender = patientData.gender || ''
-        this.contactNo = patientData.contactNo || ''
-        this.regDate = this.formatDateForInput(new Date().toISOString()) //prefill with current date
-        this.queueNo = patientData.queueNo || ''
-        this.village = patientData.village || ''
-        this.familyGroup = patientData.familyGroup || ''
-        // this.pregnant = patientData.pregnant || null
-        // this.lastMenstrualPeriod = patientData.lastMenstrualPeriod || ''
-        this.drugAllergies = patientData.drugAllergies || ''
-        // this.sentToId = patientData.sentToId || null
-        this.selectedPhoto = patientData.photo || ''
-        this.age = this.ageComputed
-      } catch (error) {
-        toast.error("Failed to fetch patient's data.")
-      }
-    },
+    // POST request to add a new patient / PUT request to update an existing patient
+    // If isAdd is true, do insert patient, otherwise do update patient
     async submitData() {
       const toast = useToast()
 
@@ -487,7 +485,7 @@ export default defineComponent({
         })
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError; // Safe casting
+          const axiosError = error as AxiosError // Safe casting
           if (axiosError.response) {
             // The request was made and server responded with a status code out of range 2xx
             console.log(axiosError.response.data)
@@ -498,7 +496,7 @@ export default defineComponent({
             toast.error('No server response received, check your connection.')
           } else {
             // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message);
+            console.log('Error', axiosError.message)
             toast.error('An internal server error occurred.')
           }
         } else {
@@ -529,14 +527,6 @@ export default defineComponent({
         alert('Please select a JPEG, JPG, or PNG file.')
       }
     },
-    formatDateForInput(dateString: string) {
-      const date = new Date(dateString)
-      const year = date.getUTCFullYear()
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-      const day = String(date.getUTCDate()).padStart(2, '0')
-      // Return the formatted date string
-      return `${year}-${month}-${day}`
-    },
     resetFields() {
       this.name = ''
       this.khmerName = ''
@@ -556,6 +546,14 @@ export default defineComponent({
       this.sentToId = null
       this.isEditing = false
       this.isMale = false
+    },
+    formatDateForInput(dateString: string) {
+      const date = new Date(dateString)
+      const year = date.getUTCFullYear()
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+      const day = String(date.getUTCDate()).padStart(2, '0')
+      // Return the formatted date string
+      return `${year}-${month}-${day}`
     }
   }
 })
