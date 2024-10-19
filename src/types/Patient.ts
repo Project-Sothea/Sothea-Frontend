@@ -5,6 +5,7 @@ import type PastMedicalHistory from "./PastMedicalHistory"
 import type SocialHistory from "./SocialHistory"
 import type HeightAndWeight from "./HeightAndWeight"
 import type VitalStatistics from "./VitalStatistics"
+import type FallRisk from "./FallRisk"
 
 // The Patient type is a composite type that contains all the other types.
 export default interface Patient {
@@ -14,5 +15,6 @@ export default interface Patient {
   vitalstatistics: VitalStatistics | null
   heightandweight: HeightAndWeight | null
   visualacuity: VisualAcuity | null
+  fallrisk: FallRisk | null
   doctorsconsultation: DoctorsConsultation | null
 }

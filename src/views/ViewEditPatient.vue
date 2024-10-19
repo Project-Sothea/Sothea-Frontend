@@ -59,7 +59,9 @@ import SocialHistModal from '../components/SocialHistModal.vue'
 import VitalStatsModal from '../components/VitalStatsModal.vue'
 import HeightWeightModal from '../components/HeightWeightModal.vue'
 import VisualAcuityModal from '../components/VisualAcuityModal.vue'
+import FallRiskModal from '@/components/FallRiskModal.vue';
 import DrConsultModal from '../components/DrConsultModal.vue'
+import AddNewVisitModal from '@/components/AddNewVisitModal.vue';
 
 import type Patient from '@/types/Patient'
 
@@ -67,7 +69,6 @@ import axios, { AxiosError, type AxiosResponse } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { BaseURL } from '@/main';
-import AddNewVisitModal from '@/components/AddNewVisitModal.vue';
 
 export default defineComponent({
   components: {
@@ -81,6 +82,7 @@ export default defineComponent({
     VitalStatsModal,
     HeightWeightModal,
     VisualAcuityModal,
+    FallRiskModal,
     DrConsultModal,
     AddNewVisitModal
   },
@@ -121,6 +123,8 @@ export default defineComponent({
           return 'HeightWeightModal'
         case 'visual-acuity':
           return 'VisualAcuityModal'
+        case 'fall-risk':
+          return 'FallRiskModal'
         case 'dr-consult':
           return 'DrConsultModal'
         case 'add-new-visit':

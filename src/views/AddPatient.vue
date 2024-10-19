@@ -34,6 +34,7 @@ import SocialHistModal from '../components/SocialHistModal.vue'
 import VitalStatsModal from '../components/VitalStatsModal.vue'
 import HeightWeightModal from '../components/HeightWeightModal.vue'
 import VisualAcuityModal from '../components/VisualAcuityModal.vue'
+import FallRiskModal from '@/components/FallRiskModal.vue'
 import DrConsultModal from '../components/DrConsultModal.vue'
 
 import axios from 'axios'
@@ -48,6 +49,7 @@ export default {
     VitalStatsModal,
     HeightWeightModal,
     VisualAcuityModal,
+    FallRiskModal,
     DrConsultModal
   },
   data() {
@@ -74,6 +76,8 @@ export default {
           return 'HeightWeightModal'
         case 'visual-acuity':
           return 'VisualAcuityModal'
+        case 'fall-risk':
+          return 'FallRiskModal'
         case 'dr-consult':
           return 'DrConsultModal'
         default:
