@@ -210,7 +210,7 @@
         <div class="flex flex-row">
           <div class="font-normal items-center inline-flex text-sm w-1/3">Referral Needed?</div>
 
-          <div class="flex w-1/6">
+          <div class="flex">
             <div class="flex items-center pr-7">
               <label class="inline-flex items-center">
                 <input type="radio" name="ref-needed" class="w-4 h-4" v-model="referralNeeded" :value="true"
@@ -225,8 +225,22 @@
             </div>
           </div>
 
-          <div class="flex w-1/3 grow">
+          <div class="flex w-1/3 pl-11 grow">
             <textarea v-model="referralLoc" rows="1" placeholder="Enter Location"
+              class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+              :disabled="!isEditing"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remarks -->
+      <div class="flex flex-col mt-2">
+        <div class="flex flex-row">
+          <div class="font-medium text-sm pl-13">Remarks</div>
+        </div>
+        <div class="flex flex-row">
+          <div class="flex pl-13 grow"> 
+            <textarea v-model="remarks" rows="1" placeholder="Enter Remarks for Referral"
               class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
               :disabled="!isEditing"></textarea>
           </div>
