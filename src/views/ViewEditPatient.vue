@@ -13,12 +13,7 @@
         :isAdd="false"
       />
       <div class="flex-grow">
-        <SubNavBar
-          :id="id"
-          :regDate="patient?.admin.regDate"
-          :queueNo="patient?.admin.queueNo"
-          @openModal="openRecords"
-        />
+        <SubNavBar :id="id" :regDate="regDate" :queueNo="queueNo" @openModal="openRecords" />
         <keep-alive>
           <component
             :is="activeComponent"
@@ -68,8 +63,6 @@
         </div>
       </div>
     </div>
-    <!-- Records Modal -->
-    <RecordsModal :id="id" :isOpen="showRecords" @close="closeRecords"> </RecordsModal>
   </div>
 </template>
 

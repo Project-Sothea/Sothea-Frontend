@@ -49,7 +49,6 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['close'],
   data() {
     return {
       patientMeta: {} as PatientMeta // Define an empty patientMeta object
@@ -62,6 +61,7 @@ export default defineComponent({
       }
     }
   },
+  emits: ['close'],
   computed: {
     sortedVisits() {
       if (this.patientMeta && this.patientMeta.visits) {
