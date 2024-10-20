@@ -107,6 +107,17 @@ test('test', async ({ page }) => {
   await page.getByPlaceholder('Remarks').fill('Pinhole: R not improved (cataract?); L 6/24')
   await page.getByRole('button', { name: 'Save Edits' }).click()
 
+  // Edit all FallRisk Modal fields
+  await page.getByRole('link', { name: 'Fall Risk' }).click()
+  await page.getByRole('button', { name: 'Edit' }).click()
+  await page.locator('input[name="pastYearFall"]').first().check()
+  await page.locator('input[name="unsteadyStandingFalling"]').first().check()
+  await page.locator('input[name="fallWorries"]').first().check()
+  await page.getByPlaceholder('Others').click()
+  await page.getByPlaceholder('Others').fill('Others here')
+  await page.locator('input[name="furtherReferral"]').first().check()
+  await page.getByRole('button', { name: 'Save Edits' }).click()
+
   // Edit all DoctorConsult Modal fields
   await page.getByRole('link', { name: "Doctor's Consult" }).click()
   await page.getByRole('button', { name: 'Edit' }).click()
@@ -158,6 +169,12 @@ test('test', async ({ page }) => {
 
   // Wait for 1 second before performing assertions
   await page.waitForTimeout(1000)
+
+  // Navigate to AllPatients Page and get View / Edit Patients Page of created Patient
+  await page.getByRole('link', { name: 'All Patients' }).click()
+  await page.getByPlaceholder('Search by ID/Name/Khmer Name/DOB/Contact No.').click()
+  await page.getByPlaceholder('Search by ID/Name/Khmer Name/DOB/Contact No.').fill('Khay Veata')
+  await page.getByRole('cell', { name: 'Khay Veata' }).first().click()
 
   // Assert all AdminModal fields correct
   await page.getByRole('link', { name: 'Admin' }).click()
@@ -218,6 +235,14 @@ test('test', async ({ page }) => {
   expect(await page.getByPlaceholder('Remarks').inputValue()).toBe(
     'Pinhole: R not improved (cataract?); L 6/24'
   )
+
+  // Assert all FallRisk Modal fields correct
+  await page.getByRole('link', { name: 'Fall Risk' }).click()
+  expect(await page.locator('input[name="pastYearFall"]').first().isChecked()).toBeTruthy()
+  expect(await page.locator('input[name="unsteadyStandingFalling"]').first().isChecked()).toBeTruthy()
+  expect(await page.locator('input[name="fallWorries"]').first().isChecked()).toBeTruthy()
+  expect(await page.getByPlaceholder('Others').inputValue()).toBe('Others here')
+  expect(await page.locator('input[name="furtherReferral"]').first().isChecked()).toBeTruthy()
 
   // Assert all DoctorConsult Modal fields correct
   await page.getByRole('link', { name: "Doctor's Consult" }).click()
