@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center justify-center">
     <div class="flex flex-col rounded-lg w-3/4 max-h-fit border border-gray-300 p-10">
-      <h1>Past Medical history</h1>
+      <h1>Fall Risk (For patients above 60)</h1>
       <br />
 
       <div class="flex flex-col">
@@ -73,11 +73,31 @@
         </div>
       </div>
 
+      <!-- Further Referral -->
+      <div class="flex flex-col mt-4">
+        <div class="flex flex-row">
+          <div class="font-normal text-sm w-1/3">Further Referral?</div>
+
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input type="radio" name="furtherReferral" class="w-4 h-4" v-model="furtherReferral" :value="true"
+                :disabled="!isEditing" />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input type="radio" name="furtherReferral" class="w-4 h-4" v-model="furtherReferral" :value="false"
+                :disabled="!isEditing" />
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- Others -->
       <div class="mt-2">
         <label>
           <label for="" class="mb-2 block text-sm font-normal text-dark">Others: </label>
-          <textarea rows="2" placeholder="Remarks"
+          <textarea rows="2" placeholder="Others"
             class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             v-model="others" :disabled="!isEditing"></textarea>
         </label>

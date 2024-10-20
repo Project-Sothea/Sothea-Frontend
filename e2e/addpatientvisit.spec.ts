@@ -120,6 +120,17 @@ test('test', async ({ page }) => {
   await page.getByPlaceholder('Remarks').fill('40');
   await page.getByRole('button', { name: 'Save Edits' }).click();
 
+  // Update Fall Risk of visit
+  await page.getByRole('link', { name: 'Fall Risk' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await page.locator('input[name="pastYearFall"]').first().check();
+  await page.locator('input[name="unsteadyStandingFalling"]').nth(1).check();
+  await page.locator('input[name="fallWorries"]').nth(1).check();
+  await page.getByPlaceholder('Others').click();
+  await page.getByPlaceholder('Others').fill('Uses a walking aid');
+  await page.locator('input[name="furtherReferral"]').nth(1).check();
+  await page.getByRole('button', { name: 'Save Edits' }).click();
+
   // Update Doctor's Consultation of visit
   await page.getByRole('link', { name: 'Doctor\'s Consult' }).click();
   await page.getByRole('button', { name: 'Edit' }).click();
@@ -210,6 +221,15 @@ test('test', async ({ page }) => {
   expect(await page.getByRole('spinbutton').first().inputValue()).toBe('40');
   expect(await page.getByRole('spinbutton').nth(1).inputValue()).toBe('40');
   expect(await page.getByPlaceholder('Remarks').inputValue()).toBe('40');
+
+  // Assert Fall Risk correct
+  await page.getByRole('link', { name: 'Fall Risk' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  expect(await page.locator('input[name="pastYearFall"]').first().isChecked()).toBe(true);
+  expect(await page.locator('input[name="unsteadyStandingFalling"]').nth(1).isChecked()).toBe(true);
+  expect(await page.locator('input[name="fallWorries"]').nth(1).isChecked()).toBe(true);
+  expect(await page.getByPlaceholder('Others').inputValue()).toBe('Uses a walking aid');
+  expect(await page.locator('input[name="furtherReferral"]').nth(1).isChecked()).toBe(true);
 
   // Assert Doctor's Consultation correct
   await page.getByRole('link', { name: 'Doctor\'s Consult' }).click();
