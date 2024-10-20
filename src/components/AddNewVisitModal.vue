@@ -104,8 +104,8 @@
                 <label for="file"
                   class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2">
                   <div>
-                    <input type="file" name="file" id="file" class="sr-only" @change="handleFileChange"
-                      accept=".jpg, .jpeg, .png" />
+                    <input type="file" name="file" id="file" class="sr-only" @change="handleImageUpload"
+                      accept=".jpg, .jpeg, .png, .heic" />
                     <img v-if="selectedPhoto" :src="selectedPhoto" alt="Selected Image"
                       class="object-cover rounded-lg w-52 h-40" />
                     <template v-else>
@@ -240,6 +240,8 @@
 import { defineComponent, type PropType } from 'vue'
 
 import type Admin from '@/types/Admin'
+import imageCompression from 'browser-image-compression';
+import heic2any from 'heic2any';
 
 import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
 import { useToast } from 'vue-toast-notification'
@@ -415,9 +417,58 @@ export default defineComponent({
       }
     },
 
-    handleFileChange(event: any) {
-      const file = event.target.files[0]
-      if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
+    // handleFileChange(event: any) {
+    //   const file = event.target.files[0]
+    //   if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
+    //     const reader = new FileReader()
+    //     reader.onload = (e) => {
+    //       // Remove the data URL prefix to get just the base64 string
+    //       if (e.target != null && typeof e.target.result == 'string') {
+    //         this.selectedPhoto = e.target.result
+    //         this.photo = e.target.result.split(',')[1]
+    //       }
+    //     }
+    //     reader.readAsDataURL(file)
+    //     console.log(this.selectedPhoto)
+    //     console.log(this.photo)
+    //   } else {
+    //     // Reset selectedPhoto or show error message
+    //     this.selectedPhoto = ''
+    //     alert('Please select a JPEG, JPG, or PNG file.')
+    //   }
+    // },
+    async handleImageUpload(event: any) {
+      const imageFile = event.target.files[0];
+      console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
+      console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
+
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      }
+      try {
+        let fileToProcess = imageFile
+        // Check if the file is a .heic image
+        if (fileToProcess.type === "image/heic") {
+          try {
+            // Convert HEIC to JPEG
+            const convertedBlob = await heic2any({
+              blob: fileToProcess,
+              toType: "image/jpeg",
+            });
+            fileToProcess = convertedBlob as Blob;
+          } catch (heicError) {
+            console.error('HEIC conversion failed', heicError);
+            const toast = useToast()
+            toast.error('Image upload failed, Please re-upload a JPEG, JPG, PNG or HEIC file.')
+            return;
+          }
+        }
+
+        const compressedFile = await imageCompression(fileToProcess, options);
+        console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
+        console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
         const reader = new FileReader()
         reader.onload = (e) => {
           // Remove the data URL prefix to get just the base64 string
@@ -426,15 +477,14 @@ export default defineComponent({
             this.photo = e.target.result.split(',')[1]
           }
         }
-        reader.readAsDataURL(file)
-        console.log(this.selectedPhoto)
-        console.log(this.photo)
-      } else {
-        // Reset selectedPhoto or show error message
+        reader.readAsDataURL(compressedFile)
+      } catch (error) {
+        console.log(error);
         this.selectedPhoto = ''
-        alert('Please select a JPEG, JPG, or PNG file.')
+        alert('Please select a JPEG, JPG, PNG or HEIC file.')
       }
     },
+
     resetFields() {
       this.name = '';
       this.khmerName = '';

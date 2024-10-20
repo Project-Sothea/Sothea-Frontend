@@ -18,6 +18,7 @@
     "autoprefixer": "^10.4.19",
     "axios": "^1.7.2",
     "browser-image-compression": "^2.0.2",
+    "heic2any": "^0.0.4",
     "pinia": "^2.1.7",
     "postcss": "^8.4.38",
     "react-toastify": "^10.0.5",

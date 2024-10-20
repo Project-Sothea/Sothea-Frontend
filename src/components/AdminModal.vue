@@ -105,7 +105,7 @@
                   class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2">
                   <div>
                     <input type="file" name="file" id="file" class="sr-only" :disabled="!isEditing && !isAdd"
-                      @change="handleImageUpload" accept=".jpg, .jpeg, .png" />
+                      @change="handleImageUpload" accept=".jpg, .jpeg, .png, .heic" />
                     <img v-if="selectedPhoto" :src="selectedPhoto" alt="Selected Image"
                       class="object-cover rounded-lg w-52 h-40" />
                     <template v-else>
@@ -256,12 +256,14 @@ import { defineComponent, type PropType } from 'vue'
 
 import type Admin from '@/types/Admin'
 import imageCompression from 'browser-image-compression';
+import heic2any from 'heic2any';
 
 import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@/types/Patient'
 import { BaseURL } from '@/main'
+import { toast } from 'react-toastify';
 
 export default defineComponent({
   props: {
@@ -516,7 +518,24 @@ export default defineComponent({
         useWebWorker: true,
       }
       try {
-        const compressedFile = await imageCompression(imageFile, options);
+        let fileToProcess = imageFile
+        // Check if the file is a .heic image
+        if (fileToProcess.type === "image/heic") {
+          try {
+            // Convert HEIC to JPEG
+            const convertedBlob = await heic2any({
+              blob: fileToProcess,
+              toType: "image/jpeg", 
+            });
+            fileToProcess = convertedBlob as Blob; 
+          } catch (heicError) {
+            console.error('HEIC conversion failed', heicError);
+            toast.error('Image upload failed, Please re-upload a JPEG, JPG, PNG or HEIC file.')
+            return;
+          }
+        }
+
+        const compressedFile = await imageCompression(fileToProcess, options);
         console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
         console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
         const reader = new FileReader()
@@ -531,7 +550,7 @@ export default defineComponent({
       } catch (error) {
         console.log(error);
         this.selectedPhoto = ''
-        alert('Please select a JPEG, JPG, or PNG file.')
+        alert('Please select a JPEG, JPG, PNG or HEIC file.')
       }
     },
 
@@ -565,3 +584,7 @@ h1 {
   font-weight: 500;
 }
 </style>
+
+function heic2any(arg0: { blob: any; toType: string; }) {
+	throw new Error('Function not implemented.');
+}
