@@ -100,7 +100,7 @@ export default defineComponent({
       patient: null as Patient | null,
       name: '' as string,
       age: 0 as number | null,
-      regDate: '' as string,
+      regDate: '' as string, // format: YYYY-MM-DD, local timezone
       queueNo: '' as string,
       showRecords: false,
       tryDeleteVisit: false
@@ -140,13 +140,28 @@ export default defineComponent({
       const response: AxiosResponse = await axios.get(`${BaseURL}/patient/${id}/${vid}`);
       const { data } = response;
       this.patient = JSON.parse(JSON.stringify(data)) as Patient;
-      this.age = this.patient.admin.dob
-        ? new Date().getFullYear() - new Date(this.patient.admin.dob).getFullYear()
+
+      const admin = this.patient.admin;
+      this.age = admin.dob
+        ? new Date().getFullYear() - new Date(admin.dob).getFullYear()
         : null;
-      this.name = this.patient.admin.name;
-      this.regDate = this.patient.admin.regDate
-      this.queueNo = this.patient.admin.queueNo
+      this.name = admin.name;
+      this.regDate = this.formatDateForInput(admin.regDate)
+      this.queueNo = admin.queueNo
     },
+
+    formatDateForInput(dateString: string) {
+      const date = new Date(dateString)
+
+      // Get the date components (year, month, day) of date in local timezone
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+
+      // Return the formatted date string
+      return `${year}-${month}-${day}`
+    },
+
     async loadPatientData() {
       const toast = useToast()
       try {

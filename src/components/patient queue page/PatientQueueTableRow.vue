@@ -58,16 +58,6 @@ export default {
         contactnumber: String,
         referralneeded: Boolean
     },
-    computed: {
-        formattedDOB() {
-            const date = new Date(this.DOB);
-            return date.toLocaleDateString('en-GB', {day: 'numeric', month: 'numeric', year: 'numeric'});
-        },
-        formattedQueuedAt() {
-            const date = new Date(this.queuedat);
-            return date.toLocaleTimeString('en-CA', {timeStyle: 'short'});
-        }
-    },
     methods: {
         handleClick() {
             this.$router.push({ name: 'patient', params: { id: this.id, vid: this.vid } });

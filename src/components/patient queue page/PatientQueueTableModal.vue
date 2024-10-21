@@ -18,7 +18,7 @@
                     <div>
                         <input type="date" id="date-input"
                             class="rounded-lg border-transparent appearance-none w-48 bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                            v-model="dateInput" @input="filterPatientsByDate(this)" />
+                            v-model="dateInput" @input="filterPatientsByDate(this)" :max="maxDate"/>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 mx-5 hover:cursor-pointer">
@@ -111,21 +111,22 @@ export default defineComponent({
             token: null,
             sortAscId: true,
             sortAscReferral: true,
-            dateInput: ''
+            dateInput: '', // format: YYYY-MM-DD, local timezone
+            maxDate: this.formatDateForInput(new Date())  // Set maxDate to today's local date, format: YYYY-MM-DD
         }
     },
     mounted() {
         // Retrieve the date from localStorage and set it as the input value
         const storedDate = localStorage.getItem('date-input');
-        this.dateInput = storedDate || new Date().toISOString().split('T')[0]; // Default to today if no stored date
+        this.dateInput = storedDate || this.formatDateForInput(new Date()); // Default to today if no stored date
     },
     methods: {
         async getData() {
             const toast = useToast()
             try {
                 const storedDate = localStorage.getItem('date-input');
-                const todayDate = storedDate ? storedDate : new Date().toISOString().split('T')[0];
-                const { data } = await axios.get(`${BaseURL}/all-patient-visit-meta/${todayDate}`);
+                const dateToRetrieve = storedDate ? this.convertLocalToUTC(new Date(storedDate)) : this.convertLocalToUTC(new Date()); // Default to today if no stored date
+                const { data } = await axios.get(`${BaseURL}/all-patient-visit-meta/${dateToRetrieve}`);
                 this.patientVisits = data;  // Store the fetched data in the patients array
                 this.patientVisitsFixed = data;
             } catch (error) {
@@ -199,7 +200,8 @@ export default defineComponent({
             try {
                 const date = document.getElementById('date-input').value;
                 localStorage.setItem('date-input', date);
-                const { data } = await axios.get(`${BaseURL}/all-patient-visit-meta/${date}`);
+                const dateToRetrieve = this.convertLocalToUTC(new Date(date))
+                const { data } = await axios.get(`${BaseURL}/all-patient-visit-meta/${dateToRetrieve}`);
                 this.patientVisits = data;
                 this.patientVisitsFixed = data;
             } catch (error) {
@@ -234,7 +236,17 @@ export default defineComponent({
                 }
             });
             this.sortAscReferral = !this.sortAscReferral;
-        }
+        },
+        formatDateForInput(date: Date) {
+            const year = date.getFullYear()
+            const month = (date.getMonth() + 1).toString().padStart(2, '0')
+            const day = date.getDate().toString().padStart(2, '0')
+
+            return `${year}-${month}-${day}`
+        },
+        convertLocalToUTC(date: Date) {
+            return date.toISOString().split('T')[0];
+        },
     },
     created() {
         this.getData();

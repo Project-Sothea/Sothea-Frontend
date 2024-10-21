@@ -270,22 +270,22 @@ export default defineComponent({
     return {
       name: '' as string,
       khmerName: '' as string,
-      dob: '' as string | null,
+      dob: '' as string | null, // format: YYYY-MM-DD, local timezone
       age: 0 as number | null,
       gender: '' as 'M' | 'F' | '',
       contactNo: '' as string,
-      regDate: '' as string,
+      regDate: '' as string, // format: YYYY-MM-DD, local timezone
       queueNo: '' as string,
       village: '' as string,
       familyGroup: '' as string,
       pregnant: null as boolean | null,
-      lastMenstrualPeriod: null as string | null,
+      lastMenstrualPeriod: null as string | null, // format: YYYY-MM-DD, local timezone
       drugAllergies: '' as string | null,
       selectedPhoto: '' as string,
       photo: '' as string | null, //base 64 string (for POST)
       sentToId: null as boolean | null,
       isEditing: false,
-      maxDate: new Date().toISOString().split('T')[0], // Set maxDate to today's date in YYYY-MM-DD format
+      maxDate: this.formatDateForInput(new Date()), // Set maxDate to today's local date, format: YYYY-MM-DD
       // Vars used for disabling / enabling fields
       isMale: false
     }
@@ -359,17 +359,17 @@ export default defineComponent({
           // need to define outside to catch missing fields
           name: this.name,
           khmerName: this.khmerName,
-          dob: new Date(this.dob).toISOString(),
+          dob: new Date(this.dob).toISOString(), /// Convert back to UTC timezone to store in DB
           age: this.ageComputed,
           gender: this.gender,
           contactNo: this.contactNo,
-          regDate: new Date(this.regDate).toISOString(),
+          regDate: new Date(this.regDate).toISOString(), // Convert back to UTC timezone to store in DB
           queueNo: this.queueNo,
           village: this.village,
           familyGroup: this.familyGroup,
           pregnant: this.pregnant,
           lastMenstrualPeriod: this.lastMenstrualPeriod
-            ? new Date(this.lastMenstrualPeriod).toISOString()
+            ? new Date(this.lastMenstrualPeriod).toISOString() // Convert back to UTC timezone to store in DB
             : null,
           drugAllergies: this.drugAllergies ? this.drugAllergies : null,
           photo: this.photo ? this.photo : null,
@@ -454,6 +454,13 @@ export default defineComponent({
       this.sentToId = null;
       this.isEditing = false;
       this.isMale = false;
+    },
+    formatDateForInput(date: Date) {
+      const year = date.getFullYear()
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const day = date.getDate().toString().padStart(2, '0')
+
+      return `${year}-${month}-${day}`
     },
   }
 })

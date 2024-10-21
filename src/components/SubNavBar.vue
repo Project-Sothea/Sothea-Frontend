@@ -1,6 +1,6 @@
 <template>
   <div class="bg-[#C3CCFF] border-none p-2 flex flex-row font-medium mb-6">
-    <div class="mr-auto pl-4 text-[#3F51B5]">Date: {{ formattedRegDate }}</div>
+    <div class="mr-auto pl-4 text-[#3F51B5]">Date: {{ regDate }}</div>
 
     <div class="mx-auto text-[#3F51B5]">Queue No: {{ queueNo }}</div>
 
@@ -33,16 +33,5 @@ export default defineComponent({
       default: null
     }
   },
-  computed: {
-    formattedRegDate(): string | null {
-      if (!this.regDate) return null;
-      const date = new Date(this.regDate);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns month index starting from 0
-      const year = date.getFullYear();
-      return `${day}-${month}-${year}`;
-    }
-  },
-
 })
 </script>

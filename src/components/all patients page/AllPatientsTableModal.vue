@@ -10,8 +10,8 @@
             <div class="flex justify-between items-center py-5">
                 <div class="relative flex-grow">
                     <input type="text" id="search-input"
-                        class="rounded-lg border-transparent appearance-none w-96 bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                        placeholder="Search by ID/Name/Khmer Name/DOB/Contact No." @input="searchPatient"
+                        class="rounded-lg border-transparent appearance-none w-5/12 bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                        placeholder="Search by ID/Name/Khmer Name/Reg Date/Contact No." @input="searchPatient"
                         @keyup.enter="searchPatient" />
                 </div>
                 <div class="flex items-center space-x-3 mx-5 hover:cursor-pointer">
@@ -86,7 +86,7 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue'
 import TableRow from './TableRow.vue';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { BaseURL } from '@/main';
@@ -181,12 +181,16 @@ export default defineComponent({
                     this.searchByRegDate(patientVisit.regDate, searchValue);
             });
         },
-        searchByRegDate(regDate, searchValue) {
-            const regDateString = regDate.split('T')[0]; // Get YYYY-MM-DD part of the ISO string
-            const [year, month, day] = regDateString.split('-');
+        searchByRegDate(regDate, searchValue) { // regDate is in ISO format, UTC timezone
+            const regDateString = new Date(regDate) // convert to local timezone Date object
 
-            const regDateFormatted = `${day}/${month}/${year}`;
-            return regDateFormatted.includes(searchValue);
+            const year = regDateString.getFullYear();
+            const month = String(regDateString.getMonth() + 1).padStart(2, '0');
+            const day = String(regDateString.getDate()).padStart(2, '0');
+            const regDateFormattedSlash = `${day}/${month}/${year}`; 
+            const regDateFormattedDash = `${day}-${month}-${year}`;
+            
+            return regDateFormattedSlash.includes(searchValue) || regDateFormattedDash.includes(searchValue);
         },
         sortById() {
             this.patientVisits.sort((a, b) => {

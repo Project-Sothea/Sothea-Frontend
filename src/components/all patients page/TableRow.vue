@@ -51,9 +51,13 @@ export default {
         contactNumber: String,
     },
     computed: {
-        formattedRegDate() {
+        formattedRegDate() { // regDate is in ISO format, UTC time. Convert to local time, with format dd-mm-yyyy
             const date = new Date(this.regDate);
-            return date.toISOString().split('T')[0];
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+
+            return `${day}-${month}-${year}`
         },
     },
     methods: {
