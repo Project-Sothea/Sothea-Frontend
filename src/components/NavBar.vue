@@ -58,19 +58,16 @@
   </nav>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
 import { authUtils } from '@/utils/auth'
-import { defineComponent } from 'vue'
 
-export default defineComponent({
-  name: 'NavBar',
-  methods: {
-    logout() {
-      authUtils.removeToken()
-      this.$router.push('/signin')
-    }
-  }
-})
+const router = useRouter()
+
+function logout() {
+  authUtils.removeToken()
+  router.push('/signin')
+}
 </script>
 
 <style scoped>
