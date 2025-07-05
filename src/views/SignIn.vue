@@ -81,65 +81,56 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import axios, { AxiosError } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import { defineComponent } from 'vue'
+import { ref } from 'vue'
 import { BaseURL } from '@/main'
 import { authUtils } from '@/utils/auth'
+import { useRouter } from 'vue-router'
 
-export default defineComponent({
-  name: 'SignIn',
-  data() {
-    return {
-      username: '',
-      password: '',
-      showPassword: false
-    }
-  },
-  methods: {
-    async getToken(event: Event) {
-      const toast = useToast()
-      event.preventDefault()
+const toast = useToast()
+const router = useRouter()
 
-      try {
-        const response = await axios.post(`${BaseURL}/login`, {
-          username: this.username,
-          password: this.password
-        })
-        // Use auth utility to set token
-        authUtils.setToken(response.data.token)
+const username = ref('')
+const password = ref('')
+const showPassword = ref(false)
 
-        // Redirect after successful login
-        this.$router.push('/allpatients')
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError // Safe casting
-          if (axiosError.response) {
-            // The request was made and server responded with a status code out of range 2xx
-            console.log(axiosError.response.data)
-            toast.error(axiosError.message)
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request)
-            toast.error('No server response received, check your connection.')
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message)
-            toast.error('An internal server error occurred.')
-          }
-        } else {
-          console.log(error)
-          toast.error('An internal server error occurred.')
-        }
+async function getToken(event: Event) {
+  event.preventDefault()
+
+  try {
+    const response = await axios.post(`${BaseURL}/login`, {
+      username: username.value,
+      password: password.value
+    })
+
+    authUtils.setToken(response.data.token)
+    router.push('/allpatients')
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError
+      if (axiosError.response) {
+        console.log(axiosError.response.data)
+        toast.error(axiosError.message)
+      } else if (axiosError.request) {
+        console.log(error.request)
+        toast.error('No server response received, check your connection.')
+      } else {
+        console.log('Error', axiosError.message)
+        toast.error('An internal server error occurred.')
       }
-    },
-    togglePasswordVisibility() {
-      this.showPassword = !this.showPassword
+    } else {
+      console.log(error)
+      toast.error('An internal server error occurred.')
     }
   }
-})
+}
+
+function togglePasswordVisibility() {
+  showPassword.value = !showPassword.value
+}
 </script>
 
 <style scoped>
