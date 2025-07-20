@@ -363,331 +363,303 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue'
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 
-import type Admin from '@/types/Admin'
 import imageCompression from 'browser-image-compression'
 import heic2any from 'heic2any'
 
-import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@/types/Patient'
 import { BaseURL } from '@/main'
-import { toast } from 'react-toastify'
 
-export default defineComponent({
-  props: {
-    patientId: {
-      type: String,
-      default: null
-    },
-    patientData: {
-      type: Object as PropType<Patient>,
-      default: null
-    },
-    isAdd: {
-      type: Boolean,
-      default: true
-    },
-    patientVid: {
-      type: String,
-      default: null
+const props = defineProps<{
+  patientId?: string
+  patientData?: Patient
+  isAdd?: boolean
+  patientVid?: string
+}>()
+
+const emit = defineEmits<{
+  patientCreated: [
+    {
+      id: string
+      name: string
+      age: number | null
+      vid: number
+      regDate: string | null
+      queueNo: string | null
     }
-  },
-  watch: {
-    patientData: function (newVal: Patient, oldVal: Patient) {
-      // watch it
-      if (!this.isAdd) {
-        // In View / Edit Page
-        const admin = this.patientData.admin
-        if (!admin) return
-        this.name = admin.name
-        this.khmerName = admin.khmerName
-        this.dob = admin.dob != null ? this.formatDateForInput(admin.dob) : null
-        this.age = admin.age
-        this.gender = admin.gender
-        this.contactNo = admin.contactNo
-        this.regDate = this.formatDateForInput(admin.regDate)
-        this.queueNo = admin.queueNo
-        this.village = admin.village
-        this.familyGroup = admin.familyGroup
-        this.pregnant = admin.pregnant
-        this.lastMenstrualPeriod =
-          admin.lastMenstrualPeriod != null
-            ? this.formatDateForInput(admin.lastMenstrualPeriod)
-            : null
-        this.drugAllergies = admin.drugAllergies
-        this.photo = admin.photo ? atob(admin.photo) : null // Decode base64 string
-        this.sentToId = admin.sentToId
-
-        this.selectedPhoto = this.photo ? `data:image/png;base64,${this.photo}` : ''
-      }
-    },
-    gender(newValue) {
-      // Set isMale based on the gender value
-      this.isMale = newValue === 'M'
+  ]
+  patientUpdated: [
+    {
+      id: string | undefined
+      name: string
+      age: number
+      vid: string | undefined
+      regDate: string | null
+      queueNo: string | null
     }
-  },
-  data() {
-    // Default values in the AddPatient page, types mirror Admin type except for booleans, which always take on boolean | null
-    return {
-      name: '' as string,
-      khmerName: '' as string,
-      dob: '' as string | null, // format: YYYY-MM-DD, local timezone
-      age: 0 as number | null,
-      gender: '' as 'M' | 'F' | '',
-      contactNo: '' as string,
-      regDate: '' as string, // format: YYYY-MM-DD, local timezone
-      queueNo: '' as string,
-      village: '' as string,
-      familyGroup: '' as string,
-      pregnant: null as boolean | null,
-      lastMenstrualPeriod: null as string | null, // format: YYYY-MM-DD, local timezone
-      drugAllergies: '' as string | null,
-      selectedPhoto: '' as string,
-      photo: '' as string | null, //base 64 string (for POST)
-      sentToId: null as boolean | null,
-      isEditing: false,
-      maxDate: this.formatDateForInput(new Date().toISOString()), // Set maxDate to today's local date, format: YYYY-MM-DD
-      // Vars used for disabling / enabling fields
-      isMale: false
-    }
-  },
-  computed: {
-    ageComputed() {
-      if (this.dob) {
-        return new Date().getFullYear() - new Date(this.dob).getFullYear()
-      }
-      return null
-    }
-  },
-  methods: {
-    // POST request to add a new patient / PUT request to update an existing patient
-    // If isAdd is true, do insert patient, otherwise do update patient
-    async submitData() {
-      const toast = useToast()
+  ]
+}>()
 
-      try {
-        // Perform validation checks
-        if (!this.name) {
-          toast.error('Name is required')
-          return
-        }
-        if (!this.khmerName) {
-          toast.error('Khmer Name is required')
-          return
-        }
-        if (!this.dob) {
-          toast.error('Date of Birth is required')
-          return
-        }
-        if (!this.gender) {
-          toast.error('Gender is required')
-          return
-        }
-        if (!this.contactNo) {
-          toast.error('Contact No. is required')
-          return
-        }
-        if (!this.regDate) {
-          toast.error('Date Registered is required')
-          return
-        }
-        if (!this.queueNo) {
-          toast.error('Queue Number is required')
-          return
-        }
-        if (!this.village) {
-          toast.error('Village is required')
-          return
-        }
-        if (this.familyGroup == '') {
-          toast.error('Family Group is required')
-          return
-        }
-        if (this.pregnant == null) {
-          toast.error('Pregnant? is required')
-          return
-        }
-        if (this.sentToId == null) {
-          toast.error('Sent to Infectious Disease? is required')
-          return
-        }
-        if (this.ageComputed == null) {
-          toast.error('Please enter a valid Date of Birth')
-          return
-        }
+const name = ref('')
+const khmerName = ref('')
+const dob = ref<string | null>('')
+const age = ref<number | null>(0)
+const gender = ref<'M' | 'F' | ''>('')
+const contactNo = ref('')
+const regDate = ref('')
+const queueNo = ref('')
+const village = ref('')
+const familyGroup = ref('')
+const pregnant = ref<boolean | null>(null)
+const lastMenstrualPeriod = ref<string | null>(null)
+const drugAllergies = ref<string | null>('')
+const selectedPhoto = ref('')
+const photo = ref<string | null>('')
+const sentToId = ref<boolean | null>(null)
+const isEditing = ref(false)
+const isMale = ref(false)
+const maxDate = ref(formatDateForInput(new Date().toISOString()))
 
-        const admin = {
-          familyGroup: this.familyGroup,
-          regDate: new Date(this.regDate).toISOString(), // Convert back to UTC timezone to store in DB
-          queueNo: this.queueNo || null,
-          name: this.name,
-          khmerName: this.khmerName,
-          dob: new Date(this.dob).toISOString(), // Convert back to UTC timezone to store in DB
-          age: this.ageComputed,
-          gender: this.gender,
-          village: this.village,
-          contactNo: this.contactNo,
-          pregnant: this.pregnant,
-          lastMenstrualPeriod: this.lastMenstrualPeriod
-            ? new Date(this.lastMenstrualPeriod).toISOString() // Convert back to UTC timezone to store in DB
-            : null,
-          drugAllergies: this.drugAllergies || null,
-          sentToId: this.sentToId,
-          photo: this.photo || null // sending over as decoded base64 string, encoded in the backend
-        }
+const toast = useToast()
 
-        if (this.isAdd && !this.isEditing) {
-          // Add new patient
-          await axios.post(`${BaseURL}/patient`, admin).then((response) => {
-            toast.success('New Patient created successfully!')
-            // Emit patient details to be rendered in sidebar
-            this.$emit('patientCreated', {
-              id: response.data['id'],
-              name: this.name,
-              age: this.ageComputed,
-              vid: 1, // newly created patient will always have a visit id of 1
-              regDate: this.regDate, // regDate in local timezone
-              queueNo: this.queueNo
-            })
-          })
-        } else if (!this.isAdd && this.isEditing) {
-          // Editing an existing patient
-          await axios
-            .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
-              admin: admin
-            })
-            .then(() => {
-              toast.success('Admin Details updated successfully!')
-              // Emit updated patient details to be rendered in sidebar
-              this.$emit('patientUpdated', {
-                id: this.patientId,
-                name: this.name,
-                age: this.ageComputed,
-                vid: this.patientVid,
-                regDate: this.regDate, // regDate in local timezone
-                queueNo: this.queueNo
-              })
-            })
-        }
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError // Safe casting
-          if (axiosError.response) {
-            // The request was made and server responded with a status code out of range 2xx
-            console.log(axiosError.response.data)
-            toast.error(axiosError.message)
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request)
-            toast.error('No server response received, check your connection.')
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message)
-            toast.error('An internal server error occurred.')
-          }
-        } else {
-          // No response received at all
-          console.log(error)
-          toast.error('An internal server error occurred.')
-        }
-      }
-    },
-    // handleFileChange(event: any) {
-    //   const file = event.target.files[0]
-    //   if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
-    //     const reader = new FileReader()
-    //     reader.onload = (e) => {
-    //       // Remove the data URL prefix to get just the base64 string
-    //       if (e.target != null && typeof e.target.result == 'string') {
-    //         this.selectedPhoto = e.target.result
-    //         this.photo = e.target.result.split(',')[1]
-    //       }
-    //     }
-    //     reader.readAsDataURL(file)
-    //     console.log(this.selectedPhoto)
-    //     console.log(this.photo)
-    //   } else {
-    //     // Reset selectedPhoto or show error message
-    //     this.selectedPhoto = ''
-    //     alert('Please select a JPEG, JPG, or PNG file.')
-    //   }
-    // },
-    async handleImageUpload(event: any) {
-      const imageFile = event.target.files[0]
-      console.log('originalFile instanceof Blob', imageFile instanceof Blob) // true
-      console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`)
+const ageComputed = computed(() => {
+  return dob.value ? new Date().getFullYear() - new Date(dob.value).getFullYear() : null
+})
 
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true
-      }
-      try {
-        let fileToProcess = imageFile
-        // Check if the file is a .heic image
-        if (fileToProcess.type === 'image/heic') {
-          try {
-            // Convert HEIC to JPEG
-            const convertedBlob = await heic2any({
-              blob: fileToProcess,
-              toType: 'image/jpeg'
-            })
-            fileToProcess = convertedBlob as Blob
-          } catch (heicError) {
-            console.error('HEIC conversion failed', heicError)
-            toast.error('Image upload failed, Please re-upload a JPEG, JPG, PNG or HEIC file.')
-            return
-          }
-        }
-
-        const compressedFile = await imageCompression(fileToProcess, options)
-        console.log('compressedFile instanceof Blob', compressedFile instanceof Blob) // true
-        console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`) // smaller than maxSizeMB
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          // Remove the data URL prefix to get just the base64 string
-          if (e.target != null && typeof e.target.result == 'string') {
-            this.selectedPhoto = e.target.result
-            this.photo = e.target.result.split(',')[1]
-          }
-        }
-        reader.readAsDataURL(compressedFile)
-      } catch (error) {
-        console.log(error)
-        this.selectedPhoto = ''
-        alert('Please select a JPEG, JPG, PNG or HEIC file.')
-      }
-    },
-
-    formatDateForInput(dateString: string) {
-      const date = new Date(dateString)
-
-      // Get the date components (year, month, day) of date in local timezone
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const day = String(date.getDate()).padStart(2, '0')
-
-      // Return the formatted date string
-      return `${year}-${month}-${day}`
-    },
-
-    toggleEdit() {
-      // console.log('toggleEdit')
-      this.isEditing = !this.isEditing
-      // console.log(this.isEditing)
-    },
-
-    saveChanges() {
-      // console.log('saving changes....')
-      this.submitData()
-      this.toggleEdit()
+watch(
+  () => props.patientData,
+  (newVal) => {
+    if (!props.isAdd && newVal) {
+      const admin = newVal.admin
+      if (!admin) return
+      name.value = admin.name
+      khmerName.value = admin.khmerName
+      dob.value = admin.dob != null ? formatDateForInput(admin.dob) : null
+      age.value = admin.age
+      gender.value = admin.gender
+      contactNo.value = admin.contactNo
+      regDate.value = formatDateForInput(admin.regDate)
+      queueNo.value = admin.queueNo
+      village.value = admin.village
+      familyGroup.value = admin.familyGroup
+      pregnant.value = admin.pregnant
+      lastMenstrualPeriod.value = admin.lastMenstrualPeriod
+        ? formatDateForInput(admin.lastMenstrualPeriod)
+        : null
+      drugAllergies.value = admin.drugAllergies
+      photo.value = admin.photo ? atob(admin.photo) : null
+      sentToId.value = admin.sentToId
+      selectedPhoto.value = photo.value ? `data:image/png;base64,${photo.value}` : ''
     }
   }
+)
+
+watch(gender, (newValue) => {
+  isMale.value = newValue === 'M'
 })
+
+// POST request to add a new patient / PUT request to update an existing patient
+// If isAdd is true, do insert patient, otherwise do update patient
+async function submitData() {
+  try {
+    // Perform validation checks
+    if (!name.value) {
+      toast.error('Name is required')
+      return
+    }
+    if (!khmerName.value) {
+      toast.error('Khmer Name is required')
+      return
+    }
+    if (!dob.value) {
+      toast.error('Date of Birth is required')
+      return
+    }
+    if (!gender.value) {
+      toast.error('Gender is required')
+      return
+    }
+    if (!contactNo.value) {
+      toast.error('Contact No. is required')
+      return
+    }
+    if (!regDate.value) {
+      toast.error('Date Registered is required')
+      return
+    }
+    if (!queueNo.value) {
+      toast.error('Queue Number is required')
+      return
+    }
+    if (!village.value) {
+      toast.error('Village is required')
+      return
+    }
+    if (familyGroup.value == '') {
+      toast.error('Family Group is required')
+      return
+    }
+    if (pregnant.value == null) {
+      toast.error('Pregnant? is required')
+      return
+    }
+    if (sentToId.value == null) {
+      toast.error('Sent to Infectious Disease? is required')
+      return
+    }
+    if (ageComputed.value == null) {
+      toast.error('Please enter a valid Date of Birth')
+      return
+    }
+
+    const admin = {
+      familyGroup: familyGroup.value,
+      regDate: new Date(regDate.value).toISOString(), // Convert back to UTC timezone to store in DB
+      queueNo: queueNo.value || null,
+      name: name.value,
+      khmerName: khmerName.value,
+      dob: new Date(dob.value).toISOString(), // Convert back to UTC timezone to store in DB
+      age: ageComputed.value,
+      gender: gender.value,
+      village: village.value,
+      contactNo: contactNo.value,
+      pregnant: pregnant.value,
+      lastMenstrualPeriod: lastMenstrualPeriod.value
+        ? new Date(lastMenstrualPeriod.value).toISOString() // Convert back to UTC timezone to store in DB
+        : null,
+      drugAllergies: drugAllergies.value || null,
+      sentToId: sentToId.value,
+      photo: photo.value || null // sending over as decoded base64 string, encoded in the backend
+    }
+
+    if (props.isAdd && !isEditing.value) {
+      // Add new patient
+      const response = await axios.post(`${BaseURL}/patient`, admin)
+      toast.success('New Patient created successfully!')
+      // Emit patient details to be rendered in sidebar
+      emit('patientCreated', {
+        id: response.data['id'],
+        name: name.value,
+        age: ageComputed.value,
+        vid: 1, // newly created patient will always have a visit id of 1
+        regDate: regDate.value, // regDate in local timezone
+        queueNo: queueNo.value
+      })
+    } else if (!props.isAdd && isEditing.value) {
+      // Editing an existing patient
+      await axios.patch(`${BaseURL}/patient/${props.patientId}/${props.patientVid}`, {
+        admin: admin
+      })
+      toast.success('Admin Details updated successfully!')
+      // Emit updated patient details to be rendered in sidebar
+      emit('patientUpdated', {
+        id: props.patientId,
+        name: name.value,
+        age: ageComputed.value,
+        vid: props.patientVid,
+        regDate: regDate.value, // regDate in local timezone
+        queueNo: queueNo.value
+      })
+    }
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError // Safe casting
+      if (axiosError.response) {
+        // The request was made and server responded with a status code out of range 2xx
+        console.log(axiosError.response.data)
+        toast.error(axiosError.message)
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.log(error.request)
+        toast.error('No server response received, check your connection.')
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', axiosError.message)
+        toast.error('An internal server error occurred.')
+      }
+    } else {
+      // No response received at all
+      console.log(error)
+      toast.error('An internal server error occurred.')
+    }
+  }
+}
+
+async function handleImageUpload(event: any) {
+  const imageFile = event.target.files[0]
+  console.log('originalFile instanceof Blob', imageFile instanceof Blob) // true
+  console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`)
+
+  const options = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true
+  }
+  try {
+    let fileToProcess = imageFile
+    // Check if the file is a .heic image
+    if (fileToProcess.type === 'image/heic') {
+      try {
+        // Convert HEIC to JPEG
+        const convertedBlob = await heic2any({
+          blob: fileToProcess,
+          toType: 'image/jpeg'
+        })
+        fileToProcess = convertedBlob as Blob
+      } catch (heicError) {
+        console.error('HEIC conversion failed', heicError)
+        toast.error('Image upload failed, Please re-upload a JPEG, JPG, PNG or HEIC file.')
+        return
+      }
+    }
+
+    const compressedFile = await imageCompression(fileToProcess, options)
+    console.log('compressedFile instanceof Blob', compressedFile instanceof Blob) // true
+    console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`) // smaller than maxSizeMB
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      // Remove the data URL prefix to get just the base64 string
+      if (e.target != null && typeof e.target.result == 'string') {
+        selectedPhoto.value = e.target.result
+        photo.value = e.target.result.split(',')[1]
+      }
+    }
+    reader.readAsDataURL(compressedFile)
+  } catch (error) {
+    console.log(error)
+    selectedPhoto.value = ''
+    alert('Please select a JPEG, JPG, PNG or HEIC file.')
+  }
+}
+
+function formatDateForInput(dateString: string) {
+  const date = new Date(dateString)
+
+  // Get the date components (year, month, day) of date in local timezone
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  // Return the formatted date string
+  return `${year}-${month}-${day}`
+}
+
+function toggleEdit() {
+  // console.log('toggleEdit')
+  isEditing.value = !isEditing.value
+  // console.log(this.isEditing)
+}
+
+function saveChanges() {
+  // console.log('saving changes....')
+  submitData()
+  toggleEdit()
+}
 </script>
 
 <style scoped>

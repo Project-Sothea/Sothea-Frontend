@@ -22,96 +22,84 @@
   </div>
 </template>
 
-<script lang="ts">
-import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import axios, { AxiosError } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { BaseURL } from '@/main'
-import { defineComponent } from 'vue'
 import RecordSection from './RecordSection.vue'
-import type PatientMeta from '@/types/PatientMeta';
-export default defineComponent({
-  name: 'RecordsModal',
-  components: {
-    RecordSection
-  },
-  props: {
-    id: {
-      type: String,
-      default: null
-    },
-    vid: {
-      type: String,
-      default: null
-    },
-    isOpen: {
-      type: Boolean,
-      required: true
-    },
-  },
-  data() {
-    return {
-      patientMeta: {} as PatientMeta, // Define an empty patientMeta object
-    };
-  },
-  watch: {
-    isOpen(newValue) {
-      if (newValue === true) {
-        this.getPatientMeta()
-      }
-    }
-  },
-  emits: ['close'],
-  computed: {
-    sortedVisits() {
-      if (this.patientMeta && this.patientMeta.visits) {
-        return Object.entries(this.patientMeta.visits)
-          .sort(([ , regDateA], [ , regDateB]) => {
-            const dateA = new Date(regDateA as string);
-            const dateB = new Date(regDateB as string);
-            return dateB.getTime() - dateA.getTime();
-          })
-          .map(([visitId, regDate]) => ({ regDate: regDate as string, visitId: visitId.toString() }));
-      }
-      return [];
-    }
-  },
-  methods: {
-    async getPatientMeta() {
-      const toast = useToast()
+import type PatientMeta from '@/types/PatientMeta'
 
-      try {
-        await axios
-          .get(`${BaseURL}/patient-meta/${this.id}`)
-          .then((response) => {
-            // Assuming the response data matches the structure of PatientMeta
-            this.patientMeta = response.data as PatientMeta;
-          })
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError; // Safe casting
-          if (axiosError.response) {
-            // The request was made and server responded with a status code out of range 2xx
-            console.log(axiosError.response.data)
-            toast.error(axiosError.message)
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request)
-            toast.error('No server response received, check your connection.')
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message);
-            toast.error('An internal server error occurred.')
-          }
-        } else {
-          // No response received at all
-          console.log(error)
-          toast.error('An internal server error occurred.')
-        }
-      }
-    },
+const props = defineProps<{
+  id: string
+  vid: string
+  isOpen: boolean
+}>()
+
+defineEmits<{
+  close: [void]
+}>()
+
+const toast = useToast()
+
+const patientMeta = ref<PatientMeta | null>(null)
+
+watch(
+  () => props.isOpen,
+  async (newValue) => {
+    if (newValue) {
+      await getPatientMeta()
+    }
   }
+)
+
+// Computed: sortedVisits
+const sortedVisits = computed(() => {
+  if (patientMeta.value && patientMeta.value.visits) {
+    return Object.entries(patientMeta.value.visits)
+      .sort(([, regDateA], [, regDateB]) => {
+        const dateA = new Date(regDateA as string)
+        const dateB = new Date(regDateB as string)
+        return dateB.getTime() - dateA.getTime()
+      })
+      .map(([visitId, regDate]) => ({
+        regDate: regDate as string,
+        visitId: visitId.toString()
+      }))
+  }
+  return []
 })
+
+async function getPatientMeta() {
+  try {
+    await axios.get(`${BaseURL}/patient-meta/${props.id}`).then((response) => {
+      // Assuming the response data matches the structure of PatientMeta
+      patientMeta.value = response.data as PatientMeta
+    })
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError // Safe casting
+      if (axiosError.response) {
+        // The request was made and server responded with a status code out of range 2xx
+        console.log(axiosError.response.data)
+        toast.error(axiosError.message)
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.log(error.request)
+        toast.error('No server response received, check your connection.')
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', axiosError.message)
+        toast.error('An internal server error occurred.')
+      }
+    } else {
+      // No response received at all
+      console.log(error)
+      toast.error('An internal server error occurred.')
+    }
+  }
+}
 </script>
 
 <style scoped>

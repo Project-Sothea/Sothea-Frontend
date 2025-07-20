@@ -211,9 +211,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue'
-
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import axios, { AxiosError } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
@@ -221,188 +220,161 @@ import type Patient from '@/types/Patient'
 import type HeightAndWeight from '@/types/HeightAndWeight'
 import { BaseURL } from '@/main'
 
-export default defineComponent({
-  props: {
-    patientId: {
-      type: String,
-      default: null
-    },
-    patientData: {
-      type: Object as PropType<Patient>,
-      default: null
-    },
-    isAdd: {
-      type: Boolean,
-      default: true
-    },
-    patientVid: {
-      type: String,
-      default: null
-    }
-  },
-  watch: {
-    patientData: function (newVal: Patient, oldVal: Patient) {
-      // watch it
-      if (!this.isAdd) {
-        const heightAndWeight = this.patientData.heightandweight
-        if (!heightAndWeight) {
-          this.height = null
-          this.weight = null
-          this.paedsHeight = null
-          this.paedsWeight = null
-        } else {
-          this.height = heightAndWeight.height
-          this.weight = heightAndWeight.weight
-          this.paedsHeight = heightAndWeight.paedsHeight
-          this.paedsWeight = heightAndWeight.paedsWeight
-        }
-      }
-    }
-  },
-  data() {
-    return {
-      height: null as number | null,
-      weight: null as number | null,
-      paedsHeight: null as number | null,
-      paedsWeight: null as number | null,
-      isEditing: false,
-      showHeightModal: false,
-      showWeightModal: false
-    }
-  },
-  created() {
-    if (!this.isAdd) {
-      const heightAndWeight = this.patientData.heightandweight
-      if (!heightAndWeight) return
-      this.height = heightAndWeight.height
-      this.weight = heightAndWeight.weight
-      this.paedsHeight = heightAndWeight.paedsHeight
-      this.paedsWeight = heightAndWeight.paedsWeight
-      this.showHeightModal = false
-      this.showWeightModal = false
-    }
-  },
-  computed: {
-    bmi() {
-      if (this.height && this.weight) {
-        const heightInMeters = this.height / 100
-        return this.weight / (heightInMeters * heightInMeters)
-      }
-      return null
-    },
-    bmianalysis() {
-      if (this.bmi) {
-        const bmiValue = this.bmi
-        if (bmiValue < 18.5) {
-          return 'Underweight'
-        } else if (bmiValue < 25) {
-          return 'Normal'
-        } else if (bmiValue < 30) {
-          return 'Overweight'
-        } else {
-          return 'Obese'
-        }
-      }
-      return null
-    }
-  },
-  methods: {
-    async submitData() {
-      const toast = useToast()
-      try {
-        if (this.height === null) {
-          toast.error('Please enter height')
-          return
-        } else if (this.height < 0) {
-          toast.error('Height cannot be negative')
-          return
-        } else if (this.height > 9999) {
-          toast.error('Height cannot be greater than 9999cm')
-          return
-        }
-        if (this.weight === null) {
-          toast.error('Please enter weight')
-          return
-        } else if (this.weight < 0) {
-          toast.error('Weight cannot be negative')
-          return
-        } else if (this.weight > 9999) {
-          toast.error('Weight cannot be greater than 9999kg')
-          return
-        }
-        if (this.paedsHeight && this.paedsHeight > 9999) {
-          toast.error('Paeds: Height % cannot be greater than 9999')
-          return
-        }
-        if (this.paedsWeight && this.paedsWeight > 9999) {
-          toast.error('Paeds: Weight % cannot be greater than 9999')
-          return
-        }
-        if (this.bmi === null) {
-          toast.error('Please enter height and weight to calculate BMI')
-          return
-        }
-        if (this.bmianalysis === null) {
-          toast.error('Please enter height and weight to calculate BMI Analysis')
-          return
-        }
-        const heightAndWeight: HeightAndWeight = {
-          // need to define outside to catch missing fields
-          height: this.height,
-          weight: this.weight,
-          bmi: this.bmi,
-          bmiAnalysis: this.bmianalysis,
-          paedsHeight: this.paedsHeight || null,
-          paedsWeight: this.paedsWeight || null
-        }
-        await axios
-          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
-            heightAndWeight: heightAndWeight
-          })
-          .then((response) => {
-            console.log(response.data)
-            console.log('Height and Weight is posted successfully!')
-            if (this.isEditing) {
-              this.toggleEdit() // to switch back to read-only mode
-            }
-            toast.success('Height and Weight saved successfully!')
-          })
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError // Safe casting
-          if (axiosError.response) {
-            // The request was made and server responded with a status code out of range 2xx
-            console.log(axiosError.response.data)
-            toast.error(axiosError.message)
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request)
-            toast.error('No server response received, check your connection.')
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message)
-            toast.error('An internal server error occurred.')
-          }
-        } else {
-          // No response received at all
-          console.log(error)
-          toast.error('An internal server error occurred.')
-        }
-      }
-    },
+const props = defineProps<{
+  patientId: string
+  patientData: Patient | null
+  isAdd?: boolean
+  patientVid?: string
+}>()
 
-    toggleEdit() {
-      console.log('toggleEdit')
-      this.isEditing = !this.isEditing
-      console.log(this.isEditing)
-    },
-    preventNegative(event: any) {
-      if (event.key === '-' || event.key === 'e') {
-        event.preventDefault()
+const toast = useToast()
+
+const height = ref<number | null>(null)
+const weight = ref<number | null>(null)
+const paedsHeight = ref<number | null>(null)
+const paedsWeight = ref<number | null>(null)
+const isEditing = ref(false)
+const showHeightModal = ref(false)
+const showWeightModal = ref(false)
+
+watch(
+  () => props.patientData,
+  (newVal: Patient | null) => {
+    if (!props.isAdd && newVal) {
+      const heightAndWeight = newVal.heightandweight
+      if (!heightAndWeight) {
+        height.value = null
+        weight.value = null
+        paedsHeight.value = null
+        paedsWeight.value = null
+      } else {
+        height.value = heightAndWeight.height
+        weight.value = heightAndWeight.weight
+        paedsHeight.value = heightAndWeight.paedsHeight
+        paedsWeight.value = heightAndWeight.paedsWeight
       }
+    }
+  },
+  { immediate: true }
+)
+
+const bmi = computed(() => {
+  if (height.value && weight.value) {
+    const heightInMeters = height.value / 100
+    return +(weight.value / (heightInMeters * heightInMeters)).toFixed(2)
+  }
+  return null
+})
+
+const bmianalysis = computed(() => {
+  if (bmi.value !== null) {
+    const bmiValue = bmi.value
+    if (bmiValue < 18.5) {
+      return 'Underweight'
+    } else if (bmiValue < 25) {
+      return 'Normal'
+    } else if (bmiValue < 30) {
+      return 'Overweight'
+    } else {
+      return 'Obese'
     }
   }
+  return null
 })
+
+async function submitData() {
+  try {
+    if (height.value === null) {
+      toast.error('Please enter height')
+      return
+    } else if (height.value < 0) {
+      toast.error('Height cannot be negative')
+      return
+    } else if (height.value > 9999) {
+      toast.error('Height cannot be greater than 9999cm')
+      return
+    }
+    if (weight.value === null) {
+      toast.error('Please enter weight')
+      return
+    } else if (weight.value < 0) {
+      toast.error('Weight cannot be negative')
+      return
+    } else if (weight.value > 9999) {
+      toast.error('Weight cannot be greater than 9999kg')
+      return
+    }
+    if (paedsHeight.value && paedsHeight.value > 9999) {
+      toast.error('Paeds: Height % cannot be greater than 9999')
+      return
+    }
+    if (paedsWeight.value && paedsWeight.value > 9999) {
+      toast.error('Paeds: Weight % cannot be greater than 9999')
+      return
+    }
+    if (bmi.value === null) {
+      toast.error('Please enter height and weight to calculate BMI')
+      return
+    }
+    if (bmianalysis.value === null) {
+      toast.error('Please enter height and weight to calculate BMI Analysis')
+      return
+    }
+    const heightAndWeight: HeightAndWeight = {
+      // need to define outside to catch missing fields
+      height: height.value,
+      weight: weight.value,
+      bmi: bmi.value,
+      bmiAnalysis: bmianalysis.value,
+      paedsHeight: paedsHeight.value || null,
+      paedsWeight: paedsWeight.value || null
+    }
+    await axios
+      .patch(`${BaseURL}/patient/${props.patientId}/${props.patientVid}`, {
+        heightAndWeight: heightAndWeight
+      })
+      .then((response) => {
+        console.log(response.data)
+        console.log('Height and Weight is posted successfully!')
+        if (isEditing.value) {
+          toggleEdit() // to switch back to read-only mode
+        }
+        toast.success('Height and Weight saved successfully!')
+      })
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError // Safe casting
+      if (axiosError.response) {
+        // The request was made and server responded with a status code out of range 2xx
+        console.log(axiosError.response.data)
+        toast.error(axiosError.message)
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.log(error.request)
+        toast.error('No server response received, check your connection.')
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', axiosError.message)
+        toast.error('An internal server error occurred.')
+      }
+    } else {
+      // No response received at all
+      console.log(error)
+      toast.error('An internal server error occurred.')
+    }
+  }
+}
+
+function toggleEdit() {
+  console.log('toggleEdit')
+  isEditing.value = !isEditing.value
+  console.log(isEditing.value)
+}
+function preventNegative(event: KeyboardEvent) {
+  if (event.key === '-' || event.key === 'e') {
+    event.preventDefault()
+  }
+}
 </script>
 
 <style>

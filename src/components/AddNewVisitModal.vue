@@ -9,10 +9,16 @@
           <div class="flex flex-row mb-2">
             <!-- Name Input -->
             <div class="w-1/2">
-              <label class="mb-1 block text-sm font-medium text-dark"> Name <span class="req">*</span></label>
+              <label class="mb-1 block text-sm font-medium text-dark">
+                Name <span class="req">*</span></label
+              >
               <div class="relative">
-                <input v-model="name" type="text" placeholder="Name"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+                <input
+                  v-model="name"
+                  type="text"
+                  placeholder="Name"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/user.svg" width="20" height="20" />
                 </span>
@@ -21,10 +27,16 @@
 
             <!-- Khmer Name Input -->
             <div class="ml-2 w-1/2">
-              <label class="mb-1 block text-sm font-medium text-dark"> Khmer Name <span class="req">*</span></label>
+              <label class="mb-1 block text-sm font-medium text-dark">
+                Khmer Name <span class="req">*</span></label
+              >
               <div class="relative">
-                <input v-model="khmerName" type="text" placeholder="Khmer Name"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+                <input
+                  v-model="khmerName"
+                  type="text"
+                  placeholder="Khmer Name"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/user.svg" width="20" height="20" />
                 </span>
@@ -37,24 +49,39 @@
             <div class="w-1/2">
               <label class="mb-1 block text-sm font-medium text-dark"> DOB </label>
               <div class="relative z-20">
-                <input v-model="dob" type="date" :max="maxDate"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2" />
+                <input
+                  v-model="dob"
+                  type="date"
+                  :max="maxDate"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+                />
               </div>
             </div>
 
             <!-- Age Input -->
             <div class="ml-2 w-1/4">
               <label for="" class="mb-1 block text-sm font-medium text-dark"> Age</label>
-              <input :value="ageComputed" disabled type="number" placeholder="" min="0" step="1"
-                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2" />
+              <input
+                :value="ageComputed"
+                disabled
+                type="number"
+                placeholder=""
+                min="0"
+                step="1"
+                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
+              />
             </div>
 
             <!-- Gender Input -->
             <div class="ml-2 w-1/4">
-              <label for="" class="mb-1 block text-sm font-medium text-dark"> Gender <span class="req">*</span> </label>
+              <label for="" class="mb-1 block text-sm font-medium text-dark">
+                Gender <span class="req">*</span>
+              </label>
               <div class="relative z-20">
-                <select v-model="gender"
-                  class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200">
+                <select
+                  v-model="gender"
+                  class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                >
                   <option value="M">M</option>
                   <option value="F">F</option>
                 </select>
@@ -69,10 +96,16 @@
           <div class="flex flex-row w-full mb-2">
             <!-- Contact No. Input -->
             <div class="w-1/2">
-              <label class="mb-1 block text-sm font-medium text-dark"> Contact No. <span class="req">*</span></label>
+              <label class="mb-1 block text-sm font-medium text-dark">
+                Contact No. <span class="req">*</span></label
+              >
               <div class="relative">
-                <input v-model="contactNo" type="tel" placeholder="Contact No."
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+                <input
+                  v-model="contactNo"
+                  type="tel"
+                  placeholder="Contact No."
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                />
                 <span class="absolute top-1/2 left-4 -translate-y-1/2">
                   <img src="../assets/phone.svg" width="20" height="20" />
                 </span>
@@ -81,10 +114,16 @@
 
             <!-- Date Registered Input -->
             <div class="ml-2 w-1/2">
-              <label class="mb-1 block text-sm font-medium text-dark"> Date Registered <span class="req">*</span> </label>
+              <label class="mb-1 block text-sm font-medium text-dark">
+                Date Registered <span class="req">*</span>
+              </label>
               <div class="relative z-20">
-                <input v-model="regDate" type="date" :max="maxDate"
-                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2" />
+                <input
+                  v-model="regDate"
+                  type="date"
+                  :max="maxDate"
+                  class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+                />
               </div>
             </div>
           </div>
@@ -97,17 +136,26 @@
             <div class="w-full">
               <label class="mb-1 block text-sm font-medium text-dark"> Photo ID </label>
 
-              <div :class="[
-                'relative',
-                'bg-white'
-              ]">
-                <label for="file"
-                  class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2">
+              <div :class="['relative', 'bg-white']">
+                <label
+                  for="file"
+                  class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
+                >
                   <div>
-                    <input type="file" name="file" id="file" class="sr-only" @change="handleImageUpload"
-                      accept=".jpg, .jpeg, .png, .heic" />
-                    <img v-if="selectedPhoto" :src="selectedPhoto" alt="Selected Image"
-                      class="object-cover rounded-lg w-52 h-40" />
+                    <input
+                      type="file"
+                      name="file"
+                      id="file"
+                      class="sr-only"
+                      @change="handleImageUpload"
+                      accept=".jpg, .jpeg, .png, .heic"
+                    />
+                    <img
+                      v-if="selectedPhoto"
+                      :src="selectedPhoto"
+                      alt="Selected Image"
+                      class="object-cover rounded-lg w-52 h-40"
+                    />
                     <template v-else>
                       <span class="flex items-center justify-center">
                         <img src="../assets/camera.svg" height="20" width="20" />
@@ -126,10 +174,16 @@
       <div class="flex flex-row w-full mb-2">
         <!-- Queue No Input -->
         <div class="mr-2 w-1/3">
-          <label class="mb-1 block text-sm font-medium text-dark"> Queue Number <span class="req">*</span> </label>
+          <label class="mb-1 block text-sm font-medium text-dark">
+            Queue Number <span class="req">*</span>
+          </label>
           <div class="relative">
-            <input v-model="queueNo" type="text" placeholder="Queue Number"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+            <input
+              v-model="queueNo"
+              type="text"
+              placeholder="Queue Number"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/queueno.svg" width="20" height="20" />
             </span>
@@ -137,10 +191,16 @@
         </div>
         <!-- Village Input -->
         <div class="w-1/3">
-          <label class="mb-1 block text-sm font-medium text-dark"> Village <span class="req">*</span> </label>
+          <label class="mb-1 block text-sm font-medium text-dark">
+            Village <span class="req">*</span>
+          </label>
           <div class="relative">
-            <input v-model="village" type="text" placeholder="Village"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+            <input
+              v-model="village"
+              type="text"
+              placeholder="Village"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/house.svg" width="20" height="20" />
             </span>
@@ -149,10 +209,16 @@
 
         <!-- Family Group Input -->
         <div class="ml-2 w-1/3">
-          <label class="mb-1 block text-sm font-medium text-dark"> Family Group <span class="req">*</span> </label>
+          <label class="mb-1 block text-sm font-medium text-dark">
+            Family Group <span class="req">*</span>
+          </label>
           <div class="relative">
-            <input v-model="familyGroup" type="text" placeholder="Family Group"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+            <input
+              v-model="familyGroup"
+              type="text"
+              placeholder="Family Group"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/users.svg" width="20" height="20" />
             </span>
@@ -164,13 +230,17 @@
       <div class="flex flex-row w-full mb-2">
         <!-- Pregnant Input -->
         <div class="w-1/2">
-          <label for="" class="mb-1 block text-sm font-medium text-dark"> Pregnant? <span class="req">*</span> </label>
+          <label for="" class="mb-1 block text-sm font-medium text-dark">
+            Pregnant? <span class="req">*</span>
+          </label>
           <div class="relative z-20">
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/pregnantwoman.svg" width="25" height="25" />
             </span>
-            <select v-model="pregnant"
-              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200">
+            <select
+              v-model="pregnant"
+              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            >
               <option :value="true">Y</option>
               <option :value="false">N</option>
             </select>
@@ -184,8 +254,13 @@
         <div class="ml-2 w-1/2">
           <label class="mb-1 block text-sm font-medium text-dark"> Last Menstrual Period </label>
           <div class="relative z-20">
-            <input v-model="lastMenstrualPeriod" :disabled="isMale" type="date" :max="maxDate"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2" />
+            <input
+              v-model="lastMenstrualPeriod"
+              :disabled="isMale"
+              type="date"
+              :max="maxDate"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+            />
           </div>
         </div>
       </div>
@@ -196,8 +271,12 @@
         <div class="w-1/2">
           <label class="mb-1 block text-sm font-medium text-dark"> Drug Allergies </label>
           <div class="relative">
-            <input v-model="drugAllergies" type="text" placeholder="Enter Drug Allergies"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200" />
+            <input
+              v-model="drugAllergies"
+              type="text"
+              placeholder="Enter Drug Allergies"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            />
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/drug.svg" width="20" height="20" />
             </span>
@@ -213,8 +292,10 @@
             <span class="absolute top-1/2 left-4 -translate-y-1/2">
               <img src="../assets/mask.svg" width="25" height="25" />
             </span>
-            <select v-model="sentToId"
-              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200">
+            <select
+              v-model="sentToId"
+              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+            >
               <option :value="true">Y</option>
               <option :value="false">N</option>
             </select>
@@ -227,8 +308,10 @@
 
       <!-- Save Button -->
       <div class="flex flex-row-reverse w-full mt-5">
-        <button @click="submitData"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
+        <button
+          @click="submitData"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
+        >
           Save
         </button>
       </div>
@@ -236,296 +319,231 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue'
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue'
 
 import type Admin from '@/types/Admin'
-import imageCompression from 'browser-image-compression';
-import heic2any from 'heic2any';
+import imageCompression from 'browser-image-compression'
+import heic2any from 'heic2any'
 
-import axios, { Axios, AxiosError, type AxiosResponse } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@/types/Patient'
 import { BaseURL } from '@/main'
 
-export default defineComponent({
-  props: {
-    patientId: {
-      type: String,
-      default: null
-    },
-    patientVid: {
-      type: String,
-      default: null
-    },
-    patientData: {
-      type: Object as PropType<Patient>,
-      default: null
-    }
-  },
-  watch: {
-    gender(newValue) {
-      // Set isMale based on the gender value
-      this.isMale = newValue === 'M'
-    }
-  },
-  mounted() {
-    if (this.patientData) {
-      const admin = this.patientData.admin
-      if (!admin) return
-      this.name = admin.name
-      this.khmerName = admin.khmerName
-      this.dob = admin.dob != null ? this.formatDateForInput(admin.dob) : null
-      this.age = admin.age
-      this.gender = admin.gender
-      this.contactNo = admin.contactNo
-      this.regDate = this.formatDateForInput(new Date().toISOString())
-      this.queueNo = admin.queueNo
-      this.village = admin.village
-      this.familyGroup = admin.familyGroup
-      // this.pregnant = admin.pregnant
-      // this.lastMenstrualPeriod =
-      //   admin.lastMenstrualPeriod != null
-      //     ? this.formatDateForInput(admin.lastMenstrualPeriod)
-      //     : null
-      this.drugAllergies = admin.drugAllergies
-      this.photo = admin.photo ? atob(admin.photo) : null
-      // this.sentToId = admin.sentToId
-      this.selectedPhoto = this.photo ? `data:image/png;base64,${this.photo}` : ''
-    }
-  },
-  emits: ['patientVisitCreated'],
-  data() {
-    // Default values in the AddPatient page, types mirror Admin type except for booleans, which always take on boolean | null
-    return {
-      name: '' as string,
-      khmerName: '' as string,
-      dob: '' as string | null, // format: YYYY-MM-DD, local timezone
-      age: 0 as number | null,
-      gender: '' as 'M' | 'F' | '',
-      contactNo: '' as string,
-      regDate: '' as string, // format: YYYY-MM-DD, local timezone
-      queueNo: '' as string,
-      village: '' as string,
-      familyGroup: '' as string,
-      pregnant: null as boolean | null,
-      lastMenstrualPeriod: null as string | null, // format: YYYY-MM-DD, local timezone
-      drugAllergies: '' as string | null,
-      selectedPhoto: '' as string,
-      photo: '' as string | null, //base 64 string (for POST)
-      sentToId: null as boolean | null,
-      isEditing: false,
-      maxDate: this.formatDateForInput(new Date()), // Set maxDate to today's local date, format: YYYY-MM-DD
-      // Vars used for disabling / enabling fields
-      isMale: false
-    }
-  },
-  computed: {
-    ageComputed() {
-      if (this.dob) {
-        return new Date().getFullYear() - new Date(this.dob).getFullYear()
-      }
-      return null
-    }
-  },
-  methods: {
-    // POST request to add a new patient / PUT request to update an existing patient
-    // If isAdd is true, do insert patient, otherwise do update patient
-    async submitData() {
-      const toast = useToast()
+const props = defineProps<{
+  patientId?: string
+  patientVid?: string
+  patientData?: Patient
+}>()
 
-      try {
-        // Perform validation checks
-        if (!this.name) {
-          toast.error('Name is required')
-          return
-        }
-        if (!this.khmerName) {
-          toast.error('Khmer Name is required')
-          return
-        }
-        if (!this.dob) {
-          toast.error('Date of Birth is required')
-          return
-        }
-        if (!this.gender) {
-          toast.error('Gender is required')
-          return
-        }
-        if (!this.contactNo) {
-          toast.error('Contact No. is required')
-          return
-        }
-        if (!this.regDate) {
-          toast.error('Date Registered is required')
-          return
-        }
-        if (!this.queueNo) {
-          toast.error('Queue Number is required')
-          return
-        }
-        if (!this.village) {
-          toast.error('Village is required')
-          return
-        }
-        if (this.familyGroup == '') {
-          toast.error('Family Group is required')
-          return
-        }
-        if (this.pregnant == null) {
-          toast.error('Pregnant? is required')
-          return
-        }
-        if (this.sentToId == null) {
-          toast.error('Sent to Infectious Disease? is required')
-          return
-        }
-        if (this.ageComputed == null) {
-          toast.error('Please enter a valid Date of Birth')
-          return
-        }
+const emit = defineEmits<{
+  patientVisitCreated: [{ id: string; name: string; age: number; vid: string }]
+}>()
 
-        const admin: Admin = {
-          // need to define outside to catch missing fields
-          name: this.name,
-          khmerName: this.khmerName,
-          dob: new Date(this.dob).toISOString(), /// Convert back to UTC timezone to store in DB
-          age: this.ageComputed,
-          gender: this.gender,
-          contactNo: this.contactNo,
-          regDate: new Date(this.regDate).toISOString(), // Convert back to UTC timezone to store in DB
-          queueNo: this.queueNo,
-          village: this.village,
-          familyGroup: this.familyGroup,
-          pregnant: this.pregnant,
-          lastMenstrualPeriod: this.lastMenstrualPeriod
-            ? new Date(this.lastMenstrualPeriod).toISOString() // Convert back to UTC timezone to store in DB
-            : null,
-          drugAllergies: this.drugAllergies ? this.drugAllergies : null,
-          photo: this.photo ? this.photo : null,
-          sentToId: this.sentToId
-        }
+const toast = useToast()
 
-        // Add new patient visit
-        await axios
-          .post(`${BaseURL}/patient/${this.patientId}`, admin)
-          .then((response) => {
-            toast.success('New Patient Visit created successfully!')
-            // Emit patient details to be rendered in sidebar
-            this.$emit('patientVisitCreated', {
-              id: this.patientId,
-              name: this.name,
-              age: this.ageComputed,
-              vid: response.data['vid'],
-            });
-          })
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError; // Safe casting
-          if (axiosError.response) {
-            // The request was made and server responded with a status code out of range 2xx
-            console.log(axiosError.response.data)
-            toast.error(axiosError.message)
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request)
-            toast.error('No server response received, check your connection.')
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message);
-            toast.error('An internal server error occurred.')
-          }
-        } else {
-          // No response received at all
-          console.log(error)
-          toast.error('An internal server error occurred.')
-        }
-      }
-    },
+const name = ref('')
+const khmerName = ref('')
+const dob = ref<string | null>('')
+const age = ref<number | null>(0)
+const gender = ref<'M' | 'F' | ''>('')
+const contactNo = ref('')
+const regDate = ref('')
+const queueNo = ref('')
+const village = ref('')
+const familyGroup = ref('')
+const pregnant = ref<boolean | null>(null)
+const lastMenstrualPeriod = ref<string | null>(null)
+const drugAllergies = ref<string | null>('')
+const photo = ref<string | null>('')
+const selectedPhoto = ref('')
+const sentToId = ref<boolean | null>(null)
 
-    // handleFileChange(event: any) {
-    //   const file = event.target.files[0]
-    //   if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
-    //     const reader = new FileReader()
-    //     reader.onload = (e) => {
-    //       // Remove the data URL prefix to get just the base64 string
-    //       if (e.target != null && typeof e.target.result == 'string') {
-    //         this.selectedPhoto = e.target.result
-    //         this.photo = e.target.result.split(',')[1]
-    //       }
-    //     }
-    //     reader.readAsDataURL(file)
-    //     console.log(this.selectedPhoto)
-    //     console.log(this.photo)
-    //   } else {
-    //     // Reset selectedPhoto or show error message
-    //     this.selectedPhoto = ''
-    //     alert('Please select a JPEG, JPG, or PNG file.')
-    //   }
-    // },
-    async handleImageUpload(event: any) {
-      const toast = useToast()
-      const imageFile = event.target.files[0];
-      console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
-      console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
-      toast.default('Loading Image...')
+const isMale = ref(false)
+const maxDate = ref(formatDateForInput(new Date().toISOString()))
 
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-      }
-      try {
-        let fileToProcess = imageFile
-        // Check if the file is a .heic image
-        if (fileToProcess.type === "image/heic") {
-          try {
-            // Convert HEIC to JPEG
-            const convertedBlob = await heic2any({
-              blob: fileToProcess,
-              toType: "image/jpeg",
-            });
-            fileToProcess = convertedBlob as Blob;
-          } catch (heicError) {
-            console.error('HEIC conversion failed', heicError);
-            toast.error('Image upload failed, Please re-upload a JPEG, JPG, PNG or HEIC file.')
-            return;
-          }
-        }
+watch(gender, (newValue) => {
+  isMale.value = newValue === 'M'
+})
 
-        const compressedFile = await imageCompression(fileToProcess, options);
-        console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
-        console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          // Remove the data URL prefix to get just the base64 string
-          if (e.target != null && typeof e.target.result == 'string') {
-            this.selectedPhoto = e.target.result
-            this.photo = e.target.result.split(',')[1]
-          }
-        }
-        reader.readAsDataURL(compressedFile)
-      } catch (error) {
-        console.log(error);
-        this.selectedPhoto = ''
-        alert('Please select a JPEG, JPG, PNG or HEIC file.')
-      }
-    },
+const ageComputed = computed(() => {
+  if (dob.value) return new Date().getFullYear() - new Date(dob.value).getFullYear()
+  return null
+})
 
-    formatDateForInput(dateString: string) {
-      const date = new Date(dateString)
+onMounted(() => {
+  if (props.patientData) {
+    const admin = props.patientData.admin
+    if (!admin) return
 
-      // Get the date components (year, month, day) of date in local timezone
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-
-      // Return the formatted date string
-      return `${year}-${month}-${day}`
-    },
+    name.value = admin.name
+    khmerName.value = admin.khmerName
+    dob.value = admin.dob ? formatDateForInput(admin.dob) : null
+    age.value = admin.age
+    gender.value = admin.gender
+    contactNo.value = admin.contactNo
+    regDate.value = formatDateForInput(new Date().toISOString())
+    queueNo.value = admin.queueNo
+    village.value = admin.village
+    familyGroup.value = admin.familyGroup
+    drugAllergies.value = admin.drugAllergies
+    photo.value = admin.photo ? atob(admin.photo) : null
+    selectedPhoto.value = photo.value ? `data:image/png;base64,${photo.value}` : ''
   }
 })
+
+// POST request to add a new patient / PUT request to update an existing patient
+// If isAdd is true, do insert patient, otherwise do update patient
+async function submitData() {
+  if (!name.value) return toast.error('Name is required')
+  if (!khmerName.value) return toast.error('Khmer Name is required')
+  if (!dob.value) return toast.error('Date of Birth is required')
+  if (!gender.value) return toast.error('Gender is required')
+  if (!contactNo.value) return toast.error('Contact No. is required')
+  if (!regDate.value) return toast.error('Date Registered is required')
+  if (!queueNo.value) return toast.error('Queue Number is required')
+  if (!village.value) return toast.error('Village is required')
+  if (familyGroup.value === '') return toast.error('Family Group is required')
+  if (pregnant.value == null) return toast.error('Pregnant? is required')
+  if (sentToId.value == null) return toast.error('Sent to Infectious Disease? is required')
+  if (ageComputed.value == null) return toast.error('Please enter a valid Date of Birth')
+
+  const admin: Admin = {
+    name: name.value,
+    khmerName: khmerName.value,
+    dob: new Date(dob.value!).toISOString(),
+    age: ageComputed.value!,
+    gender: gender.value,
+    contactNo: contactNo.value,
+    regDate: new Date(regDate.value!).toISOString(),
+    queueNo: queueNo.value,
+    village: village.value,
+    familyGroup: familyGroup.value,
+    pregnant: pregnant.value,
+    lastMenstrualPeriod: lastMenstrualPeriod.value
+      ? new Date(lastMenstrualPeriod.value).toISOString()
+      : null,
+    drugAllergies: drugAllergies.value || null,
+    photo: photo.value,
+    sentToId: sentToId.value
+  }
+
+  try {
+    // Add new patient visit
+    const response = await axios.post(`${BaseURL}/patient/${props.patientId}`, admin)
+    toast.success('New Patient Visit created successfully!')
+    // Emit patient details to be rendered in sidebar
+    emit('patientVisitCreated', {
+      id: props.patientId ?? '',
+      name: name.value,
+      age: ageComputed.value,
+      vid: response.data['vid']
+    })
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError // Safe casting
+      if (axiosError.response) {
+        // The request was made and server responded with a status code out of range 2xx
+        console.log(axiosError.response.data)
+        toast.error(axiosError.message)
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.log(error.request)
+        toast.error('No server response received, check your connection.')
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', axiosError.message)
+        toast.error('An internal server error occurred.')
+      }
+    } else {
+      // No response received at all
+      console.log(error)
+      toast.error('An internal server error occurred.')
+    }
+  }
+}
+
+// handleFileChange(event: any) {
+//   const file = event.target.files[0]
+//   if (file && /\.(jpg|jpeg|png)$/i.test(file.name)) {
+//     const reader = new FileReader()
+//     reader.onload = (e) => {
+//       // Remove the data URL prefix to get just the base64 string
+//       if (e.target != null && typeof e.target.result == 'string') {
+//         this.selectedPhoto = e.target.result
+//         this.photo = e.target.result.split(',')[1]
+//       }
+//     }
+//     reader.readAsDataURL(file)
+//     console.log(this.selectedPhoto)
+//     console.log(this.photo)
+//   } else {
+//     // Reset selectedPhoto or show error message
+//     this.selectedPhoto = ''
+//     alert('Please select a JPEG, JPG, or PNG file.')
+//   }
+// },
+async function handleImageUpload(event: any) {
+  const imageFile = event.target.files[0]
+  console.log('originalFile instanceof Blob', imageFile instanceof Blob) // true
+  console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`)
+  toast.default('Loading Image...')
+
+  const options = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true
+  }
+  try {
+    let fileToProcess = imageFile
+    // Check if the file is a .heic image
+    if (fileToProcess.type === 'image/heic') {
+      try {
+        // Convert HEIC to JPEG
+        const convertedBlob = await heic2any({
+          blob: fileToProcess,
+          toType: 'image/jpeg'
+        })
+        fileToProcess = convertedBlob as Blob
+      } catch (heicError) {
+        console.error('HEIC conversion failed', heicError)
+        toast.error('Image upload failed, Please re-upload a JPEG, JPG, PNG or HEIC file.')
+        return
+      }
+    }
+
+    const compressedFile = await imageCompression(fileToProcess, options)
+    console.log('compressedFile instanceof Blob', compressedFile instanceof Blob) // true
+    console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`) // smaller than maxSizeMB
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      // Remove the data URL prefix to get just the base64 string
+      if (e.target != null && typeof e.target.result == 'string') {
+        selectedPhoto.value = e.target.result
+        photo.value = e.target.result.split(',')[1]
+      }
+    }
+    reader.readAsDataURL(compressedFile)
+  } catch (error) {
+    console.log(error)
+    selectedPhoto.value = ''
+    alert('Please select a JPEG, JPG, PNG or HEIC file.')
+  }
+}
+
+function formatDateForInput(dateString: string) {
+  const date = new Date(dateString)
+
+  // Get the date components (year, month, day) of date in local timezone
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  // Return the formatted date string
+  return `${year}-${month}-${day}`
+}
 </script>
 
 <style scoped>
@@ -534,6 +552,6 @@ h1 {
   font-weight: 500;
 }
 .req {
-        color: red;
+  color: red;
 }
 </style>

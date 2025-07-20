@@ -9,7 +9,7 @@ export default interface PatientVisitMeta {
   gender: 'M' | 'F'
   village: string
   contactNo: string
-  drugAllergies: string | null
+  drugAllergies: string | undefined
   sentToId: boolean
   referralNeeded: boolean
 }

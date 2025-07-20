@@ -102,9 +102,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue'
-
+<script setup lang="ts">
+import { ref, watch } from 'vue'
 import axios, { AxiosError } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
@@ -112,124 +111,94 @@ import type Patient from '@/types/Patient'
 import type VisualAcuity from '@/types/VisualAcuity'
 import { BaseURL } from '@/main'
 
-export default defineComponent({
-  props: {
-    patientId: {
-      type: String,
-      default: null
-    },
-    patientData: {
-      type: Object as PropType<Patient>,
-      default: null
-    },
-    isAdd: {
-      type: Boolean,
-      default: true
-    },
-    patientVid: {
-      type: String,
-      default: null
-    }
-  },
-  watch: {
-    patientData: function (newVal: Patient, oldVal: Patient) {
-      // watch it
-      if (!this.isAdd) {
-        const visualAcuity = this.patientData.visualacuity
-        if (!visualAcuity) {
-          this.lEyeVision = null
-          this.rEyeVision = null
-          this.additionalIntervention = null
-        } else {
-          this.lEyeVision = visualAcuity.lEyeVision
-          this.rEyeVision = visualAcuity.rEyeVision
-          this.additionalIntervention = visualAcuity.additionalIntervention
-        }
+const props = defineProps<{
+  patientId: string
+  patientData: Patient | null
+  isAdd?: boolean
+  patientVid?: string
+}>()
+
+const lEyeVision = ref<number | null>(null)
+const rEyeVision = ref<number | null>(null)
+const additionalIntervention = ref<string | null>('')
+const isEditing = ref(false)
+
+const toast = useToast()
+
+watch(
+  () => props.patientData,
+  (newVal: Patient | null) => {
+    if (!props.isAdd && newVal) {
+      const visualAcuity = newVal.visualacuity
+      if (!visualAcuity) {
+        lEyeVision.value = null
+        rEyeVision.value = null
+        additionalIntervention.value = ''
+      } else {
+        lEyeVision.value = visualAcuity.lEyeVision
+        rEyeVision.value = visualAcuity.rEyeVision
+        additionalIntervention.value = visualAcuity.additionalIntervention
       }
     }
   },
-  data() {
-    return {
-      lEyeVision: null as number | null,
-      rEyeVision: null as number | null,
-      additionalIntervention: '' as string | null,
-      isEditing: false
+  { immediate: true }
+)
+async function submitData() {
+  try {
+    if (lEyeVision.value === null) {
+      toast.error('Please fill in L eye vision')
+      return
     }
-  },
-  created() {
-    if (!this.isAdd) {
-      const visualAcuity = this.patientData.visualacuity
-      if (!visualAcuity) return
-      this.lEyeVision = visualAcuity.lEyeVision
-      this.rEyeVision = visualAcuity.rEyeVision
-      this.additionalIntervention = visualAcuity.additionalIntervention
+    if (rEyeVision.value === null) {
+      toast.error('Please fill in R eye vision')
+      return
     }
-  },
-  methods: {
-    async submitData() {
-      const toast = useToast()
-      try {
-        if (this.lEyeVision === null) {
-          toast.error('Please fill in L eye vision')
-          return
+    const visualAcuity: VisualAcuity = {
+      // need to define outside to catch missing fields
+      lEyeVision: lEyeVision.value,
+      rEyeVision: rEyeVision.value,
+      additionalIntervention: additionalIntervention.value
+    }
+    await axios
+      .patch(`${BaseURL}/patient/${props.patientId}/${props.patientVid}`, {
+        visualAcuity: visualAcuity
+      })
+      .then((response) => {
+        console.log(response.data)
+        console.log('Visual Acuity posted successfully!')
+        if (isEditing.value) {
+          toggleEdit() // to switch back to read-only mode
         }
-        if (this.rEyeVision === null) {
-          toast.error('Please fill in R eye vision')
-          return
-        }
-        const visualAcuity: VisualAcuity = {
-          // need to define outside to catch missing fields
-          lEyeVision: this.lEyeVision,
-          rEyeVision: this.rEyeVision,
-          additionalIntervention: this.additionalIntervention
-        }
-        await axios
-          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
-            visualAcuity: visualAcuity
-          })
-          .then((response) => {
-            console.log(response.data)
-            console.log('Visual Acuity posted successfully!')
-            if (this.isEditing) {
-              this.toggleEdit() // to switch back to read-only mode
-            }
-            toast.success('Visual Acuity saved successfully!')
-          })
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError // Safe casting
-          if (axiosError.response) {
-            // The request was made and server responded with a status code out of range 2xx
-            console.log(axiosError.response.data)
-            toast.error(axiosError.message)
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request)
-            toast.error('No server response received, check your connection.')
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message)
-            toast.error('An internal server error occurred.')
-          }
-        } else {
-          // No response received at all
-          console.log(error)
-          toast.error('An internal server error occurred.')
-        }
+        toast.success('Visual Acuity saved successfully!')
+      })
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError // Safe casting
+      if (axiosError.response) {
+        // The request was made and server responded with a status code out of range 2xx
+        console.log(axiosError.response.data)
+        toast.error(axiosError.message)
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.log(error.request)
+        toast.error('No server response received, check your connection.')
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', axiosError.message)
+        toast.error('An internal server error occurred.')
       }
-    },
-    preventNegative(event: any) {
-      if (event.key === '-' || event.key === 'e') {
-        event.preventDefault()
-      }
-    },
-    toggleEdit() {
-      console.log('toggleEdit')
-      this.isEditing = !this.isEditing
-      console.log(this.isEditing)
+    } else {
+      // No response received at all
+      console.log(error)
+      toast.error('An internal server error occurred.')
     }
   }
-})
+}
+function toggleEdit() {
+  console.log('toggleEdit')
+  isEditing.value = !isEditing.value
+  console.log(isEditing.value)
+}
 </script>
 
 <style scoped>

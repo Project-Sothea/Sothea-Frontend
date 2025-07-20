@@ -24,7 +24,10 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
 import NavBar from '../components/NavBar.vue'
 import SideBar from '../components/SideBar.vue'
 
@@ -39,67 +42,35 @@ import DentalModal from '@/components/DentalModal.vue'
 import DrConsultModal from '../components/DrConsultModal.vue'
 import PhysiotherapyModal from '../components/PhysiotherapyModal.vue'
 
-export default {
-  components: {
-    NavBar,
-    SideBar,
-    AdminModal,
-    PastMedHistModal,
-    SocialHistModal,
-    VitalStatsModal,
-    HeightWeightModal,
-    VisualAcuityModal,
-    FallRiskModal,
-    DentalModal,
-    DrConsultModal,
-    PhysiotherapyModal
-  },
-  data() {
-    return {
-      activeSection: 'admin',
-      patientId: '', // Empty value passed to the Sidebar since it is not needed
-      patientVid: '', // Empty value since it is not need
-      name: '' as string, // Empty value passed to the Sidebar since it is not needed
-      age: null // Empty value passed to the Sidebar since it is not needed
-    }
-  },
-  computed: {
-    activeComponent() {
-      switch (this.activeSection) {
-        case 'admin':
-          return 'AdminModal'
-        case 'past-med-hist':
-          return 'PastMedHistModal'
-        case 'social-hist':
-          return 'SocialHistModal'
-        case 'vital-stats':
-          return 'VitalStatsModal'
-        case 'height-weight':
-          return 'HeightWeightModal'
-        case 'visual-acuity':
-          return 'VisualAcuityModal'
-        case 'fall-risk':
-          return 'FallRiskModal'
-        case 'dental':
-          return 'DentalModal'
-        case 'dr-consult':
-          return 'DrConsultModal'
-        case 'physiotherapy':
-          return 'PhysiotherapyModal'
-        default:
-          return 'AdminModal'
-      }
-    }
-  },
-  methods: {
-    setActiveSection(section: string) {
-      this.activeSection = section
-    },
-    handlePatientCreated(event: any) {
-      const { id, name, age, vid } = event
-      console.log(`Patient Created Wth ID: ${id}, Name: ${name}, Age: ${age}, VID: ${vid}`)
-      this.$router.push('/patient/' + id + '/' + vid)
-    }
+const router = useRouter()
+
+const activeSection = ref('admin')
+const patientId = ref('')
+const patientVid = ref('')
+
+const activeComponent = computed(() => {
+  const map: Record<string, any> = {
+    admin: AdminModal,
+    'past-med-hist': PastMedHistModal,
+    'social-hist': SocialHistModal,
+    'vital-stats': VitalStatsModal,
+    'height-weight': HeightWeightModal,
+    'visual-acuity': VisualAcuityModal,
+    'fall-risk': FallRiskModal,
+    dental: DentalModal,
+    'dr-consult': DrConsultModal,
+    physiotherapy: PhysiotherapyModal
   }
+  return map[activeSection.value] || AdminModal
+})
+
+function setActiveSection(section: string) {
+  activeSection.value = section
+}
+
+function handlePatientCreated(event: any) {
+  const { id, name, age, vid } = event
+  console.log(`Patient Created Wth ID: ${id}, Name: ${name}, Age: ${age}, VID: ${vid}`)
+  router.push('/patient/' + id + '/' + vid)
 }
 </script>
