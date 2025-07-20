@@ -1084,7 +1084,7 @@ const referralNeeded = ref<boolean | null>(null)
 const referralLoc = ref<string | null>('')
 const isEditing = ref(false)
 
-const teeth = Array.from({ length: 48 }, (__, i) => ref<boolean | null>(null))
+const teeth = Array.from({ length: 48 }, (__) => ref<boolean | null>(null))
 const toothRefs: Record<string, (typeof teeth)[0]> = {}
 for (let quadrant = 1; quadrant <= 4; quadrant++) {
   for (let position = 1; position <= 8; position++) {

@@ -21,9 +21,8 @@
     "heic2any": "^0.0.4",
     "pinia": "^2.1.7",
     "postcss": "^8.4.38",
-    "react-toastify": "^10.0.5",
     "tailwindcss": "^3.4.3",
-    "vue": "^3.4.21",
+    "vue": "^3.5.0",
     "vue-router": "^4.3.0",
     "vue-toast-notification": "^3.1.2"
   },
@@ -48,7 +47,7 @@
     "prettier": "^3.2.5",
     "typescript": "~5.4.0",
     "typescript-eslint": "^7.13.1",
-    "vite": "^5.2.11",
+    "vite": "^7.0.5",
     "vitest": "^1.4.0",
     "vue-tsc": "^2.0.11"
   }
