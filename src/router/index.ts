@@ -5,6 +5,10 @@ import SignIn from '../views/SignIn.vue'
 import AddPatient from '../views/AddPatient.vue'
 import SideBar from '../components/SideBar.vue'
 import ViewEditPatient from '../views/ViewEditPatient.vue'
+import PharmacyOverview from '@/views/PharmacyOverview.vue'
+import CreateDrug from '@/views/CreateDrug.vue'
+import CreateBatch from '@/views/CreateBatch.vue'
+import DrugOverview from '@/views/DrugOverview.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,7 +43,21 @@ const router = createRouter({
       name: 'patient',
       component: ViewEditPatient,
       props: true,
-    }
+    },
+    {
+      path: '/pharmacy',
+      name: 'PharmacyOverview',
+      component: PharmacyOverview 
+    },
+    { path: '/pharmacy/drugs/new',  component: CreateDrug  },
+    { path: '/pharmacy/batches/new', component: CreateBatch },
+    {
+      path: '/pharmacy/drugs/:drugId',
+      name: 'DrugOverview',
+      component: DrugOverview,
+      props: true,
+    },
+
     // {
     //   path: '/admin',
     //   name: 'admin',
