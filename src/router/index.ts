@@ -9,10 +9,15 @@ import PharmacyOverview from '@/views/PharmacyOverview.vue'
 import CreateDrug from '@/views/CreateDrug.vue'
 import CreateBatch from '@/views/CreateBatch.vue'
 import DrugOverview from '@/views/DrugOverview.vue'
+import { authUtils } from '@/utils/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/',
+      redirect: '/signin'
+    },
     {
       path: '/signin',
       name: 'signin',
@@ -94,6 +99,16 @@ const router = createRouter({
     //   component: DrConsultModal
     // }
   ]
+})
+
+router.beforeEach((to) => {
+  const isAuthenticated = authUtils.isAuthenticated()
+
+  if (!isAuthenticated && to.name !== 'signin') {
+    return { name: 'signin' }
+  } else if (isAuthenticated && to.name === 'signin') {
+    return { name: 'allpatients' }
+  }
 })
 
 export default router

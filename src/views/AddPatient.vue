@@ -40,8 +40,6 @@ import DrConsultModal from '../components/DrConsultModal.vue'
 import PhysiotherapyModal from '../components/PhysiotherapyModal.vue'
 import PrescriptionModal from '@/components/PrescriptionModal.vue'
 
-import axios from 'axios'
-
 export default {
   components: {
     NavBar,
@@ -64,7 +62,7 @@ export default {
       patientId: '', // Empty value passed to the Sidebar since it is not needed
       patientVid: '', // Empty value since it is not need
       name: '' as string, // Empty value passed to the Sidebar since it is not needed
-      age: null, // Empty value passed to the Sidebar since it is not needed
+      age: null // Empty value passed to the Sidebar since it is not needed
     }
   },
   computed: {
@@ -97,17 +95,11 @@ export default {
       }
     }
   },
-  created() {
-    this.getIsValidToken()
-  },
   methods: {
-    setActiveSection(section : string) {
+    setActiveSection(section: string) {
       this.activeSection = section
     },
-    async getIsValidToken() {
-      await axios.get('/login/is-valid-token')
-    },
-    handlePatientCreated(event : any) {
+    handlePatientCreated(event: any) {
       const { id, name, age, vid } = event
       console.log(`Patient Created Wth ID: ${id}, Name: ${name}, Age: ${age}, VID: ${vid}`)
       this.$router.push('/patient/' + id + '/' + vid)
