@@ -15,6 +15,7 @@
       <keep-alive>
         <component
           :is="activeComponent"
+          :isAdd="true"
           :patientId="String(patientId)"
           :patientVid="String(patientVid)"
           @patientCreated="handlePatientCreated"
