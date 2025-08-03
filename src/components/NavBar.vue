@@ -26,6 +26,10 @@
             >
               Add Patient
             </router-link>
+            <router-link class="text-white hover:text-gray-300 px-3 py-4 text-base font-medium" active-class="active"
+                to="/pharmacy">
+                Pharmacy
+            </router-link>
           </div>
         </div>
 

@@ -38,6 +38,7 @@ import FallRiskModal from '@/components/FallRiskModal.vue'
 import DentalModal from '@/components/DentalModal.vue'
 import DrConsultModal from '../components/DrConsultModal.vue'
 import PhysiotherapyModal from '../components/PhysiotherapyModal.vue'
+import PrescriptionModal from '@/components/PrescriptionModal.vue'
 
 export default {
   components: {
@@ -52,7 +53,8 @@ export default {
     FallRiskModal,
     DentalModal,
     DrConsultModal,
-    PhysiotherapyModal
+    PhysiotherapyModal,
+    PrescriptionModal
   },
   data() {
     return {
@@ -86,6 +88,8 @@ export default {
           return 'DrConsultModal'
         case 'physiotherapy':
           return 'PhysiotherapyModal'
+        case 'prescription':
+          return 'PrescriptionModal'
         default:
           return 'AdminModal'
       }

@@ -91,7 +91,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentPublicInstance, defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 
 import SideBar from '../components/SideBar.vue'
 import NavBar from '../components/NavBar.vue'
@@ -116,6 +116,7 @@ import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { BaseURL } from '@/main'
 import DentalModal from '@/components/DentalModal.vue'
+import PrescriptionModal from '@/components/PrescriptionModal.vue';
 
 export default defineComponent({
   components: {
@@ -133,6 +134,7 @@ export default defineComponent({
     DentalModal,
     DrConsultModal,
     PhysiotherapyModal,
+    PrescriptionModal,
     AddNewVisitModal
   },
   props: {
@@ -183,6 +185,8 @@ export default defineComponent({
           return 'AddNewVisitModal'
         case 'physiotherapy':
           return 'PhysiotherapyModal'
+        case 'prescriptions':
+          return 'PrescriptionModal'
         default:
           return 'AdminModal'
       }
@@ -190,7 +194,6 @@ export default defineComponent({
   },
   methods: {
     setActiveSection(section: string) {
-      // console.log(section)
       this.activeSection = section
     },
 
