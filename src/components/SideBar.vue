@@ -414,6 +414,46 @@
           <a
             class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
             :class="{
+              'border-l-white bg-[#3f51b5] text-white': activeSection === 'prescriptions',
+              'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'prescriptions'
+            }"
+            @click="setActiveSection('prescriptions')"
+            href="#"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15.6159 9.07417C16.9525 9.38026 18.2842 8.54482 18.5903 7.20817C18.8964 5.87153 18.0609 4.53983 16.7243 4.23375C15.3876 3.92766 14.0559 4.7631 13.7499 6.09975C13.4438 7.43639 14.2792 8.76809 15.6159 9.07417Z"
+                stroke="currentcolor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M2.48468 2.36606H0.92218V7.49999C0.92218 10.0395 2.98087 12.0982 5.5204 12.0982C8.05991 12.0982 10.1186 10.0395 10.1186 7.49999V2.36606H8.55611"
+                stroke="currentcolor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M5.60968 12.1428V13.8682C5.60968 16.7863 7.97521 19.1517 10.8932 19.1517C13.8113 19.1517 16.1767 16.7863 16.1767 13.8682V9.41962"
+                stroke="currentcolor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+
+            <span class="mx-4 text-sm font-medium"> Prescription </span>
+            <span class="flex-grow text-right"> </span>
+          </a>
+
+          <a
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'add-new-visit',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'add-new-visit'
             }"

@@ -42,6 +42,7 @@ import FallRiskModal from '@/components/FallRiskModal.vue'
 import DentalModal from '@/components/DentalModal.vue'
 import DrConsultModal from '../components/DrConsultModal.vue'
 import PhysiotherapyModal from '../components/PhysiotherapyModal.vue'
+import PrescriptionModal from '@/components/PrescriptionModal.vue'
 
 const router = useRouter()
 
@@ -60,7 +61,8 @@ const activeComponent = computed(() => {
     'fall-risk': FallRiskModal,
     dental: DentalModal,
     'dr-consult': DrConsultModal,
-    physiotherapy: PhysiotherapyModal
+    physiotherapy: PhysiotherapyModal,
+    prescription: PrescriptionModal
   }
   return map[activeSection.value] || AdminModal
 })

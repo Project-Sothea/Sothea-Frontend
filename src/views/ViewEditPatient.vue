@@ -121,6 +121,8 @@ import FallRiskModal from '@/components/FallRiskModal.vue'
 import DrConsultModal from '../components/DrConsultModal.vue'
 import PhysiotherapyModal from '@/components/PhysiotherapyModal.vue'
 import AddNewVisitModal from '@/components/AddNewVisitModal.vue'
+import DentalModal from '@/components/DentalModal.vue'
+import PrescriptionModal from '@/components/PrescriptionModal.vue'
 
 import type Patient from '@/types/Patient'
 
@@ -128,7 +130,6 @@ import axios, { AxiosError, type AxiosResponse } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { BaseURL } from '@/main'
-import DentalModal from '@/components/DentalModal.vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps<{
@@ -162,7 +163,8 @@ const activeComponent = computed(() => {
     dental: DentalModal,
     'dr-consult': DrConsultModal,
     'add-new-visit': AddNewVisitModal,
-    physiotherapy: PhysiotherapyModal
+    physiotherapy: PhysiotherapyModal,
+    prescription: PrescriptionModal
   }
   return map[activeSection.value] || AdminModal
 })
