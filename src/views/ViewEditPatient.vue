@@ -164,7 +164,7 @@ const activeComponent = computed(() => {
     'dr-consult': DrConsultModal,
     'add-new-visit': AddNewVisitModal,
     physiotherapy: PhysiotherapyModal,
-    prescription: PrescriptionModal
+    prescriptions: PrescriptionModal
   }
   return map[activeSection.value] || AdminModal
 })

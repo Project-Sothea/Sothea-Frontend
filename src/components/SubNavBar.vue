@@ -76,6 +76,7 @@ defineProps<{
 
 const emit = defineEmits<{
   refresh: [void]
+  openModal: [void]
 }>()
 
 const isReloading = ref(false)

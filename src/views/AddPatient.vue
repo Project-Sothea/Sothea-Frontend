@@ -62,7 +62,7 @@ const activeComponent = computed(() => {
     dental: DentalModal,
     'dr-consult': DrConsultModal,
     physiotherapy: PhysiotherapyModal,
-    prescription: PrescriptionModal
+    prescriptions: PrescriptionModal
   }
   return map[activeSection.value] || AdminModal
 })
