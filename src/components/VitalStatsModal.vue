@@ -47,9 +47,7 @@
         <div class="flex flex-row mb-2">
           <!-- Systolic BP1 -->
           <div class="w-1/4">
-            <label for="" class="mb-1 block text-sm font-medium text-dark">
-              Systolic BP1</label
-            >
+            <label for="" class="mb-1 block text-sm font-medium text-dark"> Systolic BP1</label>
             <input
               v-model="systolicBP1"
               type="number"
@@ -64,9 +62,7 @@
           </div>
           <!-- Systolic BP2 -->
           <div class="ml-3 w-1/4">
-            <label for="" class="mb-1 block text-sm font-medium text-dark">
-              Systolic BP2</label
-            >
+            <label for="" class="mb-1 block text-sm font-medium text-dark"> Systolic BP2</label>
             <input
               v-model="systolicBP2"
               type="number"
@@ -82,9 +78,7 @@
 
           <!-- Avg Systolic BP -->
           <div class="ml-3 w-1/3">
-            <label for="" class="mb-1 block text-sm font-medium text-dark">
-              Avg Systolic BP</label
-            >
+            <label for="" class="mb-1 block text-sm font-medium text-dark"> Avg Systolic BP</label>
             <input
               :value="avgSystolicBP"
               disabled
@@ -100,9 +94,7 @@
         <div class="flex flex-row mb-2">
           <!-- Diastolic BP1 -->
           <div class="w-1/4">
-            <label for="" class="mb-1 block text-sm font-medium text-dark">
-              Diastolic BP1</label
-            >
+            <label for="" class="mb-1 block text-sm font-medium text-dark"> Diastolic BP1</label>
             <input
               v-model="diastolicBP1"
               type="number"
@@ -117,9 +109,7 @@
           </div>
           <!-- Diastolic BP2 -->
           <div class="ml-3 w-1/4">
-            <label for="" class="mb-1 block text-sm font-medium text-dark">
-              Diastolic BP2</label
-            >
+            <label for="" class="mb-1 block text-sm font-medium text-dark"> Diastolic BP2</label>
             <input
               v-model="diastolicBP2"
               type="number"
@@ -249,9 +239,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue'
-
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import axios, { AxiosError } from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
@@ -259,212 +248,179 @@ import type VitalStatistics from '@/types/VitalStatistics'
 import type Patient from '@/types/Patient'
 import { BaseURL } from '@/main'
 
-export default defineComponent({
-  props: {
-    patientId: {
-      type: String,
-      default: null
-    },
-    patientData: {
-      type: Object as PropType<Patient>,
-      default: null
-    },
-    isAdd: {
-      type: Boolean,
-      default: true
-    },
-    patientVid: {
-      type: String,
-      default: null
-    }
-  },
-  watch: {
-    patientData: function (newVal: Patient, oldVal: Patient) {
-      // watch it
-      if (!this.isAdd) {
-        const vitalStatistics = this.patientData.vitalstatistics
-        if (!vitalStatistics) {
-          this.temperature = null
-          this.spO2 = null
-          this.systolicBP1 = null
-          this.systolicBP2 = null
-          this.diastolicBP1 = null
-          this.diastolicBP2 = null
-          this.hr1 = null
-          this.hr2 = null
-          this.randomBloodGlucoseMmolL = null
-        } else {
-          this.temperature = vitalStatistics.temperature
-          this.spO2 = vitalStatistics.spO2
-          this.systolicBP1 = vitalStatistics.systolicBP1
-          this.systolicBP2 = vitalStatistics.systolicBP2
-          this.diastolicBP1 = vitalStatistics.diastolicBP1
-          this.diastolicBP2 = vitalStatistics.diastolicBP2
-          this.hr1 = vitalStatistics.hr1
-          this.hr2 = vitalStatistics.hr2
-          this.randomBloodGlucoseMmolL = vitalStatistics.randomBloodGlucoseMmolL
-        }
-      }
-    }
-  },
-  data() {
-    return {
-      temperature: null as number | null,
-      spO2: null as number | null,
-      systolicBP1: null as number | null,
-      systolicBP2: null as number | null,
-      diastolicBP1: null as number | null,
-      diastolicBP2: null as number | null,
-      averageSystolicBP: null as number | null,
-      averageDiastolicBP: null as number | null,
-      hr1: null as number | null,
-      hr2: null as number | null,
-      averageHR: null as number | null,
-      randomBloodGlucoseMmolL: null as number | null,
-      isEditing: false
-    }
-  },
-  computed: {
-    avgSystolicBP() {
-      if (this.systolicBP1 && this.systolicBP2) {
-        return (Number(this.systolicBP1) + Number(this.systolicBP2)) / 2
-      }
-      return null
-    },
-    avgDiastolicBP() {
-      if (this.diastolicBP1 && this.diastolicBP2) {
-        return (Number(this.diastolicBP1) + Number(this.diastolicBP2)) / 2
-      }
-      return null
-    },
-    avgHR() {
-      if (this.hr1 && this.hr2) {
-        return (Number(this.hr1) + Number(this.hr2)) / 2
-      }
-      return null
-    }
-  },
-  created() {
-    if (!this.isAdd) {
-      const vitalStatistics = this.patientData.vitalstatistics
-      if (!vitalStatistics) return
-      this.temperature = vitalStatistics.temperature
-      this.spO2 = vitalStatistics.spO2
-      this.systolicBP1 = vitalStatistics.systolicBP1
-      this.systolicBP2 = vitalStatistics.systolicBP2
-      this.diastolicBP1 = vitalStatistics.diastolicBP1
-      this.diastolicBP2 = vitalStatistics.diastolicBP2
-      this.hr1 = vitalStatistics.hr1
-      this.hr2 = vitalStatistics.hr2
-      this.randomBloodGlucoseMmolL = vitalStatistics.randomBloodGlucoseMmolL
-    }
-  },
-  methods: {
-    async submitData() {
-      const toast = useToast()
-      try {
-        if (this.temperature === null) {
-          toast.error('Please enter temperature')
-          return
-        }
-        if (this.spO2 === null) {
-          toast.error('Please enter SpO2')
-          return
-        }
-        if (this.hr1 === null) {
-          toast.error('Please enter HR1')
-          return
-        }
-        if (this.hr2 === null) {
-          toast.error('Please enter HR2')
-          return
-        }
-        if (this.randomBloodGlucoseMmolL === null) {
-          toast.error('Please enter Random Blood Glucose (mmol/L)')
-          return
-        }
-        if (this.avgHR === null) {
-          toast.error('Average HR cannot be empty')
-          return
-        }
-        if (
-          this.temperature > 9999 ||
-          this.spO2 > 9999 ||
-          (this.systolicBP1 && this.systolicBP1 > 9999) ||
-          (this.systolicBP2 && this.systolicBP2 > 9999) ||
-          (this.diastolicBP1 && this.diastolicBP1 > 9999) ||
-          (this.diastolicBP2 && this.diastolicBP2 > 9999) ||
-          this.hr1 > 9999 ||
-          this.hr2 > 9999 ||
-          this.randomBloodGlucoseMmolL > 9999
-        ) {
-          toast.error('Values cannot be greater than 9999')
-          return
-        }
-        const vitalStatistics: VitalStatistics = {
-          // need to define outside to catch missing fields
-          temperature: this.temperature,
-          spO2: this.spO2,
-          systolicBP1: this.systolicBP1 || null,
-          systolicBP2: this.systolicBP2 || null,
-          diastolicBP1: this.diastolicBP1 || null,
-          diastolicBP2: this.diastolicBP2 || null,
-          averageSystolicBP: this.avgSystolicBP, // pre-computed value
-          averageDiastolicBP: this.avgDiastolicBP, // pre-computed value
-          hr1: this.hr1,
-          hr2: this.hr2,
-          averageHR: this.avgHR, // pre-computed value
-          randomBloodGlucoseMmolL: this.randomBloodGlucoseMmolL
-        }
-        console.log(vitalStatistics)
-        await axios
-          .patch(`${BaseURL}/patient/${this.patientId}/${this.patientVid}`, {
-            vitalStatistics: vitalStatistics
-          })
-          .then((response) => {
-            console.log(response.data)
-            console.log('Vital Statistics posted successfully!')
-            if (this.isEditing) {
-              this.toggleEdit() // to switch back to read-only mode
-            }
-            toast.success('Vital Statistics saved successfully!')
-          })
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError // Safe casting
-          if (axiosError.response) {
-            // The request was made and server responded with a status code out of range 2xx
-            console.log(axiosError.response.data)
-            toast.error(axiosError.message)
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request)
-            toast.error('No server response received, check your connection.')
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', axiosError.message)
-            toast.error('An internal server error occurred.')
-          }
-        } else {
-          // No response received at all
-          console.log(error)
-          toast.error('An internal server error occurred.')
-        }
-      }
-    },
+const props = defineProps<{
+  patientId: string
+  patientData: Patient | null
+  isAdd?: boolean
+  patientVid?: string
+}>()
 
-    toggleEdit() {
-      console.log('toggleEdit')
-      this.isEditing = !this.isEditing
-      console.log(this.isEditing)
-    },
-    preventNegative(event: any) {
-      if (event.key === '-' || event.key === 'e') {
-        event.preventDefault()
+const temperature = ref<number | null>(null)
+const spO2 = ref<number | null>(null)
+const systolicBP1 = ref<number | null>(null)
+const systolicBP2 = ref<number | null>(null)
+const diastolicBP1 = ref<number | null>(null)
+const diastolicBP2 = ref<number | null>(null)
+const hr1 = ref<number | null>(null)
+const hr2 = ref<number | null>(null)
+const randomBloodGlucoseMmolL = ref<number | null>(null)
+const isEditing = ref(false)
+
+const toast = useToast()
+
+watch(
+  () => props.patientData,
+  (newVal: Patient | null) => {
+    if (!props.isAdd && newVal) {
+      const vitalStatistics = newVal.vitalstatistics
+      if (!vitalStatistics) {
+        temperature.value = null
+        spO2.value = null
+        systolicBP1.value = null
+        systolicBP2.value = null
+        diastolicBP1.value = null
+        diastolicBP2.value = null
+        hr1.value = null
+        hr2.value = null
+        randomBloodGlucoseMmolL.value = null
+      } else {
+        temperature.value = vitalStatistics.temperature
+        spO2.value = vitalStatistics.spO2
+        systolicBP1.value = vitalStatistics.systolicBP1
+        systolicBP2.value = vitalStatistics.systolicBP2
+        diastolicBP1.value = vitalStatistics.diastolicBP1
+        diastolicBP2.value = vitalStatistics.diastolicBP2
+        hr1.value = vitalStatistics.hr1
+        hr2.value = vitalStatistics.hr2
+        randomBloodGlucoseMmolL.value = vitalStatistics.randomBloodGlucoseMmolL
       }
+    }
+  },
+  { immediate: true }
+)
+const avgSystolicBP = computed(() => {
+  if (systolicBP1.value && systolicBP2.value) {
+    return (Number(systolicBP1.value) + Number(systolicBP2.value)) / 2
+  }
+  return null
+})
+
+const avgDiastolicBP = computed(() => {
+  if (diastolicBP1.value && diastolicBP2.value) {
+    return (Number(diastolicBP1.value) + Number(diastolicBP2.value)) / 2
+  }
+  return null
+})
+
+const avgHR = computed(() => {
+  if (hr1.value && hr2.value) {
+    return (Number(hr1.value) + Number(hr2.value)) / 2
+  }
+  return null
+})
+
+async function submitData() {
+  try {
+    if (temperature.value === null) {
+      toast.error('Please enter temperature')
+      return
+    }
+    if (spO2.value === null) {
+      toast.error('Please enter SpO2')
+      return
+    }
+    if (hr1.value === null) {
+      toast.error('Please enter HR1')
+      return
+    }
+    if (hr2.value === null) {
+      toast.error('Please enter HR2')
+      return
+    }
+    if (randomBloodGlucoseMmolL.value === null) {
+      toast.error('Please enter Random Blood Glucose (mmol/L)')
+      return
+    }
+    if (avgHR.value === null) {
+      toast.error('Average HR cannot be empty')
+      return
+    }
+    if (
+      temperature.value > 9999 ||
+      spO2.value > 9999 ||
+      (systolicBP1.value && systolicBP1.value > 9999) ||
+      (systolicBP2.value && systolicBP2.value > 9999) ||
+      (diastolicBP1.value && diastolicBP1.value > 9999) ||
+      (diastolicBP2.value && diastolicBP2.value > 9999) ||
+      hr1.value > 9999 ||
+      hr2.value > 9999 ||
+      randomBloodGlucoseMmolL.value > 9999
+    ) {
+      toast.error('Values cannot be greater than 9999')
+      return
+    }
+    const vitalStatistics: VitalStatistics = {
+      // need to define outside to catch missing fields
+      temperature: temperature.value,
+      spO2: spO2.value,
+      systolicBP1: systolicBP1.value || null,
+      systolicBP2: systolicBP2.value || null,
+      diastolicBP1: diastolicBP1.value || null,
+      diastolicBP2: diastolicBP2.value || null,
+      averageSystolicBP: avgSystolicBP.value, // pre-computed value
+      averageDiastolicBP: avgDiastolicBP.value, // pre-computed value
+      hr1: hr1.value,
+      hr2: hr2.value,
+      averageHR: avgHR.value, // pre-computed value
+      randomBloodGlucoseMmolL: randomBloodGlucoseMmolL.value
+    }
+    console.log(vitalStatistics)
+    await axios
+      .patch(`${BaseURL}/patient/${props.patientId}/${props.patientVid}`, {
+        vitalStatistics: vitalStatistics
+      })
+      .then((response) => {
+        console.log(response.data)
+        console.log('Vital Statistics posted successfully!')
+        if (isEditing.value) {
+          toggleEdit() // to switch back to read-only mode
+        }
+        toast.success('Vital Statistics saved successfully!')
+      })
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError // Safe casting
+      if (axiosError.response) {
+        // The request was made and server responded with a status code out of range 2xx
+        console.log(axiosError.response.data)
+        toast.error(axiosError.message)
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.log(error.request)
+        toast.error('No server response received, check your connection.')
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', axiosError.message)
+        toast.error('An internal server error occurred.')
+      }
+    } else {
+      // No response received at all
+      console.log(error)
+      toast.error('An internal server error occurred.')
     }
   }
-})
+}
+
+function toggleEdit() {
+  console.log('toggleEdit')
+  isEditing.value = !isEditing.value
+  console.log(isEditing.value)
+}
+function preventNegative(event: KeyboardEvent) {
+  if (event.key === '-' || event.key === 'e') {
+    event.preventDefault()
+  }
+}
 </script>
 <style>
 h1 {
