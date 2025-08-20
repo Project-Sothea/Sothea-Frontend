@@ -1,12 +1,9 @@
 <template>
   <div class="container max-w-5xl px-4 mx-auto sm:px-8 table">
     <div class="py-8">
-
       <!-- Back & Title -->
       <div class="flex flex-row justify-between w-full mb-4">
-        <h2 class="text-3xl leading-tight" style="color:black">
-          Drug Overview
-        </h2>
+        <h2 class="text-3xl leading-tight" style="color: black">Drug Overview</h2>
         <router-link
           to="/pharmacy"
           class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded shadow"
@@ -60,60 +57,53 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { BaseURL } from '@/main'
 import type { Drug } from '@/types/Drug'
 import type { DrugBatch } from '@/types/DrugBatch'
 
-export default defineComponent({
-  name: 'DrugOverviewDisplay',
-  setup() {
-    const route = useRoute()
-    const drugId = route.params.drugId as string
+const route = useRoute()
+const drugId = route.params.drugId as string
 
-    const drug = ref<Drug | null>(null)
-    const batches = ref<DrugBatch[]>([])
+const drug = ref<Drug | null>(null)
+const batches = ref<DrugBatch[]>([])
 
-    const fmtDate = (s: string) => {
-      if (!s || s === '–') return '–'
-      const d = new Date(s)
-      return isNaN(+d) ? s : d.toLocaleDateString()
-    }
+const fmtDate = (s: string) => {
+  if (!s || s === '–') return '–'
+  const d = new Date(s)
+  return isNaN(+d) ? s : d.toLocaleDateString()
+}
 
-    const fetchDrug = async () => {
-      const { data } = await axios.get<Drug>(`${BaseURL}/pharmacy/drugs/${drugId}`)
-      drug.value = data
-    }
+const fetchDrug = async () => {
+  const { data } = await axios.get<Drug>(`${BaseURL}/pharmacy/drugs/${drugId}`)
+  drug.value = data
+}
 
-    const fetchBatches = async () => {
-      const { data } = await axios.get<DrugBatch[]>(`${BaseURL}/pharmacy/batches?drug_id=${drugId}`)
-      batches.value = Array.isArray(data) ? [...data] : []
-    }
+const fetchBatches = async () => {
+  const { data } = await axios.get<DrugBatch[]>(`${BaseURL}/pharmacy/batches?drug_id=${drugId}`)
+  batches.value = Array.isArray(data) ? [...data] : []
+}
 
-    onMounted(async () => {
-      await Promise.all([fetchDrug(), fetchBatches()])
-    })
-
-    return {
-      drug,
-      batches,
-      fmtDate
-    }
-  }
+onMounted(async () => {
+  await Promise.all([fetchDrug(), fetchBatches()])
 })
 </script>
 
 <style scoped>
-.table     { width: 1240px; }
-.line      { height: 1px; background: rgba(0, 0, 0, 0.17); }
+.table {
+  width: 1240px;
+}
+.line {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.17);
+}
 
 /* header cells */
 .th {
@@ -124,6 +114,10 @@ export default defineComponent({
   @apply px-5 py-4 text-sm;
 }
 
-.even-row { background-color: #ffffff; }
-.odd-row  { background-color: #f2f2f2; }
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f2f2f2;
+}
 </style>

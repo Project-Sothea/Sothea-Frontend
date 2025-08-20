@@ -9,13 +9,9 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(row, idx) in rows" :key="row.id"
-          :class="idx%2 ? 'odd-row':'even-row'">
+      <tr v-for="(row, idx) in rows" :key="row.id" :class="idx % 2 ? 'odd-row' : 'even-row'">
         <td class="px-4 py-2">
-          <router-link
-            :to="`/pharmacy/drugs/${row.id}`"
-            class="text-blue-600 hover:underline"
-          >
+          <router-link :to="`/pharmacy/drugs/${row.id}`" class="text-blue-600 hover:underline">
             {{ row.name }}
           </router-link>
         </td>
@@ -27,9 +23,9 @@
   </table>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 defineProps<{
-  rows: any[],
-  fmtDate:(d:string)=>string
+  rows: any[]
+  fmtDate: (d: string) => string
 }>()
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="container max-w-5xl px-4 mx-auto sm:px-8 table">
     <div class="py-8">
-    <div class="flex justify-end mb-4">
+      <div class="flex justify-end mb-4">
         <router-link
           to="/pharmacy/batches/new"
           class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
@@ -11,22 +11,14 @@
       </div>
       <!-- ── PAGE TITLE & TOGGLE ─────────────────────────────────────── -->
       <div class="flex flex-row justify-between w-full mb-4">
-        <h2 class="text-3xl leading-tight" style="color:black">
-          Drug&nbsp;Batches
-        </h2>
+        <h2 class="text-3xl leading-tight" style="color: black">Drug&nbsp;Batches</h2>
 
         <!-- pill-style toggle -->
         <div class="space-x-2">
-          <button
-            :class="tab === 'batches' ? activeBtn : inactiveBtn"
-            @click="tab = 'batches'"
-          >
+          <button :class="tab === 'batches' ? activeBtn : inactiveBtn" @click="tab = 'batches'">
             All&nbsp;Batches
           </button>
-          <button
-            :class="tab === 'drugs' ? activeBtn : inactiveBtn"
-            @click="tab = 'drugs'"
-          >
+          <button :class="tab === 'drugs' ? activeBtn : inactiveBtn" @click="tab = 'drugs'">
             By&nbsp;Drug
           </button>
         </div>
@@ -34,7 +26,6 @@
 
       <!-- ── FILTER BAR ──────────────────────────────────────────────── -->
       <div class="flex items-center space-x-4 pb-5">
-
         <!-- search box -->
         <input
           type="text"
@@ -103,7 +94,7 @@
                     :to="`/pharmacy/drugs/${row.id}`"
                     class="text-blue-600 hover:underline"
                   >
-                    {{ row.name  }}
+                    {{ row.name }}
                   </router-link>
                 </td>
                 <td class="td">{{ row.totalQty }}</td>
@@ -118,119 +109,102 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, computed, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { BaseURL } from '@/main'
 import type { Drug } from '@/types/Drug'
 import type { DrugBatch } from '@/types/DrugBatch'
 
-export default defineComponent({
-  setup() {
-    /* ---------------- state ---------------- */
-    const tab            = ref<'batches' | 'drugs'>('batches')
-    const drugs          = ref<any[]>([])
-    const batches        = ref<any[]>([])
-    const searchTerm     = ref('')
+/* ---------------- state ---------------- */
+const tab = ref<'batches' | 'drugs'>('batches')
+const drugs = ref<any[]>([])
+const batches = ref<any[]>([])
+const searchTerm = ref('')
 
-    /* ---------------- API calls ---------------- */
-    const fetchDrugs = async () => {
-      const { data } = await axios.get<Drug[]>(`${BaseURL}/pharmacy/drugs`);
-      drugs.value = data
-    }
+/* ---------------- API calls ---------------- */
+const fetchDrugs = async () => {
+  const { data } = await axios.get<Drug[]>(`${BaseURL}/pharmacy/drugs`)
+  drugs.value = data
+}
 
-    const fetchBatches = async () => {
-      const { data } = await axios.get<DrugBatch[]>(`${BaseURL}/pharmacy/batches`)
-      batches.value = Array.isArray(data) ? [...data] : []
-    }
+const fetchBatches = async () => {
+  const { data } = await axios.get<DrugBatch[]>(`${BaseURL}/pharmacy/batches`)
+  batches.value = Array.isArray(data) ? [...data] : []
+}
 
-    /* ---------------- helpers ---------------- */
-    const fmtDate = (s: string) => {
-        if (!s || s === '–') return '–'               // keep dash
-        const d = new Date(s)
-        return isNaN(+d) ? s : d.toLocaleDateString() // fall back to raw string
-    }
-    const drugName = (id: number) =>
-      drugs.value.find((d) => d.id === id)?.name ?? 'Unknown'
+/* ---------------- helpers ---------------- */
+const fmtDate = (s: string) => {
+  if (!s || s === '–') return '–' // keep dash
+  const d = new Date(s)
+  return isNaN(+d) ? s : d.toLocaleDateString() // fall back to raw string
+}
+const drugName = (id: number) => drugs.value.find((d) => d.id === id)?.name ?? 'Unknown'
 
-    /* ---------------- client-side search ---------------- */
-    const filteredBatches = computed(() => {
-      const term = searchTerm.value.toLowerCase()
-      if (!term) return batches.value
-      return batches.value.filter((b: any) => {
-        return (
-          b.batch_no.toLowerCase().includes(term) ||
-          drugName(b.drug_id).toLowerCase().includes(term) ||
-          (b.location || '').toLowerCase().includes(term)
-        )
-      })
-    })
-
-    /* ---------------- aggregate for By-Drug view ---------------- */
-    const drugRows = computed(() => {
-        const map = new Map<
-            number,
-            { id: number; name: string; totalQty: number; earliestExpiry: string; count: number }
-        >()
-
-        drugs.value.forEach(d => {
-            map.set(d.id, {
-            id: d.id,
-            name: d.name,
-            totalQty: 0,
-            earliestExpiry: '–',   // display dash when no batches at all
-            count: 0
-            })
-        })
-
-        filteredBatches.value.forEach((b: any) => {
-        const row = map.get(b.drug_id)!
-        row.totalQty += b.quantity
-        row.count    += 1
-
-        // choose earliest expiry among that drug’s batches
-        if (row.earliestExpiry === '–' ||
-            new Date(b.expiry_date) < new Date(row.earliestExpiry)) {
-        row.earliestExpiry = b.expiry_date
-        }
-    })
-
-    return Array.from(map.values()).sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+/* ---------------- client-side search ---------------- */
+const filteredBatches = computed(() => {
+  const term = searchTerm.value.toLowerCase()
+  if (!term) return batches.value
+  return batches.value.filter((b: any) => {
+    return (
+      b.batch_no.toLowerCase().includes(term) ||
+      drugName(b.drug_id).toLowerCase().includes(term) ||
+      (b.location || '').toLowerCase().includes(term)
     )
-    })
-
-
-    /* ---------------- init ---------------- */
-    onMounted(async () => {
-      await Promise.all([fetchDrugs(), fetchBatches()])
-    })
-
-    /* ---------------- styling helpers ---------------- */
-    const activeBtn =
-      'bg-indigo-600 text-white px-4 py-2 rounded transition-colors'
-    const inactiveBtn =
-      'bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colors'
-
-    return {
-      tab,
-      drugs,
-      batches,
-      searchTerm,
-      filteredBatches,
-      drugRows,
-      fmtDate,
-      drugName,
-      activeBtn,
-      inactiveBtn
-    }
-  }
+  })
 })
+
+/* ---------------- aggregate for By-Drug view ---------------- */
+const drugRows = computed(() => {
+  const map = new Map<
+    number,
+    { id: number; name: string; totalQty: number; earliestExpiry: string; count: number }
+  >()
+
+  drugs.value.forEach((d) => {
+    map.set(d.id, {
+      id: d.id,
+      name: d.name,
+      totalQty: 0,
+      earliestExpiry: '–', // display dash when no batches at all
+      count: 0
+    })
+  })
+
+  filteredBatches.value.forEach((b: any) => {
+    const row = map.get(b.drug_id)!
+    row.totalQty += b.quantity
+    row.count += 1
+
+    // choose earliest expiry among that drug’s batches
+    if (row.earliestExpiry === '–' || new Date(b.expiry_date) < new Date(row.earliestExpiry)) {
+      row.earliestExpiry = b.expiry_date
+    }
+  })
+
+  return Array.from(map.values()).sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  )
+})
+
+/* ---------------- init ---------------- */
+onMounted(async () => {
+  await Promise.all([fetchDrugs(), fetchBatches()])
+})
+
+/* ---------------- styling helpers ---------------- */
+const activeBtn = 'bg-indigo-600 text-white px-4 py-2 rounded transition-colors'
+const inactiveBtn = 'bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colors'
 </script>
 
 <style scoped>
-.table     { width: 1240px; }
-.line      { height: 1px; background: rgba(0, 0, 0, 0.17); }
+.table {
+  width: 1240px;
+}
+.line {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.17);
+}
 
 /* header cells */
 .th {
@@ -241,6 +215,10 @@ export default defineComponent({
   @apply px-5 py-4 text-sm;
 }
 
-.even-row { background-color: #ffffff; }
-.odd-row  { background-color: #f2f2f2; }
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f2f2f2;
+}
 </style>
