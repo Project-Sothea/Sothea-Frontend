@@ -10,15 +10,11 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(b, idx) in batches" :key="b.id"
-          :class="idx%2 ? 'odd-row':'even-row'">
+      <tr v-for="(b, idx) in batches" :key="b.id" :class="idx % 2 ? 'odd-row' : 'even-row'">
         <td class="px-4 py-2">{{ b.batch_no }}</td>
         <td class="px-4 py-2">
-          <router-link
-            :to="`/pharmacy/drugs/${b.drug_id}`"
-            class="text-blue-600 hover:underline"
-          >
-            {{ drugName(b.drug_id)  }}
+          <router-link :to="`/pharmacy/drugs/${b.drug_id}`" class="text-blue-600 hover:underline">
+            {{ drugName(b.drug_id) }}
           </router-link>
         </td>
         <td class="px-4 py-2">{{ b.quantity }}</td>
@@ -29,10 +25,10 @@
   </table>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 defineProps<{
-  batches: any[],
-  drugName: (id: number)=>string,
-  fmtDate:  (d: string)=>string
+  batches: any[]
+  drugName: (id: number) => string
+  fmtDate: (d: string) => string
 }>()
 </script>

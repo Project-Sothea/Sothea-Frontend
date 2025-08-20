@@ -48,10 +48,7 @@
         Unit: <strong>{{ currentDrug.unit }}</strong>
       </p>
 
-      <CreateDrugForm
-        v-if="selectedDrugId === NEW_DRUG_ID"
-        @created="onDrugCreated"
-      />
+      <CreateDrugForm v-if="selectedDrugId === NEW_DRUG_ID" @created="onDrugCreated" />
 
       <!-- Batch No. -->
       <label class="block mb-4">
@@ -123,15 +120,13 @@
         >
           {{ saving ? 'Saving…' : 'Save & Add Another' }}
         </button>
-        <button type="button" class="btn-gray" @click="router.back()">
-          Cancel
-        </button>
+        <button type="button" class="btn-gray" @click="router.back()">Cancel</button>
       </div>
     </form>
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import axios from 'axios'
@@ -146,14 +141,14 @@ import type { DrugBatch } from '@/types/DrugBatch'
 const NEW_DRUG_ID = 0
 
 /* ── refs / state ── */
-const router         = useRouter()
-const toast          = useToast()
-const drugs          = ref<Drug[]>([])
+const router = useRouter()
+const toast = useToast()
+const drugs = ref<Drug[]>([])
 const selectedDrugId = ref<number | ''>('')
 
-const drugQuery    = ref('')
+const drugQuery = ref('')
 const showDropdown = ref(false)
-const comboRef     = ref<HTMLElement | null>(null)
+const comboRef = ref<HTMLElement | null>(null)
 
 const batch = ref<Partial<DrugBatch>>({
   quantity: 1,
@@ -170,23 +165,21 @@ const inputClass = (err?: string) =>
     err ? 'border-red-500 focus:border-red-500' : 'border-gray-300'
   ].join(' ')
 
-const clearError = (k: string) => { delete errors.value[k] }
+const clearError = (k: string) => {
+  delete errors.value[k]
+}
 
 const onQueryInput = () => {
-  showDropdown.value = true          // keep list visible
-  selectedDrugId.value = ''          // ⬅️ clear previous choice
+  showDropdown.value = true // keep list visible
+  selectedDrugId.value = '' // ⬅️ clear previous choice
 }
 
 /* ── combo-box logic ── */
 const filteredDrugs = computed(() =>
-  drugs.value.filter(d =>
-    d.name.toLowerCase().includes(drugQuery.value.toLowerCase())
-  )
+  drugs.value.filter((d) => d.name.toLowerCase().includes(drugQuery.value.toLowerCase()))
 )
 
-const currentDrug = computed(() =>
-  drugs.value.find(d => d.id === selectedDrugId.value) ?? null
-)
+const currentDrug = computed(() => drugs.value.find((d) => d.id === selectedDrugId.value) ?? null)
 
 const selectDrug = (d: Drug) => {
   selectedDrugId.value = d.id
@@ -224,12 +217,13 @@ const onDrugCreated = (d: Drug) => {
 
 /* ── validation ── */
 const validate = () => {
-  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
   const e: Record<string, string> = {}
 
   if (!currentDrug.value && selectedDrugId.value !== NEW_DRUG_ID)
     e.drug = 'Please choose (or create) a drug.'
-  if (!batch.value.batch_no)                    e.batch_no   = 'Batch number is required.'
+  if (!batch.value.batch_no) e.batch_no = 'Batch number is required.'
   if (!batch.value.quantity || batch.value.quantity < 1) e.quantity = 'Enter a positive quantity.'
   if (!batch.value.expiry_date) {
     e.expiry_date = 'Choose an expiry date.'
@@ -266,9 +260,19 @@ const handleSubmit = async (onSuccess?: () => void) => {
 </script>
 
 <style scoped>
-.input      { @apply mt-1 block w-full rounded border border-gray-300 px-3 py-2; }
-.err        { @apply text-red-500 text-sm mt-1; }
-.btn-indigo { @apply bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded disabled:opacity-60; }
-.btn-green  { @apply bg-green-600  hover:bg-green-700  text-white px-4 py-2 rounded disabled:opacity-60; }
-.btn-gray   { @apply bg-gray-300  hover:bg-gray-400  text-black px-4 py-2 rounded; }
+.input {
+  @apply mt-1 block w-full rounded border border-gray-300 px-3 py-2;
+}
+.err {
+  @apply text-red-500 text-sm mt-1;
+}
+.btn-indigo {
+  @apply bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded disabled:opacity-60;
+}
+.btn-green {
+  @apply bg-green-600  hover:bg-green-700  text-white px-4 py-2 rounded disabled:opacity-60;
+}
+.btn-gray {
+  @apply bg-gray-300  hover:bg-gray-400  text-black px-4 py-2 rounded;
+}
 </style>

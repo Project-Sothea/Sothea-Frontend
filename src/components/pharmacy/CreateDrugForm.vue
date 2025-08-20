@@ -5,9 +5,7 @@
     <form @submit.prevent="handleSubmit">
       <!-- ── Name (required) ───────────────────────────────────── -->
       <label class="block mb-4">
-        <span class="text-gray-700">
-          Name <span class="text-red-500">*</span>
-        </span>
+        <span class="text-gray-700"> Name <span class="text-red-500">*</span> </span>
         <input
           v-model.trim="form.name"
           type="text"
@@ -21,9 +19,7 @@
 
       <!-- ── Unit (optional) ──────────────────────────────────── -->
       <label class="block mb-4">
-        <span class="text-gray-700">
-          Unit <span class="text-xs">(e.g. tablet, mL)</span>
-        </span>
+        <span class="text-gray-700"> Unit <span class="text-xs">(e.g. tablet, mL)</span> </span>
         <input
           v-model.trim="form.unit"
           type="text"
@@ -47,10 +43,7 @@
       <!-- ── Notes (optional) ─────────────────────────────────── -->
       <label class="block mb-6">
         <span class="text-gray-700">Notes</span>
-        <textarea
-          v-model.trim="form.notes"
-          class="mt-1 block w-full rounded border px-3 py-2"
-        />
+        <textarea v-model.trim="form.notes" class="mt-1 block w-full rounded border px-3 py-2" />
       </label>
 
       <!-- ── Save button ──────────────────────────────────────── -->
@@ -65,12 +58,12 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import { ref, computed }         from 'vue'
-import { useToast }              from 'vue-toast-notification'
-import axios, { AxiosError }     from 'axios'
-import { BaseURL }               from '@/main'
-import type { Drug }             from '@/types/Drug'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useToast } from 'vue-toast-notification'
+import axios, { AxiosError } from 'axios'
+import { BaseURL } from '@/main'
+import type { Drug } from '@/types/Drug'
 
 /* ── toast helper ───────────────────────────────────────────── */
 const toast = useToast()
@@ -98,9 +91,7 @@ const errors = computed(() => {
 const isValid = computed(() => Object.keys(errors.value).length === 0)
 
 const inputClass = (err?: string) =>
-  `mt-1 block w-full rounded border px-3 py-2 ${
-    err ? 'border-red-500' : 'border-gray-300'
-  }`
+  `mt-1 block w-full rounded border px-3 py-2 ${err ? 'border-red-500' : 'border-gray-300'}`
 
 /* ── submit handler ────────────────────────────────────────── */
 const handleSubmit = async () => {
@@ -108,10 +99,7 @@ const handleSubmit = async () => {
 
   submitting.value = true
   try {
-    const { data } = await axios.post<Drug>(
-      `${BaseURL}/pharmacy/drugs`,
-      form.value
-    )
+    const { data } = await axios.post<Drug>(`${BaseURL}/pharmacy/drugs`, form.value)
     toast.success(`Drug “${data.name}” created`)
     emit('created', data)
 
@@ -119,12 +107,9 @@ const handleSubmit = async () => {
     form.value = { name: '', unit: '', default_size: undefined, notes: '' }
   } catch (e) {
     const err = e as AxiosError<{ error: string }>
-    toast.error(
-      err.response?.data?.error || 'Unexpected error — please try again.'
-    )                                         // ❌ error toast
+    toast.error(err.response?.data?.error || 'Unexpected error — please try again.') // ❌ error toast
   } finally {
     submitting.value = false
   }
 }
 </script>
-
