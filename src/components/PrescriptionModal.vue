@@ -158,7 +158,7 @@
 
       <!-- Add Drug Button -->
       <button
-        v-if="isEditing && !isAdd"
+        v-if="isEditing"
         @click="addDrugEntry"
         class="mt-2 px-4 py-2 border rounded text-sm text-[#3f51b5]"
       >
