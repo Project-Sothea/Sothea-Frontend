@@ -87,11 +87,12 @@ import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { ref } from 'vue'
 import { BaseURL } from '@/main'
-import { authUtils } from '@/utils/auth'
+import { useAuth } from '@/composables/useAuth'
 import { useRouter } from 'vue-router'
 
 const toast = useToast()
 const router = useRouter()
+const { login } = useAuth()
 
 const username = ref('')
 const password = ref('')
@@ -106,7 +107,7 @@ async function getToken(event: Event) {
       password: password.value
     })
 
-    authUtils.setToken(response.data.token)
+    login(response.data.token)
     router.push('/allpatients')
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {

@@ -5,10 +5,11 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import { authUtils } from './utils/auth'
+import { useAuth } from './composables/useAuth'
 
 const router = useRouter()
 const toast = useToast()
+const { logout, initializeAuth } = useAuth()
 
 axios.interceptors.response.use(
   (response) => {
@@ -16,7 +17,7 @@ axios.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      authUtils.removeToken() // Clear token if unauthorized
+      logout() // Clear token if unauthorized
 
       if (router.currentRoute.value.path !== '/signin') {
         // Redirect to login page if not already there
@@ -30,7 +31,7 @@ axios.interceptors.response.use(
 
 onMounted(() => {
   // Restore session on mount
-  authUtils.restoreSession()
+  initializeAuth()
 })
 </script>
 

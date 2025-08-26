@@ -26,9 +26,12 @@
             >
               Add Patient
             </router-link>
-            <router-link class="text-white hover:text-gray-300 px-3 py-4 text-base font-medium" active-class="active"
-                to="/pharmacy">
-                Pharmacy
+            <router-link
+              class="text-white hover:text-gray-300 px-3 py-4 text-base font-medium"
+              active-class="active"
+              to="/pharmacy"
+            >
+              Pharmacy
             </router-link>
           </div>
         </div>
@@ -64,12 +67,13 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { authUtils } from '@/utils/auth'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const { logout: authLogout } = useAuth()
 
 function logout() {
-  authUtils.removeToken()
+  authLogout()
   router.push('/signin')
 }
 </script>
