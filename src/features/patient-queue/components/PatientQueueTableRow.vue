@@ -17,7 +17,7 @@
     </td>
     <td class="px-10 py-4 text-sm border-b border-gray-200">
       <p class="text-gray-900 whitespace-no-wrap">
-        {{ khmername }}
+        {{ khmerName }}
       </p>
     </td>
     <td class="px-3 py-4 text-sm border-b border-gray-200">
@@ -32,30 +32,31 @@
       <div v-else class="text-gray-900 whitespace-no-wrap allergies nil">Nil</div>
     </td>
     <td class="px-7 py-4 text-sm border-b border-gray-200">
-      <p class="text-gray-900 whitespace-no-wrap" v-if="referralneeded == true">Yes</p>
-      <p class="text-gray-900 whitespace-no-wrap" v-else-if="referralneeded == false">No</p>
+      <p class="text-gray-900 whitespace-no-wrap" v-if="referralNeeded === true">Yes</p>
+      <p class="text-gray-900 whitespace-no-wrap" v-else-if="referralNeeded === false">No</p>
     </td>
   </tr>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-const props = defineProps({
-  queueNo: String,
-  id: String,
-  vid: String,
-  name: String,
-  khmername: String,
-  gender: String,
-  allergies: String,
-  contactnumber: String,
-  referralneeded: Boolean
-})
+
+const props = defineProps<{
+  queueNo?: string
+  id?: string
+  vid?: string
+  name?: string
+  khmerName?: string
+  gender?: string
+  allergies?: string
+  contactNumber?: string
+  referralNeeded?: boolean
+}>()
 
 const router = useRouter()
 
 function handleClick() {
-  router.push({ name: 'patient', params: { id: props.id, vid: props.vid } })
+  router.push({ name: 'patient-record', params: { id: props.id, vid: props.vid } })
 }
 </script>
 

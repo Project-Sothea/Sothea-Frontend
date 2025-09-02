@@ -1,5 +1,5 @@
 <template>
-  <div class="relative bg-gray-800">
+  <div class="relative bg-gray-800 w-64 flex-shrink-0">
     <div class="flex flex-col">
       <div class="h-screen">
         <div class="flex flex-col items-start justify-start mx-6 mt-5">
@@ -9,7 +9,7 @@
         </div>
         <nav class="mt-3 px-6">
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'admin',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'admin'
@@ -30,10 +30,12 @@
                 d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
               />
             </svg>
-            <span class="mx-4 text-sm font-medium"> Admin </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Admin
+            </span>
           </a>
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'past-med-hist',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'past-med-hist'
@@ -93,11 +95,13 @@
               </defs>
             </svg>
 
-            <span class="mx-4 text-sm font-medium"> Past Medical History </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Past Medical History
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'social-hist',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'social-hist'
@@ -138,11 +142,13 @@
               />
             </svg>
 
-            <span class="mx-4 text-sm font-medium"> Social History </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Social History
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'vital-stats',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'vital-stats'
@@ -177,12 +183,14 @@
               />
             </svg>
 
-            <span class="mx-4 text-sm font-medium"> Vital Statistics </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Vital Statistics
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
 
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'height-weight',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'height-weight'
@@ -224,11 +232,13 @@
               </defs>
             </svg>
 
-            <span class="mx-4 text-sm font-medium"> Height and Weight </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Height and Weight
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'visual-acuity',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'visual-acuity'
@@ -281,12 +291,14 @@
               />
             </svg>
 
-            <span class="mx-4 text-sm font-medium"> Visual Acuity </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Visual Acuity
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
 
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'fall-risk',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'fall-risk'
@@ -311,12 +323,14 @@
               ></path>
             </svg>
 
-            <span class="mx-4 text-sm font-medium"> Fall Risk </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Fall Risk
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
 
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'physiotherapy',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'physiotherapy'
@@ -338,12 +352,14 @@
               <path d="M8 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3" />
             </svg>
 
-            <span class="mx-4 text-sm font-medium"> Physiotherapy </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Physiotherapy
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
 
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'dental',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'dental'
@@ -367,12 +383,14 @@
               ></path>
             </svg>
 
-            <span class="mx-4 text-sm font-medium"> Dental </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Dental
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
 
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'dr-consult',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'dr-consult'
@@ -407,12 +425,14 @@
               />
             </svg>
 
-            <span class="mx-4 text-sm font-medium"> Doctor's Consult </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Doctor's Consult
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
 
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'prescriptions',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'prescriptions'
@@ -423,36 +443,33 @@
             <svg
               width="20"
               height="20"
-              viewBox="0 0 20 20"
+              viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                d="M15.6159 9.07417C16.9525 9.38026 18.2842 8.54482 18.5903 7.20817C18.8964 5.87153 18.0609 4.53983 16.7243 4.23375C15.3876 3.92766 14.0559 4.7631 13.7499 6.09975C13.4438 7.43639 14.2792 8.76809 15.6159 9.07417Z"
-                stroke="currentcolor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M2.48468 2.36606H0.92218V7.49999C0.92218 10.0395 2.98087 12.0982 5.5204 12.0982C8.05991 12.0982 10.1186 10.0395 10.1186 7.49999V2.36606H8.55611"
-                stroke="currentcolor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M5.60968 12.1428V13.8682C5.60968 16.7863 7.97521 19.1517 10.8932 19.1517C13.8113 19.1517 16.1767 16.7863 16.1767 13.8682V9.41962"
-                stroke="currentcolor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+              <g id="SVGRepo_iconCarrier">
+                <path
+                  d="M3.99057 13.6019C1.33648 10.9478 1.33648 6.64466 3.99057 3.99057C6.64466 1.33648 10.9478 1.33648 13.6019 3.99057L20.0094 10.3981C22.6635 13.0522 22.6635 17.3553 20.0094 20.0094C17.3553 22.6635 13.0522 22.6635 10.3981 20.0094L3.99057 13.6019Z"
+                  stroke="currentcolor"
+                  stroke-width="1.5"
+                ></path>
+                <path
+                  d="M16.8057 7.19434C16.8057 7.19434 16.2649 9.99999 13.1322 13.1327C9.99952 16.2653 7.19434 16.8057 7.19434 16.8057"
+                  stroke="currentcolor"
+                  stroke-width="1.5"
+                ></path>
+              </g>
             </svg>
-
-            <span class="mx-4 text-sm font-medium"> Prescription </span>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Prescription
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
 
           <a
-            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200"
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'add-new-visit',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'add-new-visit'
@@ -477,12 +494,16 @@
               <line x1="8" y1="12" x2="16" y2="12"></line>
             </svg>
 
-            <span class="mx-4 text-sm font-medium text-white"> Add New Visit </span>
+            <span
+              class="ml-3 text-sm font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              Add New Visit
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
 
           <a
-            class="border-l-4 border-l-transparent flex hover:cursor-pointer items-center p-2 my-2 transition-colors duration-200 text-gray-500 hover:bg-[#3f51b5] hover:text-white"
+            class="border-l-4 border-l-transparent flex hover:cursor-pointer items-center p-2 my-2 transition-colors duration-200 text-gray-500 hover:bg-[#3f51b5] hover:text-white w-full"
             v-if="!isAdd"
             @click="tryDeleteVisit"
           >
@@ -506,7 +527,11 @@
               </g>
             </svg>
 
-            <span class="mx-4 text-sm font-medium text-white"> Delete This Visit </span>
+            <span
+              class="ml-3 text-sm font-medium text-white whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              Delete This Visit
+            </span>
             <span class="flex-grow text-right"> </span>
           </a>
         </nav>

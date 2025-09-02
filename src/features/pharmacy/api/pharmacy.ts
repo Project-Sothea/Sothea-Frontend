@@ -27,8 +27,17 @@ export async function createDrug(payload: Omit<Drug, 'id'>) {
   return data
 }
 
-export async function createBatch(payload: any) {
-  // TODO: type payload
-  const { data } = await http.post('/pharmacy/batches', payload)
+// Payload required to create a batch (without server-populated fields)
+export interface CreateBatchPayload {
+  drug_id: number
+  batch_no: string
+  quantity: number
+  expiry_date: string // ISO string (will be converted on server as needed)
+  notes?: string
+  location?: string
+}
+
+export async function createBatch(payload: CreateBatchPayload) {
+  const { data } = await http.post<DrugBatch>('/pharmacy/batches', payload)
   return data
 }

@@ -41,27 +41,22 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { formatDateDMY } from '@shared/utils/date'
 
-const props = defineProps({
-  id: String,
-  vid: String,
-  regDate: String,
-  name: String,
-  khmerName: String,
-  gender: String,
-  familyGroup: String,
-  contactNumber: String
-})
+const props = defineProps<{
+  id?: string
+  vid?: string
+  regDate?: string
+  name?: string
+  khmerName?: string
+  gender?: string
+  familyGroup?: string
+  contactNumber?: string
+}>()
 
 const router = useRouter()
 
-const formattedRegDate = computed(() => {
-  const date = new Date(props.regDate ?? '')
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
-  return `${day}-${month}-${year}`
-})
+const formattedRegDate = computed(() => formatDateDMY(props.regDate))
 
 function handleClick() {
   router.push({ name: 'patient-record', params: { id: props.id, vid: props.vid } })

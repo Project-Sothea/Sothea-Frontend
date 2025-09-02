@@ -215,10 +215,10 @@
 import { ref, computed, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import type Patient from '../../types/Patient'
-import type HeightAndWeight from '../../types/HeightAndWeight'
+import type Patient from '@patient-record/types/Patient'
+import type HeightAndWeight from '@patient-record/types/HeightAndWeight'
 import { updateSection } from '@features/patient-record/api/visit'
-import { handleApiError } from '@shared/api/handleApiError'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -233,7 +233,7 @@ const height = ref<number | null>(null)
 const weight = ref<number | null>(null)
 const paedsHeight = ref<number | null>(null)
 const paedsWeight = ref<number | null>(null)
-const isEditing = ref(false)
+const { isEditing, toggleEdit, save, runChecks } = useEditableSection<HeightAndWeight>()
 const showHeightModal = ref(false)
 const showWeightModal = ref(false)
 
@@ -282,70 +282,46 @@ const bmianalysis = computed(() => {
   return null
 })
 
-async function submitData() {
-  try {
-    if (height.value === null) {
-      toast.error('Please enter height')
-      return
-    } else if (height.value < 0) {
-      toast.error('Height cannot be negative')
-      return
-    } else if (height.value > 9999) {
-      toast.error('Height cannot be greater than 9999cm')
-      return
-    }
-    if (weight.value === null) {
-      toast.error('Please enter weight')
-      return
-    } else if (weight.value < 0) {
-      toast.error('Weight cannot be negative')
-      return
-    } else if (weight.value > 9999) {
-      toast.error('Weight cannot be greater than 9999kg')
-      return
-    }
-    if (paedsHeight.value && paedsHeight.value > 9999) {
-      toast.error('Paeds: Height % cannot be greater than 9999')
-      return
-    }
-    if (paedsWeight.value && paedsWeight.value > 9999) {
-      toast.error('Paeds: Weight % cannot be greater than 9999')
-      return
-    }
-    if (bmi.value === null) {
-      toast.error('Please enter height and weight to calculate BMI')
-      return
-    }
-    if (bmianalysis.value === null) {
-      toast.error('Please enter height and weight to calculate BMI Analysis')
-      return
-    }
-    const heightAndWeight: HeightAndWeight = {
-      // need to define outside to catch missing fields
-      height: height.value,
-      weight: weight.value,
-      bmi: bmi.value,
-      bmiAnalysis: bmianalysis.value,
-      paedsHeight: paedsHeight.value || null,
-      paedsWeight: paedsWeight.value || null
-    }
-    if (!props.patientVid) {
-      toast.error('Missing visit id')
-      return
-    }
-    await updateSection(props.patientId, props.patientVid, 'heightAndWeight', heightAndWeight)
-    if (isEditing.value) toggleEdit()
-    toast.success('Height and Weight saved successfully!')
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
+function buildPayload(): HeightAndWeight | null {
+  if (
+    !runChecks([
+      [height.value !== null, 'Enter height'],
+      [weight.value !== null, 'Enter weight']
+    ])
+  )
+    return null
+  if (height.value! < 0) return (toast.error('Height cannot be negative'), null)
+  if (height.value! > 9999) return (toast.error('Height cannot be greater than 9999cm'), null)
+  if (weight.value! < 0) return (toast.error('Weight cannot be negative'), null)
+  if (weight.value! > 9999) return (toast.error('Weight cannot be greater than 9999kg'), null)
+  if (paedsHeight.value && paedsHeight.value > 9999)
+    return (toast.error('Paeds: Height % too large'), null)
+  if (paedsWeight.value && paedsWeight.value > 9999)
+    return (toast.error('Paeds: Weight % too large'), null)
+  if (bmi.value === null) return (toast.error('Enter height & weight to calculate BMI'), null)
+  if (bmianalysis.value === null)
+    return (toast.error('Enter height & weight to calculate BMI Analysis'), null)
+  return {
+    height: height.value!,
+    weight: weight.value!,
+    bmi: bmi.value!,
+    bmiAnalysis: bmianalysis.value!,
+    paedsHeight: paedsHeight.value || null,
+    paedsWeight: paedsWeight.value || null
   }
 }
 
-function toggleEdit() {
-  console.log('toggleEdit')
-  isEditing.value = !isEditing.value
-  console.log(isEditing.value)
+async function submitData() {
+  if (!props.patientVid) {
+    toast.error('Missing visit id')
+    return
+  }
+  await save({
+    buildPayload,
+    update: () =>
+      updateSection(props.patientId, props.patientVid!, 'heightAndWeight', buildPayload()!),
+    onSuccess: () => toast.success('Height and Weight saved successfully!')
+  })
 }
 function preventNegative(event: KeyboardEvent) {
   if (event.key === '-' || event.key === 'e') {

@@ -1,12 +1,11 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import PatientQueue from '@features/patient-queue/pages/PatientQueue.vue'
-import PatientDirectory from '@features/patient-directory/pages/PatientDirectory.vue'
-import SignIn from '@features/auth/pages/SignIn.vue'
-import PatientRecordPage from '@features/patient-record/pages/PatientRecordPage.vue'
-import PharmacyOverview from '@features/pharmacy/pages/PharmacyOverview.vue'
-import CreateDrug from '@features/pharmacy/pages/CreateDrug.vue'
-import CreateBatch from '@features/pharmacy/pages/CreateBatch.vue'
-import DrugOverview from '@features/pharmacy/pages/DrugOverview.vue'
+import SignIn from '@features/auth/pages/SignInPage.vue'
+import PatientQueue from '@features/patient-queue/pages/PatientQueuePage.vue'
+import PatientDirectory from '@features/patient-directory/pages/PatientDirectoryPage.vue'
+import PatientRecord from '@features/patient-record/pages/PatientRecordPage.vue'
+import PharmacyOverview from '@features/pharmacy/pages/PharmacyOverviewPage.vue'
+import PharmacyCreateBatch from '@features/pharmacy/pages/PharmacyCreateBatchPage.vue'
+import PharmacyDrugOverview from '@features/pharmacy/pages/PharmacyDrugOverviewPage.vue'
 import { useAuth } from '@features/auth/composables/useAuth'
 
 const routes: RouteRecordRaw[] = [
@@ -20,14 +19,18 @@ const routes: RouteRecordRaw[] = [
   { path: '/patient-directory', name: 'patient-directory', component: PatientDirectory },
 
   // Patient record
-  { path: '/patient/new', name: 'patient-new', component: PatientRecordPage },
-  { path: '/patient/:id/:vid', name: 'patient-record', component: PatientRecordPage, props: true },
+  { path: '/patient/new', name: 'patient-new', component: PatientRecord },
+  { path: '/patient/:id/:vid', name: 'patient-record', component: PatientRecord, props: true },
 
   // Pharmacy
   { path: '/pharmacy', name: 'pharmacy-overview', component: PharmacyOverview },
-  { path: '/pharmacy/drugs/new', name: 'drug-new', component: CreateDrug },
-  { path: '/pharmacy/batches/new', name: 'batch-new', component: CreateBatch },
-  { path: '/pharmacy/drugs/:drugId', name: 'drug-overview', component: DrugOverview, props: true }
+  { path: '/pharmacy/batches/new', name: 'batch-new', component: PharmacyCreateBatch },
+  {
+    path: '/pharmacy/drugs/:drugId',
+    name: 'drug-overview',
+    component: PharmacyDrugOverview,
+    props: true
+  }
 ]
 
 const router = createRouter({

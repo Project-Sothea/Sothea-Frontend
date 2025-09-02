@@ -93,10 +93,10 @@
             <tbody>
               <tr v-for="b in entry.batches" :key="b.batchId">
                 <td class="p-1">
-                  {{ findBatch(entry.drugId!, b.batchId)?.batch_no || 'Unknown' }}
+                  {{ findBatch(entry.drugId!, b.batchId)?.batchNo || 'Unknown' }}
                 </td>
                 <td class="p-1">
-                  {{ formatDate(findBatch(entry.drugId!, b.batchId)?.expiry_date || '') }}
+                  {{ formatDate(findBatch(entry.drugId!, b.batchId)?.expiryDate || '') }}
                 </td>
                 <td class="p-1">{{ b.quantity }}</td>
                 <td class="p-1">{{ calculateRemaining(entry.drugId!, b.batchId, b.quantity) }}</td>
@@ -121,8 +121,8 @@
                 v-for="(batch, bIndex) in availableBatches[entry.drugId ?? -1] || []"
                 :key="batch.id"
               >
-                <td class="p-1">{{ batch.batch_no }}</td>
-                <td class="p-1">{{ formatDate(batch.expiry_date) }}</td>
+                <td class="p-1">{{ batch.batchNo }}</td>
+                <td class="p-1">{{ formatDate(batch.expiryDate) }}</td>
                 <td class="p-1">
                   {{
                     calculateRemaining(
@@ -194,25 +194,25 @@ import {
   fetchPrescriptions,
   fetchPrescriptionDrugs,
   fetchBatchesByDrug,
-  upsertPrescription
+  upsertPrescription,
+  type PrescriptionDrugMeta,
+  type DrugBatchMeta,
+  type UpsertPrescriptionPayload
 } from '@features/patient-record/api/prescription'
-import { handleApiError } from '@shared/api/handleApiError'
-import type Patient from '@features/patient-record/types/Patient'
-import type { Drug } from '@features/pharmacy/types/Drug'
-import type { DrugBatch } from '@features/pharmacy/types/DrugBatch'
-import type { Prescription } from '@features/pharmacy/types/Prescription'
+import type Patient from '@patient-record/types/Patient'
+import type { DrugPrescription, Prescription } from '@features/pharmacy/types/Prescription'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
-interface PrescriptionBatchItem {
+interface FormBatchSelection {
   batchId: number
   quantity: number
 }
-
 interface DrugPrescriptionFormEntry {
   drugId: number | null
   mode: 'auto' | 'manual'
   quantity?: number
   remarks?: string
-  batches: PrescriptionBatchItem[]
+  batches: FormBatchSelection[]
 }
 
 const props = defineProps<{
@@ -223,23 +223,21 @@ const props = defineProps<{
 }>()
 
 const toast = useToast()
+const { isEditing, toggleEdit, save } = useEditableSection<any>()
 
 // Reactive state
-const drugs = ref<Drug[]>([])
-const availableBatches = ref<Record<number, DrugBatch[]>>({})
+const drugs = ref<PrescriptionDrugMeta[]>([])
+const availableBatches = ref<Record<number, DrugBatchMeta[]>>({})
 const prescribedDrugs = ref<DrugPrescriptionFormEntry[]>([])
-const isEditing = ref(false)
 const existingPrescriptionId = ref<number | null>(null)
-const originalPrescriptionBatchQuantities = ref<Record<number, number>>({}) // maps batch id to its initial quantity in the prescription
-const autoModeErrors = ref<Record<number, string>>({}) // maps index to error message
+const originalPrescriptionBatchQuantities = ref<Record<number, number>>({})
+const autoModeErrors = ref<Record<number, string>>({})
 
-// Initialize data on mount
 onMounted(() => {
   fetchPrescription()
   fetchDrugs()
 })
 
-// Methods
 function calculateRemaining(drugId: number, batchId: number, currentQty: number): number {
   const available = availableBatches.value[drugId]?.find((b) => b.id === batchId)
   const availableQty = available?.quantity ?? 0
@@ -250,69 +248,41 @@ function calculateRemaining(drugId: number, batchId: number, currentQty: number)
 function onModeChange(index: number, newMode: 'auto' | 'manual') {
   const entry = prescribedDrugs.value[index]
   entry.mode = newMode
-
   if (newMode === 'auto') {
     entry.quantity = 0
     entry.batches = []
-  } else if (newMode === 'manual') {
+  } else {
     entry.quantity = undefined
-    // Repopulate batches to match available batch structure
     const drugId = entry.drugId
     const batches = availableBatches.value[drugId ?? -1] || []
-    entry.batches = batches.map((b) => ({
-      batchId: b.id,
-      quantity: 0
-    }))
+    entry.batches = batches.map((b) => ({ batchId: b.id, quantity: 0 }))
   }
 }
 
 async function fetchPrescription() {
   const res = await fetchPrescriptions(props.patientId)
-  const prescription: Prescription = res[0]
-
-  if (!prescription || !prescription.prescribedDrugs) return
-
+  const prescription = (res && res.length > 0 ? res[0] : null) as Prescription | null
+  if (!prescription) return
   existingPrescriptionId.value = prescription.id ?? null
   prescribedDrugs.value = []
-
-  for (const pd of prescription.prescribedDrugs) {
+  for (const pd of prescription.prescribedDrugs as DrugPrescription[]) {
     const drugId = pd.drugId
     const batches = pd.batches || []
-
-    // Preload batches
-    const batchRes: DrugBatch[] = await fetchBatchesByDrug(drugId)
+    const batchRes = await fetchBatchesByDrug(drugId)
     availableBatches.value[drugId] = batchRes
-
-    // If manual, map existing batch quantities
-    let batchEntries: PrescriptionBatchItem[] = []
-    if (batches.length > 0) {
-      batchEntries = batchRes.map((b: DrugBatch) => {
-        const existing = batches.find((e) => e.batchId === b.id)
-        return {
-          batchId: b.id,
-          quantity: existing ? existing.quantity : 0
-        }
-      })
-    }
-
+    const batchEntries: FormBatchSelection[] = batchRes.map((b) => {
+      const existing = batches.find((e) => e.batchId === b.id)
+      return { batchId: b.id, quantity: existing ? existing.quantity : 0 }
+    })
     prescribedDrugs.value.push({
       drugId,
       mode: batches.length > 0 ? 'manual' : 'auto',
       quantity: pd.quantity,
       remarks: pd.remarks,
-      batches:
-        batchEntries.length > 0
-          ? batchEntries
-          : batchRes.map((b: DrugBatch) => ({
-              batchId: b.id,
-              quantity: b.quantity
-            }))
+      batches: batchEntries
     })
-  }
-
-  for (const drug of prescribedDrugs.value) {
-    for (const batch of drug.batches) {
-      originalPrescriptionBatchQuantities.value[batch.batchId] = batch.quantity
+    for (const be of batchEntries) {
+      originalPrescriptionBatchQuantities.value[be.batchId] = be.quantity
     }
   }
 }
@@ -320,43 +290,33 @@ async function fetchPrescription() {
 function calculateAutoBatches(index: number) {
   const entry = prescribedDrugs.value[index]
   const batches = availableBatches.value[entry.drugId ?? -1] || []
-
-  // Calculate total available quantity
   const totalAvailable = batches.reduce((sum, b) => sum + b.quantity, 0)
-
   if (entry.quantity && entry.quantity > totalAvailable) {
     autoModeErrors.value[index] = `Only ${totalAvailable} available. Reduce quantity.`
-    entry.batches = [] // clear to prevent partial save
+    entry.batches = []
     return
   }
-
-  // No error
   autoModeErrors.value[index] = ''
-
   const sorted = [...batches].sort(
-    (a, b) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime()
+    (a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()
   )
-
   const targetQty = entry.quantity ?? 0
   if (!targetQty || targetQty <= 0) {
     entry.batches = []
     return
   }
-
   let remaining = targetQty
-  const result: PrescriptionBatchItem[] = []
-
+  const result: FormBatchSelection[] = []
   for (const b of sorted) {
     if (remaining <= 0) break
     const taken = Math.min(b.quantity, remaining)
     result.push({ batchId: b.id, quantity: taken })
     remaining -= taken
   }
-
   entry.batches = result
 }
 
-function findBatch(drugId: number, batchId: number): DrugBatch | undefined {
+function findBatch(drugId: number, batchId: number) {
   return availableBatches.value[drugId]?.find((b) => b.id === batchId)
 }
 
@@ -367,13 +327,9 @@ async function fetchDrugs() {
 async function onDrugChange(index: number) {
   const entry = prescribedDrugs.value[index]
   if (!entry.drugId) return
-
   const response = await fetchBatchesByDrug(entry.drugId)
   availableBatches.value[entry.drugId] = response
-  entry.batches = response.map((b: DrugBatch) => ({
-    batchId: b.id,
-    quantity: 0
-  }))
+  entry.batches = response.map((b) => ({ batchId: b.id, quantity: 0 }))
 }
 
 function addDrugEntry() {
@@ -390,52 +346,51 @@ function removeDrugEntry(index: number) {
   prescribedDrugs.value.splice(index, 1)
 }
 
-function toggleEdit() {
-  isEditing.value = !isEditing.value
-}
-
-async function submitData() {
+function buildPayload(): UpsertPrescriptionPayload | null {
   for (const [i, entry] of prescribedDrugs.value.entries()) {
     if (entry.mode === 'auto' && autoModeErrors.value[i]) {
       toast.error(`Drug #${i + 1}: ${autoModeErrors.value[i]}`)
-      return
+      return null
     }
     if (!entry.drugId) {
       toast.error(`Drug #${i + 1}: Please select a drug.`)
-      return
+      return null
     }
     if (entry.mode === 'auto' && (!entry.quantity || entry.quantity <= 0)) {
       toast.error(`Drug #${i + 1}: Please specify quantity.`)
-      return
+      return null
     }
     if (entry.mode === 'manual' && !entry.batches.some((b) => b.quantity > 0)) {
       toast.error(`Drug #${i + 1}: At least one batch must have quantity.`)
-      return
+      return null
     }
   }
-
-  const payload = {
-    patientId: Number(props.patientId),
-    vid: Number(props.patientVid),
-    prescribedDrugs: prescribedDrugs.value.map((entry) => ({
+  return {
+    patientId: props.patientId,
+    visitId: props.patientVid,
+    entries: prescribedDrugs.value.map((entry) => ({
       drugId: entry.drugId!,
+      dosage: '',
+      frequency: '',
       quantity:
         entry.mode === 'auto'
           ? entry.quantity!
           : entry.batches.reduce((sum, b) => sum + b.quantity, 0),
-      remarks: entry.remarks ?? '',
-      batches: entry.batches.filter((b) => b.quantity > 0)
+      batchId: entry.batches.find((b) => b.quantity > 0)?.batchId ?? null
     }))
   }
+}
 
-  try {
-    await upsertPrescription(existingPrescriptionId.value, payload)
-    toast.success('Prescription saved successfully.')
-    toggleEdit()
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
-  }
+async function submitData() {
+  const payload = buildPayload()
+  if (!payload) return
+  await save({
+    buildPayload: () => payload,
+    update: async () => {
+      await upsertPrescription(existingPrescriptionId.value, payload)
+    },
+    onSuccess: () => toast.success('Prescription saved successfully.')
+  })
 }
 
 function formatDate(date: string): string {

@@ -42,7 +42,7 @@ const formattedDate = computed(() => {
 })
 
 function handleClick() {
-  router.push({ name: 'patient', params: { id: props.id, vid: props.vid } })
+  router.push({ name: 'patient-record', params: { id: props.id, vid: props.vid } })
   emit('close')
 }
 </script>

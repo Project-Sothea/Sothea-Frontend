@@ -393,10 +393,10 @@
 import { ref, computed, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import type Patient from '@features/patient-record/types/Patient'
+import type Patient from '@patient-record/types/Patient'
+import type FallRisk from '@patient-record/types/FallRisk'
 import { updateSection } from '@features/patient-record/api/visit'
-import { handleApiError } from '@shared/api/handleApiError'
-import type FallRisk from '@features/patient-record/types/FallRisk'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -413,7 +413,7 @@ const cognitiveStatus = ref<'a' | 'b' | 'c' | 'd' | ''>('')
 const continenceProblems = ref<'a' | 'b' | 'c' | 'd' | 'e' | ''>('')
 const safetyAwareness = ref<'a' | 'b' | 'c' | 'd' | ''>('')
 const unsteadiness = ref<'a' | 'b' | 'c' | 'd' | ''>('')
-const isEditing = ref(false)
+const { isEditing, toggleEdit, save, runChecks } = useEditableSection<FallRisk>()
 
 const scoresMap = {
   fallHistory: { a: 0, b: 1, c: 5, d: 5 },
@@ -461,45 +461,39 @@ watch(
   { immediate: true }
 )
 
-async function submitData() {
-  try {
-    if (
-      fallWorries.value === '' ||
-      fallHistory.value === '' ||
-      cognitiveStatus.value === '' ||
-      continenceProblems.value === '' ||
-      safetyAwareness.value === '' ||
-      unsteadiness.value === ''
-    ) {
-      toast.error('Please select options for all fields')
-      return
-    }
-    const fallRisk: FallRisk = {
-      // need to define outside to catch missing fields
-      fallWorries: fallWorries.value,
-      fallHistory: fallHistory.value,
-      cognitiveStatus: cognitiveStatus.value,
-      continenceProblems: continenceProblems.value,
-      safetyAwareness: safetyAwareness.value,
-      unsteadiness: unsteadiness.value,
-      fallRiskScore: fallRiskScore.value
-    }
-    if (!props.patientVid) {
-      toast.error('Missing visit id')
-      return
-    }
-    await updateSection(props.patientId, props.patientVid, 'fallRisk', fallRisk)
-    toggleEdit()
-    toast.success('Fall Risk saved successfully!')
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
+function buildPayload(): FallRisk | null {
+  if (
+    !runChecks([
+      [fallWorries.value !== '', 'Select fall worries'],
+      [fallHistory.value !== '', 'Select fall history'],
+      [cognitiveStatus.value !== '', 'Select cognitive status'],
+      [continenceProblems.value !== '', 'Select continence problems'],
+      [safetyAwareness.value !== '', 'Select safety awareness'],
+      [unsteadiness.value !== '', 'Select unsteadiness']
+    ])
+  )
+    return null
+  return {
+    fallWorries: fallWorries.value as any,
+    fallHistory: fallHistory.value as any,
+    cognitiveStatus: cognitiveStatus.value as any,
+    continenceProblems: continenceProblems.value as any,
+    safetyAwareness: safetyAwareness.value as any,
+    unsteadiness: unsteadiness.value as any,
+    fallRiskScore: fallRiskScore.value
   }
 }
-function toggleEdit() {
-  console.log('toggleEdit')
-  isEditing.value = !isEditing.value
-  console.log(isEditing.value)
+
+async function submitData() {
+  if (!props.patientVid) {
+    toast.error('Missing visit id')
+    return
+  }
+  await save({
+    buildPayload,
+    update: () => updateSection(props.patientId, props.patientVid!, 'fallRisk', buildPayload()!),
+    onSuccess: () => toast.success('Fall Risk saved successfully!')
+  })
 }
 </script>
 

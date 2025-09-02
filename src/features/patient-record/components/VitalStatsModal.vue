@@ -243,10 +243,10 @@
 import { ref, computed, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import type VitalStatistics from '../../types/VitalStatistics'
-import type Patient from '../../types/Patient'
+import type VitalStatistics from '@patient-record/types/VitalStatistics'
+import type Patient from '@patient-record/types/Patient'
 import { updateSection } from '@features/patient-record/api/visit'
-import { handleApiError } from '@shared/api/handleApiError'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -264,7 +264,7 @@ const diastolicBP2 = ref<number | null>(null)
 const hr1 = ref<number | null>(null)
 const hr2 = ref<number | null>(null)
 const randomBloodGlucoseMmolL = ref<number | null>(null)
-const isEditing = ref(false)
+const { isEditing, toggleEdit, save, runChecks } = useEditableSection<VitalStatistics>()
 
 const toast = useToast()
 
@@ -319,84 +319,62 @@ const avgHR = computed(() => {
   return null
 })
 
-async function submitData() {
-  try {
-    if (temperature.value === null) {
-      toast.error('Please enter temperature')
-      return
-    }
-    if (spO2.value === null) {
-      toast.error('Please enter SpO2')
-      return
-    }
-    if (hr1.value === null) {
-      toast.error('Please enter HR1')
-      return
-    }
-    if (hr2.value === null) {
-      toast.error('Please enter HR2')
-      return
-    }
-    if (randomBloodGlucoseMmolL.value === null) {
-      toast.error('Please enter Random Blood Glucose (mmol/L)')
-      return
-    }
-    if (avgHR.value === null) {
-      toast.error('Average HR cannot be empty')
-      return
-    }
-    if (
-      temperature.value > 9999 ||
-      spO2.value > 9999 ||
-      (systolicBP1.value && systolicBP1.value > 9999) ||
-      (systolicBP2.value && systolicBP2.value > 9999) ||
-      (diastolicBP1.value && diastolicBP1.value > 9999) ||
-      (diastolicBP2.value && diastolicBP2.value > 9999) ||
-      hr1.value > 9999 ||
-      hr2.value > 9999 ||
-      randomBloodGlucoseMmolL.value > 9999
-    ) {
-      toast.error('Values cannot be greater than 9999')
-      return
-    }
-    const vitalStatistics: VitalStatistics = {
-      // need to define outside to catch missing fields
-      temperature: temperature.value,
-      spO2: spO2.value,
-      systolicBP1: systolicBP1.value || null,
-      systolicBP2: systolicBP2.value || null,
-      diastolicBP1: diastolicBP1.value || null,
-      diastolicBP2: diastolicBP2.value || null,
-      averageSystolicBP: avgSystolicBP.value, // pre-computed value
-      averageDiastolicBP: avgDiastolicBP.value, // pre-computed value
-      hr1: hr1.value,
-      hr2: hr2.value,
-      averageHR: avgHR.value, // pre-computed value
-      randomBloodGlucoseMmolL: randomBloodGlucoseMmolL.value
-    }
-    console.log(vitalStatistics)
-    if (!props.patientVid) {
-      toast.error('Missing visit id')
-      return
-    }
-    await updateSection(props.patientId, props.patientVid, 'vitalStatistics', vitalStatistics)
-    if (isEditing.value) toggleEdit()
-    toast.success('Vital Statistics saved successfully!')
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
+function buildPayload(): VitalStatistics | null {
+  if (
+    !runChecks([
+      [temperature.value !== null, 'Please enter temperature'],
+      [spO2.value !== null, 'Please enter SpO2'],
+      [hr1.value !== null, 'Please enter HR1'],
+      [hr2.value !== null, 'Please enter HR2'],
+      [randomBloodGlucoseMmolL.value !== null, 'Please enter Random Blood Glucose (mmol/L)'],
+      [avgHR.value !== null, 'Average HR cannot be empty']
+    ])
+  )
+    return null
+  if (
+    temperature.value! > 9999 ||
+    spO2.value! > 9999 ||
+    (systolicBP1.value && systolicBP1.value > 9999) ||
+    (systolicBP2.value && systolicBP2.value > 9999) ||
+    (diastolicBP1.value && diastolicBP1.value > 9999) ||
+    (diastolicBP2.value && diastolicBP2.value > 9999) ||
+    hr1.value! > 9999 ||
+    hr2.value! > 9999 ||
+    randomBloodGlucoseMmolL.value! > 9999
+  ) {
+    toast.error('Values cannot be greater than 9999')
+    return null
+  }
+  return {
+    temperature: temperature.value!,
+    spO2: spO2.value!,
+    systolicBP1: systolicBP1.value || null,
+    systolicBP2: systolicBP2.value || null,
+    diastolicBP1: diastolicBP1.value || null,
+    diastolicBP2: diastolicBP2.value || null,
+    averageSystolicBP: avgSystolicBP.value,
+    averageDiastolicBP: avgDiastolicBP.value,
+    hr1: hr1.value!,
+    hr2: hr2.value!,
+    averageHR: avgHR.value!,
+    randomBloodGlucoseMmolL: randomBloodGlucoseMmolL.value!
   }
 }
 
-function toggleEdit() {
-  console.log('toggleEdit')
-  isEditing.value = !isEditing.value
-  console.log(isEditing.value)
+async function submitData() {
+  if (!props.patientVid) {
+    toast.error('Missing visit id')
+    return
+  }
+  await save({
+    buildPayload,
+    update: () =>
+      updateSection(props.patientId, props.patientVid!, 'vitalStatistics', buildPayload()!),
+    onSuccess: () => toast.success('Vital Statistics saved successfully!')
+  })
 }
 function preventNegative(event: KeyboardEvent) {
-  if (event.key === '-' || event.key === 'e') {
-    event.preventDefault()
-  }
+  if (event.key === '-' || event.key === 'e') event.preventDefault()
 }
 </script>
 <style>

@@ -1,8 +1,8 @@
 <template>
-  <div class="bar">Project Sothea</div>
+  <header class="bar">Project Sothea</header>
   <div class="center-div">
     <div class="form-container">
-      <form @submit.prevent="getToken">
+      <form @submit.prevent="handleSignIn">
         <h1>SIGN IN</h1>
         <br />
         <!-- Username Input -->
@@ -82,24 +82,26 @@
 </template>
 
 <script setup lang="ts">
+// Imports
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import { ref } from 'vue'
 import { loginRequest } from '@features/auth/api/auth'
 import { useAuth } from '@features/auth/composables/useAuth'
-import { useRouter } from 'vue-router'
 
+// Composables
 const toast = useToast()
 const router = useRouter()
 const { login } = useAuth()
 
+// Reactive State
 const username = ref('')
 const password = ref('')
 const showPassword = ref(false)
 
-async function getToken(event: Event) {
-  event.preventDefault()
-
+// Handlers
+async function handleSignIn() {
   try {
     const { token } = await loginRequest(username.value, password.value)
     login(token)

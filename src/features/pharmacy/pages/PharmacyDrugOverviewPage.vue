@@ -1,4 +1,5 @@
 <template>
+  <NavBar />
   <div class="container max-w-5xl px-4 mx-auto sm:px-8 table">
     <div class="py-8">
       <!-- Back & Title -->
@@ -64,6 +65,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import NavBar from '@shared/ui/navigation/NavBar.vue'
 import { fetchDrug as apiFetchDrug, fetchDrugBatches } from '@features/pharmacy/api/pharmacy'
 import type { Drug } from '@features/pharmacy/types/Drug'
 import type { DrugBatch } from '@features/pharmacy/types/DrugBatch'
@@ -105,11 +107,19 @@ onMounted(async () => {
 
 /* header cells */
 .th {
-  @apply px-5 py-5 text-sm font-medium text-left text-gray-800 uppercase bg-indigo-200 border-b border-gray-200;
+  padding: 1.25rem 1.25rem; /* px-5 py-5 */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  text-align: left; /* text-left */
+  text-transform: uppercase; /* uppercase */
+  color: #1f2937; /* text-gray-800 */
+  background: #c7d2fe; /* bg-indigo-200 */
+  border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
 }
 /* body cells */
 .td {
-  @apply px-5 py-4 text-sm;
+  padding: 1rem 1.25rem; /* px-5 py-4 */
+  font-size: 0.875rem; /* text-sm */
 }
 
 .even-row {

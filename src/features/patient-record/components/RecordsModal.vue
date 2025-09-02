@@ -26,9 +26,9 @@
 import { ref, computed, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import { fetchPatientMeta } from '@features/patient-record/api/record'
+import { fetchPatientMeta } from '@patient-record/api/record'
 import RecordSection from './RecordSection.vue'
-import type PatientMeta from '../../types/PatientMeta'
+import type PatientMeta from '@patient-record/types/PatientMeta'
 
 const props = defineProps<{
   id: string

@@ -10,7 +10,6 @@ export function handleApiError(error: unknown): string {
   return 'Unexpected error'
 }
 
-// Narrow wrapper so components can tree-shake axios types away later if swapped
 function isAxiosError(e: any): e is AxiosError {
   return !!e && typeof e === 'object' && 'isAxiosError' in e
 }

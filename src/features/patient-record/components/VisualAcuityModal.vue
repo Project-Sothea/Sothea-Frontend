@@ -106,10 +106,10 @@
 import { ref, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import type Patient from '../../types/Patient'
-import type VisualAcuity from '../../types/VisualAcuity'
+import type Patient from '@patient-record/types/Patient'
+import type VisualAcuity from '@patient-record/types/VisualAcuity'
 import { updateSection } from '@features/patient-record/api/visit'
-import { handleApiError } from '@shared/api/handleApiError'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -121,7 +121,7 @@ const props = defineProps<{
 const lEyeVision = ref<number | null>(null)
 const rEyeVision = ref<number | null>(null)
 const additionalIntervention = ref<string | null>('')
-const isEditing = ref(false)
+const { isEditing, toggleEdit, save, runChecks } = useEditableSection<VisualAcuity>()
 
 const toast = useToast()
 
@@ -143,38 +143,32 @@ watch(
   },
   { immediate: true }
 )
-async function submitData() {
-  try {
-    if (lEyeVision.value === null) {
-      toast.error('Please fill in L eye vision')
-      return
-    }
-    if (rEyeVision.value === null) {
-      toast.error('Please fill in R eye vision')
-      return
-    }
-    const visualAcuity: VisualAcuity = {
-      // need to define outside to catch missing fields
-      lEyeVision: lEyeVision.value,
-      rEyeVision: rEyeVision.value,
-      additionalIntervention: additionalIntervention.value
-    }
-    if (!props.patientVid) {
-      toast.error('Missing visit id')
-      return
-    }
-    await updateSection(props.patientId, props.patientVid, 'visualAcuity', visualAcuity)
-    if (isEditing.value) toggleEdit()
-    toast.success('Visual Acuity saved successfully!')
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
+function buildPayload(): VisualAcuity | null {
+  if (
+    !runChecks([
+      [lEyeVision.value !== null, 'Please fill in L eye vision'],
+      [rEyeVision.value !== null, 'Please fill in R eye vision']
+    ])
+  )
+    return null
+  return {
+    lEyeVision: lEyeVision.value!,
+    rEyeVision: rEyeVision.value!,
+    additionalIntervention: additionalIntervention.value
   }
 }
-function toggleEdit() {
-  console.log('toggleEdit')
-  isEditing.value = !isEditing.value
-  console.log(isEditing.value)
+
+async function submitData() {
+  if (!props.patientVid) {
+    toast.error('Missing visit id')
+    return
+  }
+  await save({
+    buildPayload,
+    update: () =>
+      updateSection(props.patientId, props.patientVid!, 'visualAcuity', buildPayload()!),
+    onSuccess: () => toast.success('Visual Acuity saved successfully!')
+  })
 }
 </script>
 

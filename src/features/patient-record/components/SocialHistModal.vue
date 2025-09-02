@@ -187,10 +187,10 @@
 import { ref, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import type Patient from '../../types/Patient'
-import type SocialHistory from '../../types/SocialHistory'
+import type Patient from '@patient-record/types/Patient'
+import type SocialHistory from '@patient-record/types/SocialHistory'
 import { updateSection } from '@features/patient-record/api/visit'
-import { handleApiError } from '@shared/api/handleApiError'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -205,81 +205,67 @@ const currentSmokingHistory = ref<boolean | null>(null)
 const cigarettesPerDay = ref<number | null>(null)
 const alcoholHistory = ref<boolean | null>(null)
 const howRegular = ref<string | null>('')
-const isEditing = ref(false)
+const { isEditing, toggleEdit, save, runChecks } = useEditableSection<SocialHistory>()
 
 const toast = useToast()
 
+let initialized = false
 watch(
   () => props.patientData,
   (newVal: Patient | null) => {
-    if (!props.isAdd && newVal) {
-      const socialHistory = newVal.socialhistory
-      if (!socialHistory) {
-        pastSmokingHistory.value = null
-        numberOfYears.value = null
-        currentSmokingHistory.value = null
-        cigarettesPerDay.value = null
-        alcoholHistory.value = null
-        howRegular.value = ''
-      } else {
-        pastSmokingHistory.value = socialHistory.pastSmokingHistory
-        numberOfYears.value = socialHistory.numberOfYears
-        currentSmokingHistory.value = socialHistory.currentSmokingHistory
-        cigarettesPerDay.value = socialHistory.cigarettesPerDay
-        alcoholHistory.value = socialHistory.alcoholHistory
-        howRegular.value = socialHistory.howRegular
-      }
+    if (initialized || props.isAdd || !newVal) return
+    const socialHistory = newVal.socialhistory
+    if (socialHistory) {
+      pastSmokingHistory.value = socialHistory.pastSmokingHistory
+      numberOfYears.value = socialHistory.numberOfYears
+      currentSmokingHistory.value = socialHistory.currentSmokingHistory
+      cigarettesPerDay.value = socialHistory.cigarettesPerDay
+      alcoholHistory.value = socialHistory.alcoholHistory
+      howRegular.value = socialHistory.howRegular
     }
+    initialized = true
   },
   { immediate: true }
 )
-async function submitData() {
-  try {
-    if (pastSmokingHistory.value === null) {
-      toast.error('Please indicate past smoking history')
-      return
-    }
-    if (currentSmokingHistory.value === null) {
-      toast.error('Please indicate current smoking history')
-      return
-    }
-    if (alcoholHistory.value === null) {
-      toast.error('Please indicate alcohol history')
-      return
-    }
-    if (numberOfYears.value && isNaN(numberOfYears.value)) {
-      toast.error('Number of years must be a valid number')
-      return
-    }
-    if (cigarettesPerDay.value && isNaN(cigarettesPerDay.value)) {
-      toast.error('Cigarettes per day must be a valid number')
-      return
-    }
-    const socialHistory: SocialHistory = {
-      // need to define outside to catch missing fields
-      pastSmokingHistory: pastSmokingHistory.value,
-      numberOfYears: numberOfYears.value || null,
-      currentSmokingHistory: currentSmokingHistory.value,
-      cigarettesPerDay: cigarettesPerDay.value || null,
-      alcoholHistory: alcoholHistory.value,
-      howRegular: howRegular.value || null
-    }
-    if (!props.patientVid) {
-      toast.error('Missing visit id')
-      return
-    }
-    await updateSection(props.patientId, props.patientVid, 'socialHistory', socialHistory)
-    if (isEditing.value) toggleEdit()
-    toast.success('Social history saved successfully!')
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
+
+function buildPayload(): SocialHistory | null {
+  if (
+    !runChecks([
+      [pastSmokingHistory.value !== null, 'Indicate past smoking history'],
+      [currentSmokingHistory.value !== null, 'Indicate current smoking history'],
+      [alcoholHistory.value !== null, 'Indicate alcohol history']
+    ])
+  )
+    return null
+  if (numberOfYears.value && isNaN(numberOfYears.value)) {
+    toast.error('Number of years must be a valid number')
+    return null
+  }
+  if (cigarettesPerDay.value && isNaN(cigarettesPerDay.value)) {
+    toast.error('Cigarettes per day must be a valid number')
+    return null
+  }
+  return {
+    pastSmokingHistory: pastSmokingHistory.value!,
+    numberOfYears: numberOfYears.value || null,
+    currentSmokingHistory: currentSmokingHistory.value!,
+    cigarettesPerDay: cigarettesPerDay.value || null,
+    alcoholHistory: alcoholHistory.value!,
+    howRegular: howRegular.value || null
   }
 }
-function toggleEdit() {
-  console.log('toggleEdit')
-  isEditing.value = !isEditing.value
-  console.log(isEditing.value)
+
+async function submitData() {
+  if (!props.patientVid) {
+    toast.error('Missing visit id')
+    return
+  }
+  await save({
+    buildPayload,
+    update: () =>
+      updateSection(props.patientId, props.patientVid!, 'socialHistory', buildPayload()!),
+    onSuccess: () => toast.success('Social history saved successfully!')
+  })
 }
 </script>
 

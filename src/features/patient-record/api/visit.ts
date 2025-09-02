@@ -8,6 +8,7 @@ import type SocialHistory from '../types/SocialHistory'
 import type Physiotherapy from '../types/Physiotherapy'
 import type Dental from '../types/Dental'
 import type DoctorsConsultation from '../types/DoctorsConsultation'
+import type Admin from '../types/Admin'
 
 export interface AdminPayload {
   familyGroup: string
@@ -27,18 +28,34 @@ export interface AdminPayload {
   photo: string | null
 }
 
-export async function createPatient(admin: AdminPayload) {
-  const { data } = await http.post('/patient', admin)
+// Responses as observed / required by callers
+export interface CreatePatientResponse {
+  id: number
+}
+export interface AddVisitResponse {
+  vid: number
+}
+
+export async function createPatient(admin: AdminPayload): Promise<CreatePatientResponse> {
+  const { data } = await http.post<CreatePatientResponse>('/patient', admin)
   return data
 }
 
-export async function addVisit(patientId: string | number, admin: AdminPayload) {
-  const { data } = await http.post(`/patient/${patientId}`, admin)
+// Accept either AdminPayload (used when creating new patient) or Admin (built from existing form) to avoid casts at call sites
+export async function addVisit(
+  patientId: string | number,
+  admin: AdminPayload | Admin
+): Promise<AddVisitResponse> {
+  const { data } = await http.post<AddVisitResponse>(`/patient/${patientId}`, admin)
   return data
 }
 
-export async function patchVisit(patientId: string | number, visitId: string | number, body: any) {
-  const { data } = await http.patch(`/patient/${patientId}/${visitId}`, body)
+export async function patchVisit<T = unknown>(
+  patientId: string | number,
+  visitId: string | number,
+  body: unknown
+): Promise<T> {
+  const { data } = await http.patch<T>(`/patient/${patientId}/${visitId}`, body)
   return data
 }
 
@@ -46,8 +63,8 @@ export async function updateAdmin(
   patientId: string | number,
   visitId: string | number,
   admin: AdminPayload
-) {
-  return patchVisit(patientId, visitId, { admin })
+): Promise<void> {
+  await patchVisit(patientId, visitId, { admin })
 }
 
 // Generic section updater (e.g., vitalStats, visualAcuity, etc.)
@@ -71,6 +88,6 @@ export async function updateSection<K extends SectionName>(
   visitId: string | number,
   sectionName: K,
   payload: SectionPayloadMap[K]
-) {
-  return patchVisit(patientId, visitId, { [sectionName]: payload })
+): Promise<void> {
+  await patchVisit(patientId, visitId, { [sectionName]: payload })
 }

@@ -1,4 +1,5 @@
 <template>
+  <NavBar />
   <div class="container max-w-lg mx-auto mt-10 p-6 shadow rounded bg-white">
     <h2 class="text-2xl font-semibold mb-6">Create Batch</h2>
 
@@ -130,11 +131,11 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import { useRouter } from 'vue-router'
+import NavBar from '@shared/ui/navigation/NavBar.vue'
 import { fetchDrugs, createBatch } from '@features/pharmacy/api/pharmacy'
 
 import CreateDrugForm from '@features/pharmacy/components/CreateDrugForm.vue'
 import type { Drug } from '@features/pharmacy/types/Drug'
-import type { DrugBatch } from '@features/pharmacy/types/DrugBatch'
 
 /* ── constants ── */
 const NEW_DRUG_ID = 0
@@ -149,9 +150,13 @@ const drugQuery = ref('')
 const showDropdown = ref(false)
 const comboRef = ref<HTMLElement | null>(null)
 
-const batch = ref<Partial<DrugBatch>>({
+// Use explicit shape matching CreateBatchPayload (except mandatory batch_no starts empty)
+const batch = ref({
+  batch_no: '',
   quantity: 1,
-  expiry_date: ''
+  expiry_date: '',
+  notes: '' as string | undefined,
+  location: '' as string | undefined
 })
 
 const saving = ref(false)
@@ -240,12 +245,15 @@ const handleSubmit = async (onSuccess?: () => void) => {
   saving.value = true
   try {
     await createBatch({
-      ...batch.value,
       drug_id: currentDrug.value!.id,
-      expiry_date: new Date(batch.value.expiry_date!).toISOString()
+      batch_no: batch.value.batch_no.trim(),
+      quantity: batch.value.quantity,
+      expiry_date: new Date(batch.value.expiry_date).toISOString(),
+      notes: batch.value.notes?.trim() || undefined,
+      location: batch.value.location?.trim() || undefined
     })
     toast.success('Batch saved')
-    batch.value = { quantity: 1, expiry_date: '' }
+    batch.value = { batch_no: '', quantity: 1, expiry_date: '', notes: '', location: '' }
     selectedDrugId.value = ''
     drugQuery.value = ''
     onSuccess?.()
@@ -260,18 +268,42 @@ const handleSubmit = async (onSuccess?: () => void) => {
 
 <style scoped>
 .input {
-  @apply mt-1 block w-full rounded border border-gray-300 px-3 py-2;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  width: 100%;
+  display: block;
 }
 .err {
-  @apply text-red-500 text-sm mt-1;
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 .btn-indigo {
-  @apply bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded disabled:opacity-60;
+  background: #4f46e5;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.btn-indigo:hover {
+  background: #4338ca;
 }
 .btn-green {
-  @apply bg-green-600  hover:bg-green-700  text-white px-4 py-2 rounded disabled:opacity-60;
+  background: #16a34a;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.btn-green:hover {
+  background: #15803d;
 }
 .btn-gray {
-  @apply bg-gray-300  hover:bg-gray-400  text-black px-4 py-2 rounded;
+  background: #d1d5db;
+  color: #000;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.btn-gray:hover {
+  background: #9ca3af;
 }
 </style>

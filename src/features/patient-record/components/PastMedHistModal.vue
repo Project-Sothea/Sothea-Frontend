@@ -300,13 +300,12 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import type Patient from '../../types/Patient'
-import type PastMedicalHistory from '../../types/PastMedicalHistory'
+import type Patient from '@patient-record/types/Patient'
+import type PastMedicalHistory from '@patient-record/types/PastMedicalHistory'
 import { updateSection } from '@features/patient-record/api/visit'
-import { handleApiError } from '@shared/api/handleApiError'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -326,81 +325,67 @@ const chronicMuscleAches = ref<boolean | null>(null)
 const sexuallyTransmittedDisease = ref<boolean | null>(null)
 const specifiedSTDs = ref<string | null>('')
 const others = ref<string | null>('')
-const isEditing = ref(false)
+const { isEditing, save, toggleEdit, runChecks } = useEditableSection<PastMedicalHistory>()
 
+let initialized = false
 watch(
   () => props.patientData,
   (newVal: Patient | undefined) => {
-    if (!props.isAdd && newVal) {
-      const pastMedHist = newVal.pastmedicalhistory
-      if (!pastMedHist) {
-        tuberculosis.value = null
-        diabetes.value = null
-        hypertension.value = null
-        hyperlipidemia.value = null
-        chronicJointPains.value = null
-        chronicMuscleAches.value = null
-        sexuallyTransmittedDisease.value = null
-        specifiedSTDs.value = ''
-        others.value = ''
-      } else {
-        tuberculosis.value = pastMedHist.tuberculosis
-        diabetes.value = pastMedHist.diabetes
-        hypertension.value = pastMedHist.hypertension
-        hyperlipidemia.value = pastMedHist.hyperlipidemia
-        chronicJointPains.value = pastMedHist.chronicJointPains
-        chronicMuscleAches.value = pastMedHist.chronicMuscleAches
-        sexuallyTransmittedDisease.value = pastMedHist.sexuallyTransmittedDisease
-        specifiedSTDs.value = pastMedHist.specifiedSTDs
-        others.value = pastMedHist.others
-      }
+    if (initialized || props.isAdd || !newVal) return
+    const pastMedHist = newVal.pastmedicalhistory
+    if (pastMedHist) {
+      tuberculosis.value = pastMedHist.tuberculosis
+      diabetes.value = pastMedHist.diabetes
+      hypertension.value = pastMedHist.hypertension
+      hyperlipidemia.value = pastMedHist.hyperlipidemia
+      chronicJointPains.value = pastMedHist.chronicJointPains
+      chronicMuscleAches.value = pastMedHist.chronicMuscleAches
+      sexuallyTransmittedDisease.value = pastMedHist.sexuallyTransmittedDisease
+      specifiedSTDs.value = pastMedHist.specifiedSTDs
+      others.value = pastMedHist.others
     }
+    initialized = true
   },
   { immediate: true }
 )
-async function submitData() {
-  try {
-    if (
-      tuberculosis.value === null ||
-      diabetes.value === null ||
-      hypertension.value === null ||
-      hyperlipidemia.value === null ||
-      chronicJointPains.value === null ||
-      chronicMuscleAches.value === null ||
-      sexuallyTransmittedDisease.value === null
-    ) {
-      toast.error('Please select yes/no for all fields')
-      return
-    }
-    const pastMedicalHistory: PastMedicalHistory = {
-      // need to define outside to catch missing fields
-      tuberculosis: tuberculosis.value,
-      diabetes: diabetes.value,
-      hypertension: hypertension.value,
-      hyperlipidemia: hyperlipidemia.value,
-      chronicJointPains: chronicJointPains.value,
-      chronicMuscleAches: chronicMuscleAches.value,
-      sexuallyTransmittedDisease: sexuallyTransmittedDisease.value,
-      specifiedSTDs: specifiedSTDs.value,
-      others: others.value
-    }
-    if (!props.patientVid) {
-      toast.error('Missing visit id')
-      return
-    }
-    await updateSection(props.patientId, props.patientVid, 'pastMedicalHistory', pastMedicalHistory)
-    toggleEdit()
-    toast.success('Past medical history saved successfully!')
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
+
+function buildPayload(): PastMedicalHistory | null {
+  if (
+    !runChecks([
+      [tuberculosis.value !== null, 'Select Tuberculosis'],
+      [diabetes.value !== null, 'Select Diabetes'],
+      [hypertension.value !== null, 'Select Hypertension'],
+      [hyperlipidemia.value !== null, 'Select Hyperlipidemia'],
+      [chronicJointPains.value !== null, 'Select Chronic Joint Pains'],
+      [chronicMuscleAches.value !== null, 'Select Chronic Muscle Aches'],
+      [sexuallyTransmittedDisease.value !== null, 'Select STD history']
+    ])
+  )
+    return null
+  return {
+    tuberculosis: tuberculosis.value!,
+    diabetes: diabetes.value!,
+    hypertension: hypertension.value!,
+    hyperlipidemia: hyperlipidemia.value!,
+    chronicJointPains: chronicJointPains.value!,
+    chronicMuscleAches: chronicMuscleAches.value!,
+    sexuallyTransmittedDisease: sexuallyTransmittedDisease.value!,
+    specifiedSTDs: specifiedSTDs.value,
+    others: others.value
   }
 }
 
-function toggleEdit() {
-  console.log('toggleEdit')
-  isEditing.value = !isEditing.value
-  console.log(isEditing.value)
+async function submitData() {
+  if (!props.patientVid) {
+    toast.error('Missing visit id')
+    return
+  }
+  await save({
+    buildPayload,
+    update: () =>
+      updateSection(props.patientId, props.patientVid!, 'pastMedicalHistory', buildPayload()!),
+    onSuccess: () => toast.success('Past medical history saved successfully!')
+  })
 }
 </script>
 

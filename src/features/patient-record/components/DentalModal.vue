@@ -1061,9 +1061,9 @@ import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@features/patient-record/types/Patient'
 import { updateSection } from '@features/patient-record/api/visit'
-import { handleApiError } from '@shared/api/handleApiError'
 import type Dental from '@features/patient-record/types/Dental'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId?: string
@@ -1082,7 +1082,8 @@ const drinkOtherWater = ref<boolean | null>(null)
 const dentalNotes = ref<string | null>('')
 const referralNeeded = ref<boolean | null>(null)
 const referralLoc = ref<string | null>('')
-const isEditing = ref(false)
+// Editing state handled by composable
+const { isEditing, toggleEdit, save } = useEditableSection<Dental>()
 
 const teeth = Array.from({ length: 48 }, () => ref<boolean | null>(null))
 const toothRefs: Record<string, (typeof teeth)[0]> = {}
@@ -1093,99 +1094,99 @@ for (let quadrant = 1; quadrant <= 4; quadrant++) {
   }
 }
 
+// Initialize once
+let initialized = false
 watch(
   () => props.patientData,
   (newVal) => {
-    if (!props.isAdd && newVal?.dental) {
-      const dental = newVal.dental
-      cleanTeethFreq.value = dental.cleanTeethFreq
-      sugarConsumeFreq.value = dental.sugarConsumeFreq
-      pastYearDecay.value = dental.pastYearDecay
-      brushTeethPain.value = dental.brushTeethPain
-      drinkOtherWater.value = dental.drinkOtherWater
-      dentalNotes.value = dental.dentalNotes
-      referralNeeded.value = dental.referralNeeded
-      referralLoc.value = dental.referralLoc
-      Object.keys(toothRefs).forEach((key) => {
-        toothRefs[key].value = dental[key as keyof Dental] as boolean | null
-      })
-    }
+    if (initialized || props.isAdd || !newVal?.dental) return
+    const dental = newVal.dental
+    cleanTeethFreq.value = dental.cleanTeethFreq
+    sugarConsumeFreq.value = dental.sugarConsumeFreq
+    pastYearDecay.value = dental.pastYearDecay
+    brushTeethPain.value = dental.brushTeethPain
+    drinkOtherWater.value = dental.drinkOtherWater
+    dentalNotes.value = dental.dentalNotes
+    referralNeeded.value = dental.referralNeeded
+    referralLoc.value = dental.referralLoc
+    Object.keys(toothRefs).forEach((key) => {
+      toothRefs[key].value = dental[key as keyof Dental] as boolean | null
+    })
+    initialized = true
   },
   { immediate: true }
 )
-async function submitData() {
-  try {
-    if (
-      pastYearDecay.value === null ||
-      brushTeethPain.value === null ||
-      drinkOtherWater.value === null ||
-      referralNeeded.value === null
-    ) {
-      toast.error('Please fill in all required fields.')
-      return
-    }
-    if (cleanTeethFreq.value === null || sugarConsumeFreq.value === null) {
-      toast.error('Please fill in all required fields.')
-      return
-    }
-    const dental: Dental = {
-      cleanTeethFreq: cleanTeethFreq.value,
-      sugarConsumeFreq: sugarConsumeFreq.value,
-      pastYearDecay: pastYearDecay.value,
-      brushTeethPain: brushTeethPain.value,
-      drinkOtherWater: drinkOtherWater.value,
-      dentalNotes: dentalNotes.value,
-      referralNeeded: referralNeeded.value,
-      referralLoc: referralLoc.value,
-      tooth11: toothRefs.tooth11.value,
-      tooth12: toothRefs.tooth12.value,
-      tooth13: toothRefs.tooth13.value,
-      tooth14: toothRefs.tooth14.value,
-      tooth15: toothRefs.tooth15.value,
-      tooth16: toothRefs.tooth16.value,
-      tooth17: toothRefs.tooth17.value,
-      tooth18: toothRefs.tooth18.value,
-      tooth21: toothRefs.tooth21.value,
-      tooth22: toothRefs.tooth22.value,
-      tooth23: toothRefs.tooth23.value,
-      tooth24: toothRefs.tooth24.value,
-      tooth25: toothRefs.tooth25.value,
-      tooth26: toothRefs.tooth26.value,
-      tooth27: toothRefs.tooth27.value,
-      tooth28: toothRefs.tooth28.value,
-      tooth31: toothRefs.tooth31.value,
-      tooth32: toothRefs.tooth32.value,
-      tooth33: toothRefs.tooth33.value,
-      tooth34: toothRefs.tooth34.value,
-      tooth35: toothRefs.tooth35.value,
-      tooth36: toothRefs.tooth36.value,
-      tooth37: toothRefs.tooth37.value,
-      tooth38: toothRefs.tooth38.value,
-      tooth41: toothRefs.tooth41.value,
-      tooth42: toothRefs.tooth42.value,
-      tooth43: toothRefs.tooth43.value,
-      tooth44: toothRefs.tooth44.value,
-      tooth45: toothRefs.tooth45.value,
-      tooth46: toothRefs.tooth46.value,
-      tooth47: toothRefs.tooth47.value,
-      tooth48: toothRefs.tooth48.value
-    }
-    if (!props.patientVid) {
-      toast.error('Missing visit id')
-      return
-    }
-    await updateSection(props.patientId!, props.patientVid!, 'dental', dental)
-    toggleEdit()
-    toast.success('Dental saved successfully!')
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
+
+const requiredFlags = computed(() => [
+  pastYearDecay.value,
+  brushTeethPain.value,
+  drinkOtherWater.value,
+  referralNeeded.value
+])
+
+function buildPayload(): Dental | null {
+  if (
+    requiredFlags.value.some((v) => v === null) ||
+    cleanTeethFreq.value === null ||
+    sugarConsumeFreq.value === null
+  ) {
+    toast.error('Please fill in all required fields.')
+    return null
+  }
+  return {
+    cleanTeethFreq: cleanTeethFreq.value,
+    sugarConsumeFreq: sugarConsumeFreq.value,
+    pastYearDecay: pastYearDecay.value!,
+    brushTeethPain: brushTeethPain.value!,
+    drinkOtherWater: drinkOtherWater.value!,
+    dentalNotes: dentalNotes.value,
+    referralNeeded: referralNeeded.value!,
+    referralLoc: referralLoc.value,
+    tooth11: toothRefs.tooth11.value,
+    tooth12: toothRefs.tooth12.value,
+    tooth13: toothRefs.tooth13.value,
+    tooth14: toothRefs.tooth14.value,
+    tooth15: toothRefs.tooth15.value,
+    tooth16: toothRefs.tooth16.value,
+    tooth17: toothRefs.tooth17.value,
+    tooth18: toothRefs.tooth18.value,
+    tooth21: toothRefs.tooth21.value,
+    tooth22: toothRefs.tooth22.value,
+    tooth23: toothRefs.tooth23.value,
+    tooth24: toothRefs.tooth24.value,
+    tooth25: toothRefs.tooth25.value,
+    tooth26: toothRefs.tooth26.value,
+    tooth27: toothRefs.tooth27.value,
+    tooth28: toothRefs.tooth28.value,
+    tooth31: toothRefs.tooth31.value,
+    tooth32: toothRefs.tooth32.value,
+    tooth33: toothRefs.tooth33.value,
+    tooth34: toothRefs.tooth34.value,
+    tooth35: toothRefs.tooth35.value,
+    tooth36: toothRefs.tooth36.value,
+    tooth37: toothRefs.tooth37.value,
+    tooth38: toothRefs.tooth38.value,
+    tooth41: toothRefs.tooth41.value,
+    tooth42: toothRefs.tooth42.value,
+    tooth43: toothRefs.tooth43.value,
+    tooth44: toothRefs.tooth44.value,
+    tooth45: toothRefs.tooth45.value,
+    tooth46: toothRefs.tooth46.value,
+    tooth47: toothRefs.tooth47.value,
+    tooth48: toothRefs.tooth48.value
   }
 }
-function toggleEdit() {
-  console.log('toggleEdit')
-  isEditing.value = !isEditing.value
-  console.log(isEditing.value)
+
+async function submitData() {
+  if (!props.patientVid) {
+    toast.error('Missing visit id')
+    return
+  }
+  await save({
+    buildPayload,
+    update: () => updateSection(props.patientId!, props.patientVid!, 'dental', buildPayload()!),
+    onSuccess: () => toast.success('Dental saved successfully!')
+  })
 }
 </script>
 

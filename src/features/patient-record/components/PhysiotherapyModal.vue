@@ -266,10 +266,10 @@
 import { ref, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import type Patient from '../../types/Patient'
-import type Physiotherapy from '../../types/Physiotherapy'
+import type Patient from '@patient-record/types/Patient'
+import type Physiotherapy from '@patient-record/types/Physiotherapy'
 import { updateSection } from '@features/patient-record/api/visit'
-import { handleApiError } from '@shared/api/handleApiError'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -279,8 +279,9 @@ const props = defineProps<{
 }>()
 
 const toast = useToast()
+const { isEditing, toggleEdit, save, runChecks } = useEditableSection<Physiotherapy>()
+const initialized = ref(false)
 
-const isEditing = ref(false)
 const painStiffnessDay = ref<0 | 1 | 2 | 3 | 4 | 5 | null>(null)
 const painStiffnessNight = ref<0 | 1 | 2 | 3 | 4 | 5 | null>(null)
 const symptomsInterfereTasks = ref<'Never' | 'Rarely' | 'Sometimes' | 'Often' | 'Always' | ''>('')
@@ -294,76 +295,83 @@ const medicationManageSymptoms = ref<'Never' | 'Rarely' | 'Sometimes' | 'Often' 
 watch(
   () => props.patientData,
   (newVal: Patient | null) => {
-    if (!props.isAdd && newVal) {
-      const physiotherapy = newVal.physiotherapy
-      if (!physiotherapy) {
-        painStiffnessDay.value = null
-        painStiffnessNight.value = null
-        symptomsInterfereTasks.value = ''
-        symptomsChange.value = ''
-        symptomsNeedHelp.value = ''
-        troubleSleepSymptoms.value = ''
-        howMuchFatigue.value = null
-        anxiousLowMood.value = null
-        medicationManageSymptoms.value = ''
-      } else {
-        painStiffnessDay.value = physiotherapy.painStiffnessDay
-        painStiffnessNight.value = physiotherapy.painStiffnessNight
-        symptomsInterfereTasks.value = physiotherapy.symptomsInterfereTasks
-        symptomsChange.value = physiotherapy.symptomsChange
-        symptomsNeedHelp.value = physiotherapy.symptomsNeedHelp
-        troubleSleepSymptoms.value = physiotherapy.troubleSleepSymptoms
-        howMuchFatigue.value = physiotherapy.howMuchFatigue
-        anxiousLowMood.value = physiotherapy.anxiousLowMood
-        medicationManageSymptoms.value = physiotherapy.medicationManageSymptoms
-      }
+    if (props.isAdd || !newVal || initialized.value || isEditing.value) return
+    const p = newVal.physiotherapy
+    if (p) {
+      painStiffnessDay.value = p.painStiffnessDay
+      painStiffnessNight.value = p.painStiffnessNight
+      symptomsInterfereTasks.value = p.symptomsInterfereTasks
+      symptomsChange.value = p.symptomsChange
+      symptomsNeedHelp.value = p.symptomsNeedHelp
+      troubleSleepSymptoms.value = p.troubleSleepSymptoms
+      howMuchFatigue.value = p.howMuchFatigue
+      anxiousLowMood.value = p.anxiousLowMood
+      medicationManageSymptoms.value = p.medicationManageSymptoms
     }
+    initialized.value = true
   },
   { immediate: true }
 )
 
-async function submitData() {
-  try {
-    if (
-      painStiffnessDay.value === null ||
-      painStiffnessNight.value === null ||
-      symptomsInterfereTasks.value === '' ||
-      symptomsChange.value === '' ||
-      symptomsNeedHelp.value === '' ||
-      troubleSleepSymptoms.value === '' ||
-      howMuchFatigue.value === null ||
-      anxiousLowMood.value === null ||
-      medicationManageSymptoms.value === ''
-    ) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-    const physiotherapy: Physiotherapy = {
-      painStiffnessDay: painStiffnessDay.value,
-      painStiffnessNight: painStiffnessNight.value,
-      symptomsInterfereTasks: symptomsInterfereTasks.value,
-      symptomsChange: symptomsChange.value,
-      symptomsNeedHelp: symptomsNeedHelp.value,
-      troubleSleepSymptoms: troubleSleepSymptoms.value,
-      howMuchFatigue: howMuchFatigue.value,
-      anxiousLowMood: anxiousLowMood.value,
-      medicationManageSymptoms: medicationManageSymptoms.value
-    }
-    if (!props.patientVid) {
-      toast.error('Missing visit id')
-      return
-    }
-    await updateSection(props.patientId, props.patientVid, 'physiotherapy', physiotherapy)
-    toggleEdit()
-    toast.success('Physiotherapy assessment saved successfully')
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
+function buildPayload(): Physiotherapy | null {
+  if (
+    !runChecks([
+      [painStiffnessDay.value !== null, 'Select pain stiffness (day)'],
+      [painStiffnessNight.value !== null, 'Select pain stiffness (night)'],
+      [symptomsInterfereTasks.value !== '', 'Select tasks interference'],
+      [symptomsChange.value !== '', 'Select symptoms change'],
+      [symptomsNeedHelp.value !== '', 'Select need help'],
+      [troubleSleepSymptoms.value !== '', 'Select sleep trouble'],
+      [howMuchFatigue.value !== null, 'Select fatigue'],
+      [anxiousLowMood.value !== null, 'Select mood'],
+      [medicationManageSymptoms.value !== '', 'Select medication management']
+    ])
+  )
+    return null
+  return {
+    painStiffnessDay: painStiffnessDay.value!,
+    painStiffnessNight: painStiffnessNight.value!,
+    symptomsInterfereTasks: symptomsInterfereTasks.value as
+      | 'Never'
+      | 'Rarely'
+      | 'Sometimes'
+      | 'Often'
+      | 'Always',
+    symptomsChange: symptomsChange.value as 'Improved' | 'Worsened' | 'Stayed the same',
+    symptomsNeedHelp: symptomsNeedHelp.value as
+      | 'Never'
+      | 'Rarely'
+      | 'Sometimes'
+      | 'Often'
+      | 'Always',
+    troubleSleepSymptoms: troubleSleepSymptoms.value as
+      | 'Never'
+      | 'Rarely'
+      | 'Sometimes'
+      | 'Often'
+      | 'Always',
+    howMuchFatigue: howMuchFatigue.value!,
+    anxiousLowMood: anxiousLowMood.value!,
+    medicationManageSymptoms: medicationManageSymptoms.value as
+      | 'Never'
+      | 'Rarely'
+      | 'Sometimes'
+      | 'Often'
+      | 'Always'
   }
 }
 
-function toggleEdit() {
-  isEditing.value = !isEditing.value
+async function submitData() {
+  if (!props.patientVid) {
+    toast.error('Missing visit id')
+    return
+  }
+  await save({
+    buildPayload,
+    update: () =>
+      updateSection(props.patientId, props.patientVid!, 'physiotherapy', buildPayload()!),
+    onSuccess: () => toast.success('Physiotherapy assessment saved successfully')
+  })
 }
 </script>
 

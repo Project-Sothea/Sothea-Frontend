@@ -108,23 +108,23 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
-import SideBar from '@shared/ui/navigation/SideBar.vue'
-import SubNavBar from '@shared/ui/navigation/SubNavBar.vue'
-import RecordsModal from '@features/patient-record/components/RecordsModal.vue'
-import AdminModal from '@features/patient-record/components/AdminModal.vue'
-import PastMedHistModal from '@features/patient-record/components/PastMedHistModal.vue'
-import SocialHistModal from '@features/patient-record/components/SocialHistModal.vue'
-import VitalStatsModal from '@features/patient-record/components/VitalStatsModal.vue'
-import HeightWeightModal from '@features/patient-record/components/HeightWeightModal.vue'
-import VisualAcuityModal from '@features/patient-record/components/VisualAcuityModal.vue'
-import FallRiskModal from '@features/patient-record/components/FallRiskModal.vue'
-import DrConsultModal from '@features/patient-record/components/DrConsultModal.vue'
-import PhysiotherapyModal from '@features/patient-record/components/PhysiotherapyModal.vue'
-import AddNewVisitModal from '@features/patient-record/components/AddNewVisitModal.vue'
-import DentalModal from '@features/patient-record/components/DentalModal.vue'
-import PrescriptionModal from '@features/patient-record/components/PrescriptionModal.vue'
-import { fetchPatientRecord, deletePatientVisit } from '@features/patient-record/api/patient'
-import type Patient from '@features/patient-record/types/Patient'
+import SideBar from '@patient-record/components/SideBar.vue'
+import SubNavBar from '@patient-record/components/SubNavBar.vue'
+import RecordsModal from '@patient-record/components/RecordsModal.vue'
+import AdminModal from '@patient-record/components/AdminModal.vue'
+import PastMedHistModal from '@patient-record/components/PastMedHistModal.vue'
+import SocialHistModal from '@patient-record/components/SocialHistModal.vue'
+import VitalStatsModal from '@patient-record/components/VitalStatsModal.vue'
+import HeightWeightModal from '@patient-record/components/HeightWeightModal.vue'
+import VisualAcuityModal from '@patient-record/components/VisualAcuityModal.vue'
+import FallRiskModal from '@patient-record/components/FallRiskModal.vue'
+import DrConsultModal from '@patient-record/components/DrConsultModal.vue'
+import PhysiotherapyModal from '@patient-record/components/PhysiotherapyModal.vue'
+import AddNewVisitModal from '@patient-record/components/AddNewVisitModal.vue'
+import DentalModal from '@patient-record/components/DentalModal.vue'
+import PrescriptionModal from '@patient-record/components/PrescriptionModal.vue'
+import { fetchPatientRecord, deletePatientVisit } from '@patient-record/api/patient'
+import type Patient from '@patient-record/types/Patient'
 import { useToast } from 'vue-toast-notification'
 
 const route = useRoute()
@@ -198,7 +198,7 @@ function handlePatientCreated(evt: { id: string; vid: number; name: string; age:
   createdPatientId.value = String(evt.id)
   createdVisitVid.value = String(evt.vid)
   // switch to view mode route
-  router.replace(`/patients/${evt.id}/${evt.vid}`)
+  router.replace(`/patient/${evt.id}/${evt.vid}`)
 }
 
 function handlePatientUpdated(evt: any) {
@@ -209,7 +209,7 @@ function handlePatientUpdated(evt: any) {
 }
 
 function handlePatientVisitCreated(evt: any) {
-  router.push(`/patients/${evt.id}/${evt.vid}`)
+  router.push(`/patient/${evt.id}/${evt.vid}`)
   activeSection.value = 'admin'
 }
 

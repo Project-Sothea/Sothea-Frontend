@@ -424,10 +424,10 @@
 import { ref, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import type Patient from '../../types/Patient'
-import type DoctorsConsultation from '../../types/DoctorsConsultation'
+import type Patient from '@patient-record/types/Patient'
+import type DoctorsConsultation from '@patient-record/types/DoctorsConsultation'
 import { updateSection } from '@features/patient-record/api/visit'
-import { handleApiError } from '@shared/api/handleApiError'
+import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -437,6 +437,8 @@ const props = defineProps<{
 }>()
 
 const toast = useToast()
+const { isEditing, toggleEdit, save, runChecks } = useEditableSection<DoctorsConsultation>()
+const initialized = ref(false)
 
 const well = ref<boolean | null>(null)
 const msk = ref<boolean | null>(null)
@@ -453,132 +455,77 @@ const treatment = ref<string | null>('')
 const referralNeeded = ref<boolean | null>(null)
 const referralLoc = ref<string | null>('')
 const remarks = ref<string | null>('')
-const isEditing = ref(false)
 
 watch(
   () => props.patientData,
-  (newVal: Patient | null) => {
-    if (!props.isAdd && newVal) {
-      const drConsult = newVal.doctorsconsultation
-      if (!drConsult) {
-        well.value = null
-        msk.value = null
-        cvs.value = null
-        respi.value = null
-        gu.value = null
-        git.value = null
-        eye.value = null
-        derm.value = null
-        others.value = ''
-        consultationNotes.value = ''
-        diagnosis.value = ''
-        treatment.value = ''
-        referralNeeded.value = null
-        referralLoc.value = ''
-        remarks.value = ''
-      } else {
-        well.value = drConsult.well
-        msk.value = drConsult.msk
-        cvs.value = drConsult.cvs
-        respi.value = drConsult.respi
-        gu.value = drConsult.gu
-        git.value = drConsult.git
-        eye.value = drConsult.eye
-        derm.value = drConsult.derm
-        others.value = drConsult.others
-        consultationNotes.value = drConsult.consultationNotes
-        diagnosis.value = drConsult.diagnosis
-        treatment.value = drConsult.treatment
-        referralNeeded.value = drConsult.referralNeeded
-        referralLoc.value = drConsult.referralLoc
-        remarks.value = drConsult.remarks
-      }
+  (val: Patient | null) => {
+    if (props.isAdd || !val || initialized.value || isEditing.value) return
+    const d = val.doctorsconsultation
+    if (d) {
+      well.value = d.well
+      msk.value = d.msk
+      cvs.value = d.cvs
+      respi.value = d.respi
+      gu.value = d.gu
+      git.value = d.git
+      eye.value = d.eye
+      derm.value = d.derm
+      others.value = d.others
+      consultationNotes.value = d.consultationNotes
+      diagnosis.value = d.diagnosis
+      treatment.value = d.treatment
+      referralNeeded.value = d.referralNeeded
+      referralLoc.value = d.referralLoc
+      remarks.value = d.remarks
     }
+    initialized.value = true
   },
   { immediate: true }
 )
-async function submitData() {
-  try {
-    if (well.value === null) {
-      toast.error('Please indicate if patient is well')
-      return
-    }
-    if (msk.value === null) {
-      toast.error('Please indicate if patient has MSK')
-      return
-    }
-    if (cvs.value === null) {
-      toast.error('Please indicate if patient has CVS')
-      return
-    }
-    if (respi.value === null) {
-      toast.error('Please indicate if patient has Respi')
-      return
-    }
-    if (gu.value === null) {
-      toast.error('Please indicate if patient has GU')
-      return
-    }
-    if (git.value === null) {
-      toast.error('Please indicate if patient has GIT')
-      return
-    }
-    if (eye.value === null) {
-      toast.error('Please indicate if patient has Eye')
-      return
-    }
-    if (derm.value === null) {
-      toast.error('Please indicate if patient has Derm')
-      return
-    }
-    if (others.value === '') {
-      toast.error('Please indicate if patient has Others')
-      return
-    }
-    if (referralNeeded.value === null) {
-      toast.error('Please indicate if patient needs referral')
-      return
-    }
-    const doctorsConsultation: DoctorsConsultation = {
-      // need to define outside to catch missing fields
-      well: well.value,
-      msk: msk.value,
-      cvs: cvs.value,
-      respi: respi.value,
-      gu: gu.value,
-      git: git.value,
-      eye: eye.value,
-      derm: derm.value,
-      others: others.value,
-      consultationNotes: consultationNotes.value,
-      diagnosis: diagnosis.value,
-      treatment: treatment.value,
-      referralNeeded: referralNeeded.value,
-      referralLoc: referralLoc.value,
-      remarks: remarks.value
-    }
-    if (!props.patientVid) {
-      toast.error('Missing visit id')
-      return
-    }
-    await updateSection(
-      props.patientId,
-      props.patientVid,
-      'doctorsConsultation',
-      doctorsConsultation
-    )
-    if (isEditing.value) toggleEdit()
-    toast.success('Doctors Consultation saved successfully!')
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
+
+function buildPayload(): DoctorsConsultation | null {
+  if (
+    !runChecks([
+      [well.value !== null, 'Indicate if patient is well'],
+      [msk.value !== null, 'Indicate MSK'],
+      [cvs.value !== null, 'Indicate CVS'],
+      [respi.value !== null, 'Indicate Respi'],
+      [gu.value !== null, 'Indicate GU'],
+      [git.value !== null, 'Indicate GIT'],
+      [eye.value !== null, 'Indicate Eye'],
+      [derm.value !== null, 'Indicate Derm'],
+      [others.value.trim() !== '', 'Specify Others'],
+      [referralNeeded.value !== null, 'Indicate referral need']
+    ])
+  )
+    return null
+  return {
+    well: well.value!,
+    msk: msk.value!,
+    cvs: cvs.value!,
+    respi: respi.value!,
+    gu: gu.value!,
+    git: git.value!,
+    eye: eye.value!,
+    derm: derm.value!,
+    others: others.value.trim(),
+    consultationNotes: consultationNotes.value || '',
+    diagnosis: diagnosis.value || '',
+    treatment: treatment.value || '',
+    referralNeeded: referralNeeded.value!,
+    referralLoc: referralLoc.value || '',
+    remarks: remarks.value || ''
   }
 }
 
-function toggleEdit() {
-  console.log('toggleEdit')
-  isEditing.value = !isEditing.value
-  console.log(isEditing.value)
+async function submitData() {
+  if (!props.patientVid) return toast.error('Missing visit id')
+  await save({
+    buildPayload,
+    update: () =>
+      updateSection(props.patientId, props.patientVid!, 'doctorsConsultation', buildPayload()!),
+    onSuccess: () => toast.success('Doctors Consultation saved successfully!')
+  })
 }
 </script>
 
