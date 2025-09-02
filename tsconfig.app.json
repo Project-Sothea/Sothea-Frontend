@@ -8,7 +8,14 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@app/*": ["./src/app/*"],
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@patient-directory/*": ["./src/features/patient-directory/*"],
+      "@patient-queue/*": ["./src/features/patient-queue/*"],
+      "@patient-record/*": ["./src/features/patient-record/*"]
     }
   }
 }
