@@ -1,6 +1,6 @@
 <template>
   <NavBar />
-  <div class="container max-w-lg mx-auto mt-10 p-6 shadow rounded bg-white">
+  <div class="mx-auto mt-10 p-6 shadow rounded bg-white max-w-3xl">
     <h2 class="text-2xl font-semibold mb-6">Create Batch</h2>
 
     <form @submit.prevent="handleSubmit(() => router.back())">
@@ -8,7 +8,6 @@
       <label ref="comboRef" class="block mb-4 relative">
         <span class="text-gray-700">Drug <span class="text-red-600">*</span></span>
 
-        <!-- typed input -->
         <input
           v-model.trim="drugQuery"
           @focus="showDropdown = true"
@@ -19,7 +18,6 @@
           autocomplete="off"
         />
 
-        <!-- dropdown -->
         <ul
           v-if="showDropdown"
           class="absolute z-20 bg-white border border-gray-300 rounded shadow w-full mt-1 max-h-48 overflow-auto"
@@ -49,59 +47,108 @@
         Unit: <strong>{{ currentDrug.unit }}</strong>
       </p>
 
-      <CreateDrugForm v-if="selectedDrugId === NEW_DRUG_ID" @created="onDrugCreated" />
+      <CreateDrugForm
+        v-if="selectedDrugId === NEW_DRUG_ID"
+        :open="true"
+        :drug-name="drugQuery"
+        @created="onDrugCreated"
+        @close="selectedDrugId = ''"
+      />
 
       <!-- Batch No. -->
       <label class="block mb-4">
         <span class="text-gray-700">Batch&nbsp;No. <span class="text-red-600">*</span></span>
         <input
-          v-model.trim="batch.batch_no"
-          :class="inputClass(errors.batch_no)"
+          v-model.trim="batch.batchNumber"
+          :class="inputClass(errors.batchNumber)"
           @input="clearError('batch_no')"
           type="text"
           autocomplete="off"
           required
         />
-        <p v-if="errors.batch_no" class="err">{{ errors.batch_no }}</p>
-      </label>
-
-      <!-- Quantity -->
-      <label class="block mb-4">
-        <span class="text-gray-700">Quantity <span class="text-red-600">*</span></span>
-        <input
-          v-model.number="batch.quantity"
-          :class="inputClass(errors.quantity)"
-          @input="clearError('quantity')"
-          type="number"
-          min="1"
-          required
-        />
-        <p v-if="errors.quantity" class="err">{{ errors.quantity }}</p>
+        <p v-if="errors.batchNumber" class="err">{{ errors.batchNumber }}</p>
       </label>
 
       <!-- Expiry Date -->
       <label class="block mb-4">
         <span class="text-gray-700">Expiry&nbsp;Date <span class="text-red-600">*</span></span>
         <input
-          v-model="batch.expiry_date"
-          :class="inputClass(errors.expiry_date)"
+          v-model="batch.expiryDate"
+          :class="inputClass(errors.expiryDate)"
           @input="clearError('expiry_date')"
           type="date"
           required
         />
-        <p v-if="errors.expiry_date" class="err">{{ errors.expiry_date }}</p>
+        <p v-if="errors.expiryDate" class="err">{{ errors.expiryDate }}</p>
       </label>
 
-      <!-- Location / Notes -->
-      <label class="block mb-4">
-        <span class="text-gray-700">Location</span>
-        <textarea v-model="batch.location" class="input"></textarea>
-      </label>
+      <!-- ─────────── LOCATIONS & QUANTITIES (free-text, repeatable) ─────────── -->
+      <div class="mb-2 flex items-center justify-between">
+        <span class="text-gray-700">Locations <span class="text-red-600">*</span></span>
+        <button type="button" class="btn-indigo !py-1" @click="addLocationRow">Add row</button>
+      </div>
 
-      <label class="block mb-6">
-        <span class="text-gray-700">Notes</span>
-        <textarea v-model="batch.notes" class="input"></textarea>
-      </label>
+      <div class="mb-2 text-sm text-gray-600">Total quantity: <strong>{{ totalQuantity }}</strong></div>
+      <p v-if="errors.batchLocations" class="err mb-2">{{ errors.batchLocations }}</p>
+
+      <div class="space-y-3 mb-6">
+        <div
+          v-for="(row, idx) in batchLocations"
+          :key="idx"
+          class="grid grid-cols-7 gap-2 items-start"
+        >
+          <!-- Location (free text) -->
+          <div class="col-span-4">
+            <label class="block text-sm text-gray-700 mb-1">Location</label>
+            <input
+              v-model.trim="row.location"
+              type="text"
+              placeholder="e.g., Cupboard A, Drawer 3"
+              :class="inputClass(rowErrors(idx, 'location'))"
+              @input="clearRowError(idx, 'location')"
+              autocomplete="off"
+            />
+            <p v-if="rowErrors(idx, 'location')" class="err">
+              {{ rowErrors(idx, 'location') }}
+            </p>
+          </div>
+
+          <!-- Quantity -->
+          <div class="col-span-2">
+            <label class="block text-sm text-gray-700 mb-1">Qty</label>
+            <input
+              v-model.number="row.quantity"
+              type="number"
+              min="1"
+              step="1"
+              :class="inputClass(rowErrors(idx, 'quantity'))"
+              @input="clearRowError(idx, 'quantity')"
+            />
+            <p v-if="rowErrors(idx, 'quantity')" class="err">
+              {{ rowErrors(idx, 'quantity') }}
+            </p>
+          </div>
+
+          <!-- Remove -->
+          <div class="col-span-1 flex items-end">
+           <button
+            type="button"
+            class="btn-gray !py-1 w-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="removeLocationRow(idx)"
+            :disabled="batchLocations.length === 1"
+            title="Remove row"
+            aria-label="Remove row"
+          >
+            <!-- Heroicons: Eye (outline) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5">
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6M14 11v6"/>
+              <path d="M3 6h18M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Actions -->
       <div class="flex justify-end gap-3 mt-6">
@@ -133,34 +180,39 @@ import { useToast } from 'vue-toast-notification'
 import { useRouter } from 'vue-router'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
 import { fetchDrugs, createBatch } from '@features/pharmacy/api/pharmacy'
-
 import CreateDrugForm from '@features/pharmacy/components/CreateDrugForm.vue'
 import type { Drug } from '@features/pharmacy/types/Drug'
+import type { DrugBatch } from '../types/DrugBatch'
+import type { BatchLocation } from '../types/BatchLocation'
 
 /* ── constants ── */
-const NEW_DRUG_ID = 0
+const NEW_DRUG_ID = -1
 
 /* ── refs / state ── */
 const router = useRouter()
 const toast = useToast()
-const drugs = ref<Drug[]>([])
-const selectedDrugId = ref<number | ''>('')
 
+const drugs = ref<Drug[]>([])
+
+const selectedDrugId = ref<number | ''>('')
 const drugQuery = ref('')
 const showDropdown = ref(false)
 const comboRef = ref<HTMLElement | null>(null)
 
-// Use explicit shape matching CreateBatchPayload (except mandatory batch_no starts empty)
-const batch = ref({
-  batch_no: '',
-  quantity: 1,
-  expiry_date: '',
-  notes: '' as string | undefined,
-  location: '' as string | undefined
+const batch = ref<Partial<DrugBatch>>({
+  batchNumber: '',
+  expiryDate: '',
 })
+
+/** locations table rows (free text) */
+const batchLocations = ref<Partial<BatchLocation>[]>([
+  { location: '', quantity: 0 }
+])
 
 const saving = ref(false)
 const errors = ref<Record<string, string>>({})
+/** per-row field errors, mirror shape: { [rowIndex.field]: 'msg' } */
+const rowFieldErrors = ref<Record<string, string>>({})
 
 /* ── helpers ── */
 const inputClass = (err?: string) =>
@@ -173,9 +225,15 @@ const clearError = (k: string) => {
   delete errors.value[k]
 }
 
+const rowKey = (i: number, field: 'location' | 'quantity') => `${i}.${field}`
+const rowErrors = (i: number, field: 'location' | 'quantity') => rowFieldErrors.value[rowKey(i, field)]
+const clearRowError = (i: number, field: 'location' | 'quantity') => {
+  delete rowFieldErrors.value[rowKey(i, field)]
+}
+
 const onQueryInput = () => {
-  showDropdown.value = true // keep list visible
-  selectedDrugId.value = '' // ⬅️ clear previous choice
+  showDropdown.value = true
+  selectedDrugId.value = ''
 }
 
 /* ── combo-box logic ── */
@@ -193,7 +251,6 @@ const selectDrug = (d: Drug) => {
 
 const selectNewDrug = () => {
   selectedDrugId.value = NEW_DRUG_ID
-  drugQuery.value = '+ Create new drug…'
   showDropdown.value = false
 }
 
@@ -203,7 +260,22 @@ const onClickOutside = (e: MouseEvent) => {
   }
 }
 
-/* ── fetch drugs ── */
+
+const addLocationRow = () => {
+  batchLocations.value.push({ location: '', quantity: 0 })
+}
+
+const removeLocationRow = (idx: number) => {
+  if (batchLocations.value.length === 1) return
+  batchLocations.value.splice(idx, 1)
+}
+
+/* ── computed ── */
+const totalQuantity = computed(() =>
+  batchLocations.value.reduce((sum, r) => sum + (Number(r.quantity) || 0), 0)
+)
+
+/* ── fetch ── */
 onMounted(async () => {
   drugs.value = await fetchDrugs()
   document.addEventListener('click', onClickOutside)
@@ -223,19 +295,37 @@ const validate = () => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const e: Record<string, string> = {}
+  const re: Record<string, string> = {}
 
+  // drug
   if (!currentDrug.value && selectedDrugId.value !== NEW_DRUG_ID)
     e.drug = 'Please choose (or create) a drug.'
-  if (!batch.value.batch_no) e.batch_no = 'Batch number is required.'
-  if (!batch.value.quantity || batch.value.quantity < 1) e.quantity = 'Enter a positive quantity.'
-  if (!batch.value.expiry_date) {
-    e.expiry_date = 'Choose an expiry date.'
+
+  // batch_no
+  if (!batch.value.batchNumber) e.batchNumber = 'Batch number is required.'
+
+  // expiry_date
+  if (!batch.value.expiryDate) {
+    e.expiryDate = 'Choose an expiry date.'
   } else {
-    const picked = new Date(batch.value.expiry_date)
-    if (picked <= today) e.expiry_date = 'Expiry date must be after today.'
+    const picked = new Date(batch.value.expiryDate)
+    if (picked <= today) e.expiryDate = 'Expiry date must be after today.'
   }
+
+  // batch_locations rows: ≥1 row, each with non-empty location and positive quantity
+  if (!batchLocations.value.length) {
+    e.batchLocations = 'Add at least one location row.'
+  } else {
+    batchLocations.value.forEach((row, idx) => {
+      if (!row.location?.trim()) re[rowKey(idx, 'location')] = 'Enter a location.'
+      const q = Number(row.quantity)
+      if (!Number.isFinite(q) || q <= 0) re[rowKey(idx, 'quantity')] = 'Enter a positive quantity.'
+    })
+  }
+
   errors.value = e
-  return Object.keys(e).length === 0
+  rowFieldErrors.value = re
+  return Object.keys(e).length === 0 && Object.keys(re).length === 0
 }
 
 /* ── submit ── */
@@ -245,17 +335,24 @@ const handleSubmit = async (onSuccess?: () => void) => {
   saving.value = true
   try {
     await createBatch({
-      drug_id: currentDrug.value!.id,
-      batch_no: batch.value.batch_no.trim(),
-      quantity: batch.value.quantity,
-      expiry_date: new Date(batch.value.expiry_date).toISOString(),
-      notes: batch.value.notes?.trim() || undefined,
-      location: batch.value.location?.trim() || undefined
+      drugId: currentDrug.value!.id,
+      batchNumber: batch.value.batchNumber!.trim(),
+      expiryDate: new Date(batch.value.expiryDate!).toISOString(),
+      supplier: batch.value.supplier!.trim(),
+      batchLocations: batchLocations.value.map((r) => ({
+        location: r.location!.trim(),
+        quantity: Number(r.quantity)
+      }))
     })
+
     toast.success('Batch saved')
-    batch.value = { batch_no: '', quantity: 1, expiry_date: '', notes: '', location: '' }
+
+    // reset
+    batch.value = { batchNumber: '', expiryDate: '' }
+    batchLocations.value = [{ location: '', quantity: 0 }]
     selectedDrugId.value = ''
     drugQuery.value = ''
+
     onSuccess?.()
   } catch (e) {
     console.error(e)

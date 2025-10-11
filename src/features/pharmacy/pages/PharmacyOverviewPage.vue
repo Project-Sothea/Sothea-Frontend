@@ -47,9 +47,9 @@
               <tr>
                 <th class="th">Batch&nbsp;ID</th>
                 <th class="th">Drug</th>
-                <th class="th">Qty</th>
+                <th class="th">Total Qty</th>
                 <th class="th">Expiry</th>
-                <th class="th">Location</th>
+                <th class="th">View Locations</th>
               </tr>
             </thead>
             <tbody>
@@ -58,18 +58,27 @@
                 :key="b.id"
                 :class="idx % 2 ? 'odd-row' : 'even-row'"
               >
-                <td class="td">{{ b.batch_no }}</td>
+                <td class="td">{{ b.batchNumber }}</td>
                 <td class="td">
                   <router-link
-                    :to="`/pharmacy/drugs/${b.drug_id}`"
+                    :to="`/pharmacy/drugs/${b.drugId}`"
                     class="text-blue-600 hover:underline"
                   >
-                    {{ drugName(b.drug_id) }}
+                    {{ drugName(b.drugId) }}
                   </router-link>
                 </td>
-                <td class="td">{{ b.quantity }}</td>
-                <td class="td">{{ fmtDate(b.expiry_date) }}</td>
-                <td class="td">{{ b.location ?? '-' }}</td>
+                <td class="td">{{ batchTotalQty(b) }}</td>
+                <td class="td">{{ fmtDate(b.expiryDate) }}</td>
+                <td class="td">
+                  <button
+                    class="icon-btn"
+                    aria-label="View locations"
+                    title="View locations"
+                    @click="openLocations(b)"
+                  >
+                    <EyeIcon class="h-5 w-5" aria-hidden="true" />
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -86,7 +95,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="(row, idx) in drugRows"
+                v-for="(row, idx) in filteredDrugRows"
                 :key="row.id"
                 :class="idx % 2 ? 'odd-row' : 'even-row'"
               >
@@ -105,6 +114,7 @@
             </tbody>
           </table>
         </div>
+        <BatchLocationsModal v-model:open="showLocations" :batch="selectedBatch" />
       </div>
     </div>
   </div>
@@ -117,12 +127,20 @@ import {
   fetchDrugs as apiFetchDrugs,
   fetchBatches as apiFetchBatches
 } from '@features/pharmacy/api/pharmacy'
+import type { Drug } from '../types/Drug'
+import type { DrugBatch } from '../types/DrugBatch'
+
+import BatchLocationsModal from '../components/BatchLocationsModal.vue'
 
 /* ---------------- state ---------------- */
 const tab = ref<'batches' | 'drugs'>('batches')
-const drugs = ref<any[]>([])
-const batches = ref<any[]>([])
+const drugs = ref<Drug[]>([])
+const batches = ref<DrugBatch[]>([])
 const searchTerm = ref('')
+
+// whether to show the pop up for batch locations for the selected batch
+const showLocations = ref(false)
+const selectedBatch = ref<DrugBatch | null>(null)
 
 /* ---------------- API calls ---------------- */
 const fetchDrugs = async () => {
@@ -140,58 +158,106 @@ const fmtDate = (s: string) => {
   const d = new Date(s)
   return isNaN(+d) ? s : d.toLocaleDateString() // fall back to raw string
 }
-const drugName = (id: number) => drugs.value.find((d) => d.id === id)?.name ?? 'Unknown'
 
-/* ---------------- client-side search ---------------- */
+const drugById = computed(() => {
+  const m = new Map<number, Drug>()
+  for (const d of drugs.value) m.set(d.id, d)
+  return m
+})
+
+const drugName = (id: number) => drugById.value.get(id)?.name ?? 'Unknown'
+
+const batchTotalQty = (b: DrugBatch) =>
+  (b.batchLocations ?? []).reduce((sum, loc) => sum + (loc.quantity ?? 0), 0)
+
+/* ---------------- client-side search for batches / drugs ---------------- */
 const filteredBatches = computed(() => {
   const term = searchTerm.value.toLowerCase()
   if (!term) return batches.value
-  return batches.value.filter((b: any) => {
+  return batches.value.filter((b) => {
     return (
-      b.batch_no.toLowerCase().includes(term) ||
-      drugName(b.drug_id).toLowerCase().includes(term) ||
-      (b.location || '').toLowerCase().includes(term)
+      b.batchNumber.toLowerCase().includes(term) ||
+      drugName(b.drugId).toLowerCase().includes(term) ||
+      (b.batchLocations ?? []).some(bl => bl.location?.toLowerCase().includes(term))
     )
   })
 })
 
-/* ---------------- aggregate for By-Drug view ---------------- */
-const drugRows = computed(() => {
-  const map = new Map<
-    number,
-    { id: number; name: string; totalQty: number; earliestExpiry: string; count: number }
-  >()
-
-  drugs.value.forEach((d) => {
-    map.set(d.id, {
-      id: d.id,
-      name: d.name,
-      totalQty: 0,
-      earliestExpiry: '–', // display dash when no batches at all
-      count: 0
-    })
-  })
-
-  filteredBatches.value.forEach((b: any) => {
-    const row = map.get(b.drug_id)!
-    row.totalQty += b.quantity
-    row.count += 1
-
-    // choose earliest expiry among that drug’s batches
-    if (row.earliestExpiry === '–' || new Date(b.expiry_date) < new Date(row.earliestExpiry)) {
-      row.earliestExpiry = b.expiry_date
+// find drug IDs that match the search term in any batch fields (batch number, location)
+const matchingDrugIdsByBatchFields = computed(() => {
+  const term = searchTerm.value.toLowerCase()
+  if (!term) return null // no extra filtering
+  const ids = new Set<number>()
+  for (const b of batches.value) {
+    if (b.batchNumber?.toLowerCase().includes(term)) ids.add(b.drugId)
+    if ((b.batchLocations ?? []).some(bl => bl.location?.toLowerCase().includes(term))) {
+      ids.add(b.drugId)
     }
-  })
+  }
+  return ids
+})
 
-  return Array.from(map.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+const filteredDrugRows = computed(() => {
+  const term = searchTerm.value.toLowerCase()
+  if (!term) return drugRows.value
+
+  const ids = matchingDrugIdsByBatchFields.value
+  return drugRows.value.filter((row) =>
+    row.name.toLowerCase().includes(term) ||
+    (ids?.has(row.id) ?? false)
   )
 })
+
+/* ---------------- aggregate for By-Drug view ---------------- */
+const drugRows = computed(() => {
+  type Row = { id: number; name: string; totalQty: number; earliestExpiryMs: number | null; count: number }
+  const map = new Map<number, Row>()
+
+  // seed from drugs so drugs with 0 batches still show up
+  for (const d of drugs.value) {
+    map.set(d.id, { id: d.id, name: d.name, totalQty: 0, earliestExpiryMs: null, count: 0 })
+  }
+
+  for (const b of batches.value) {
+    let row = map.get(b.drugId)
+    if (!row) {
+      // defensive: a batch arrived before its drug, or data mismatch
+      const fallbackName = `Unknown (#${b.drugId})`
+      row = { id: b.drugId, name: fallbackName, totalQty: 0, earliestExpiryMs: null, count: 0 }
+      map.set(b.drugId, row)
+    }
+
+    row.totalQty += batchTotalQty(b)
+    row.count += 1
+
+    const ms = Date.parse(b.expiryDate)
+    if (!Number.isNaN(ms)) {
+      row.earliestExpiryMs = (row.earliestExpiryMs == null) ? ms : Math.min(row.earliestExpiryMs, ms)
+    }
+  }
+
+  // convert to view model
+  return Array.from(map.values()).map((r) => ({
+    id: r.id,
+    name: r.name,
+    totalQty: r.totalQty,
+    count: r.count,
+    earliestExpiry: r.earliestExpiryMs == null ? '–' : new Date(r.earliestExpiryMs).toLocaleDateString('en-SG')
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name))
+})
+
+/* ---------------- View Batch Locations for selected batch ---------------- */
+const openLocations = (b: DrugBatch) => {
+  selectedBatch.value = b
+  showLocations.value = true
+}
 
 /* ---------------- init ---------------- */
 onMounted(async () => {
   await Promise.all([fetchDrugs(), fetchBatches()])
 })
+
 
 /* ---------------- styling helpers ---------------- */
 const activeBtn = 'bg-indigo-600 text-white px-4 py-2 rounded transition-colors'

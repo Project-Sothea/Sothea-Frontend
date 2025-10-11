@@ -17,41 +17,82 @@
       <div class="mb-6 space-y-2">
         <p><strong>Name:</strong> {{ drug?.name }}</p>
         <p><strong>Unit:</strong> {{ drug?.unit }}</p>
-        <p><strong>Default Size:</strong> {{ drug?.default_size }}</p>
+        <p><strong>Default Size:</strong> {{ drug?.defaultSize }}</p>
         <p><strong>Notes:</strong> {{ drug?.notes || '–' }}</p>
       </div>
 
       <hr class="line" />
-
-      <!-- Batches Table -->
       <div class="mt-6">
         <h3 class="text-2xl mb-4">Batches</h3>
+      </div>
 
+      <div class="flex flex-row justify-between w-full mb-4">
+
+        <!-- pill-style toggle -->
+        <div class="space-x-2">
+          <button :class="tab === 'batches' ? activeBtn : inactiveBtn" @click="tab = 'batches'">
+            All&nbsp;Batches
+          </button>
+          <button :class="tab === 'locations' ? activeBtn : inactiveBtn" @click="tab = 'locations'">
+            By&nbsp;Location
+          </button>
+        </div>
+      </div>
+
+      <!-- ── FILTER BAR ──────────────────────────────────────────────── -->
+      <div class="flex items-center space-x-4">
+        <!-- search box -->
+        <input
+          type="text"
+          v-model="searchTerm"
+          placeholder="Search batch / location"
+          class="rounded-lg border-transparent w-[25rem] bg-gray-300 py-3 px-5 text-sm placeholder-gray-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+      </div>
+
+      <!-- Batches Table -->
+      <div>
         <div class="px-4 py-4 -mx-4 overflow-x-auto sm:-mx-8 sm:px-8">
           <div class="inline-block min-w-full overflow-hidden shadow">
-            <table class="min-w-full leading-normal">
+            <table v-if="tab === 'batches'" class="min-w-full leading-normal">
               <thead>
                 <tr>
-                  <th class="th">Batch No</th>
-                  <th class="th">Quantity</th>
+                  <th class="th">Batch Number</th>
+                  <th class="th">Total Quantity</th>
                   <th class="th">Expiry Date</th>
-                  <th class="th">Location</th>
-                  <th class="th">Created At</th>
-                  <th class="th">Notes</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="(b, idx) in batches"
+                  v-for="(b, idx) in filteredBatches"
                   :key="b.id"
                   :class="idx % 2 ? 'odd-row' : 'even-row'"
                 >
-                  <td class="td">{{ b.batch_no }}</td>
-                  <td class="td">{{ b.quantity }}</td>
-                  <td class="td">{{ fmtDate(b.expiry_date) }}</td>
-                  <td class="td">{{ b.location || '–' }}</td>
-                  <td class="td">{{ fmtDate(b.created_at) }}</td>
-                  <td class="td">{{ b.notes || '–' }}</td>
+                  <td class="td">{{ b.batchNumber }}</td>
+                  <td class="td">{{ batchTotalQty(b) }}</td>
+                  <td class="td">{{ fmtDate(b.expiryDate) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <table v-else class="min-w-full leading-normal">
+              <thead>
+                <tr>
+                  <th class="th">Location</th>
+                  <th class="th">Batch Number</th>
+                  <th class="th">Quantity</th>
+                  <th class="th">Expiry Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(bL, idx) in filteredBatchLocations"
+                  :key="bL.id"
+                  :class="idx % 2 ? 'odd-row' : 'even-row'"
+                >
+                  <td class="td">{{ bL.location }}</td>
+                  <td class="td">{{ bL.batchNumber }}</td>
+                  <td class="td">{{ bL.quantity }}</td>
+                  <td class="td">{{ fmtDate(bL.expiryDate) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -63,25 +104,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
 import { fetchDrug as apiFetchDrug, fetchDrugBatches } from '@features/pharmacy/api/pharmacy'
 import type { Drug } from '@features/pharmacy/types/Drug'
-import type { DrugBatch } from '@features/pharmacy/types/DrugBatch'
+import type { DrugBatch } from '@/features/pharmacy/types/DrugBatch'
 
 const route = useRoute()
 const drugId = route.params.drugId as string
 
+/* ---------------- State ---------------- */
 const drug = ref<Drug | null>(null)
 const batches = ref<DrugBatch[]>([])
+const searchTerm = ref('')
+const tab = ref<'batches' | 'locations'>('batches')
 
-const fmtDate = (s: string) => {
-  if (!s || s === '–') return '–'
-  const d = new Date(s)
-  return isNaN(+d) ? s : d.toLocaleDateString()
-}
-
+/* ---------------- API calls ---------------- */
 const fetchDrug = async () => {
   drug.value = await apiFetchDrug(drugId)
 }
@@ -91,9 +130,53 @@ const fetchBatches = async () => {
   batches.value = Array.isArray(data) ? [...data] : []
 }
 
+/* ---------------- helpers ---------------- */
+const batchTotalQty = (b: DrugBatch) =>
+  (b.batchLocations ?? []).reduce((sum, loc) => sum + (loc.quantity ?? 0), 0)
+
+const fmtDate = (s: string) => {
+  if (!s || s === '–') return '–'
+  const d = new Date(s)
+  return isNaN(+d) ? s : d.toLocaleDateString()
+}
+
+/* ---------------- client-side search for batches / drugs ---------------- */
+const filteredBatches = computed(() => {
+  const term = searchTerm.value.toLowerCase()
+  if (!term) return batches.value
+  return batches.value.filter((b) => {
+    return (
+      b.batchNumber.toLowerCase().includes(term) ||
+      (b.batchLocations ?? []).some(bl => bl.location?.toLowerCase().includes(term))
+    )
+  })
+})
+
+const batchLocations = computed(() => {
+  return batches.value.flatMap(b => (b.batchLocations ?? [])
+                    .map(bL => ({ ...bL, batchNumber: b.batchNumber, expiryDate: b.expiryDate })))
+})
+
+const filteredBatchLocations = computed(() => {
+  const term = searchTerm.value.toLowerCase()
+  if (!term) return batchLocations.value
+  return batchLocations.value.filter(bL => 
+    bL.batchNumber.toLowerCase().includes(term) ||
+    bL.location?.toLowerCase().includes(term)
+  )
+})
+
+/* ---------------- init ---------------- */
+
 onMounted(async () => {
   await Promise.all([fetchDrug(), fetchBatches()])
 })
+
+/* ---------------- Styling Helpers ---------------- */
+
+const activeBtn = 'bg-indigo-600 text-white px-4 py-2 rounded transition-colors'
+const inactiveBtn = 'bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colors'
+
 </script>
 
 <style scoped>
