@@ -82,6 +82,20 @@
         <p v-if="errors.expiryDate" class="err">{{ errors.expiryDate }}</p>
       </label>
 
+      <!-- Supplier -->
+      <label class="block mb-4">
+        <span class="text-gray-700">Supplier <span class="text-red-600">*</span></span>
+        <input
+          v-model="batch.supplier"
+          :class="inputClass(errors.supplier)"
+          @input="clearError('supplier')"
+          type="text"
+          autocomplete="off"
+          required
+        />
+        <p v-if="errors.expiryDate" class="err">{{ errors.expiryDate }}</p>
+      </label>
+
       <!-- ─────────── LOCATIONS & QUANTITIES (free-text, repeatable) ─────────── -->
       <div class="mb-2 flex items-center justify-between">
         <span class="text-gray-700">Locations <span class="text-red-600">*</span></span>
@@ -95,57 +109,89 @@
         <div
           v-for="(row, idx) in batchLocations"
           :key="idx"
-          class="grid grid-cols-7 gap-2 items-start"
+          class="grid grid-cols-7 gap-2 items-center"
         >
-          <!-- Location (free text) -->
+          <!-- Location -->
           <div class="col-span-4">
-            <label class="block text-sm text-gray-700 mb-1">Location</label>
+            <label class="sr-only">Location</label>
             <input
               v-model.trim="row.location"
               type="text"
-              placeholder="e.g., Cupboard A, Drawer 3"
+              placeholder="Location (e.g., Cupboard A, Drawer 3)"
               :class="inputClass(rowErrors(idx, 'location'))"
               @input="clearRowError(idx, 'location')"
               autocomplete="off"
             />
-            <p v-if="rowErrors(idx, 'location')" class="err">
-              {{ rowErrors(idx, 'location') }}
-            </p>
+          <p
+            :class="[
+              'err text-xs leading-5 min-h-5',          // fixed vertical space
+              rowErrors(idx, 'location') ? '' : 'invisible' // hide but keep space
+            ]"
+          >
+            {{ rowErrors(idx, 'location') || 'placeholder' }}
+          </p>
           </div>
 
           <!-- Quantity -->
           <div class="col-span-2">
-            <label class="block text-sm text-gray-700 mb-1">Qty</label>
+            <label class="sr-only">Qty</label>
             <input
               v-model.number="row.quantity"
               type="number"
               min="1"
               step="1"
+              placeholder="Qty"
               :class="inputClass(rowErrors(idx, 'quantity'))"
               @input="clearRowError(idx, 'quantity')"
             />
-            <p v-if="rowErrors(idx, 'quantity')" class="err">
-              {{ rowErrors(idx, 'quantity') }}
+            <p
+              :class="[
+                'err text-xs leading-5 min-h-5',
+                rowErrors(idx, 'quantity') ? '' : 'invisible'
+              ]"
+            >
+              {{ rowErrors(idx, 'quantity') || 'placeholder' }}
             </p>
           </div>
 
-          <!-- Remove -->
-          <div class="col-span-1 flex items-end">
-           <button
-            type="button"
-            class="btn-gray !py-1 w-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="removeLocationRow(idx)"
-            :disabled="batchLocations.length === 1"
-            title="Remove row"
-            aria-label="Remove row"
+          <!-- Remove (icon-only, red when enabled, grey when disabled) -->
+          <div class="col-span-1" justify-center>
+            <button
+              type="button"
+              @click="removeLocationRow(idx)"
+              :disabled="batchLocations.length === 1"
+              title="Remove row"
+              aria-label="Remove row"
+              class="p-2 rounded-md transition self-center
+                    text-red-600 hover:text-red-700
+                    focus:outline-none focus:ring-2 focus:ring-red-500/40
+                    disabled:text-gray-300 disabled:hover:text-gray-300
+                    disabled:cursor-not-allowed
+                    ml-5"
+            >
+              <!-- Lucide 'trash-2' -->
+              <svg xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  class="h-5 w-5"
+                  aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+
+          <p
+            :class="[
+              'err text-xs leading-5 min-h-5',          // fixed vertical space
+              'invisible' // hide but keep space
+            ]"
           >
-            <!-- Heroicons: Eye (outline) -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5">
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-              <path d="M10 11v6M14 11v6"/>
-              <path d="M3 6h18M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
-            </svg>
-          </button>
+            Placeholder
+          </p>
           </div>
         </div>
       </div>
@@ -312,6 +358,9 @@ const validate = () => {
     if (picked <= today) e.expiryDate = 'Expiry date must be after today.'
   }
 
+  // supplier
+  if (!batch.value.supplier) e.supplier = 'Supplier is required.'
+
   // batch_locations rows: ≥1 row, each with non-empty location and positive quantity
   if (!batchLocations.value.length) {
     e.batchLocations = 'Add at least one location row.'
@@ -321,6 +370,19 @@ const validate = () => {
       const q = Number(row.quantity)
       if (!Number.isFinite(q) || q <= 0) re[rowKey(idx, 'quantity')] = 'Enter a positive quantity.'
     })
+
+    const seen = new Map<string, number[]>()
+    batchLocations.value.forEach((row, idx) => {
+      const key = (row.location ?? '').trim().toLowerCase()
+      if (!key) return
+      if (!seen.has(key)) seen.set(key, [])
+      seen.get(key)!.push(idx)
+    })
+    for (const [, idxs] of seen) {
+      if (idxs.length > 1) {
+        idxs.forEach(i => { re[rowKey(i, 'location')] = 'Duplicate location. Use unique names.' })
+      }
+    }
   }
 
   errors.value = e

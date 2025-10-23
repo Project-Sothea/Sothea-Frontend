@@ -4,18 +4,22 @@ export interface Prescription {
     patientId?: number;
     notes?: string;
     prescribedDrugs: DrugPrescription[]
+    isDispensed?: boolean;
+    dispenserName?: string;
 }
 
 export interface DrugPrescription {
-    id: number
+    id?: number
     drugId: number;
-    quantity: number;
     remarks: string;
+    requestedQty: number;
+    isPacked?: boolean;
+    packerName?: string;
     batches: PrescriptionBatchItem[];
 }
 
 export interface PrescriptionBatchItem {
-    id: number;
-    batchId: number;
+    id?: number;
+    batchLocationId: number;
     quantity: number
 }

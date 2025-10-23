@@ -1,410 +1,483 @@
+ <!-- Add button for mark  -->
+
 <template>
   <div class="flex items-center justify-center">
-    <div class="flex flex-col rounded-lg w-3/4 max-h-fit border border-gray-300 p-10">
-      <h1>Pharmacy</h1>
-      <br />
-
-      <div
-        v-for="(entry, index) in prescribedDrugs"
-        :key="index"
-        class="mb-6 border border-gray-200 p-4 rounded-md"
-      >
-        <!-- Drug Selector -->
-        <div class="mb-2">
-          <label class="block text-sm font-medium text-dark">Drug <span class="req">*</span></label>
-          <select
-            v-model.number="entry.drugId"
-            @change="onDrugChange(index)"
-            class="w-1/2 border p-1 rounded"
-          >
-            <option :value="null">Select a drug</option>
-            <option v-for="drug in drugs" :key="drug.id" :value="drug.id">{{ drug.name }}</option>
-          </select>
-        </div>
-
-        <!-- Mode Toggle -->
-        <div class="flex space-x-4 mt-2">
-          <label>
-            <input
-              type="radio"
-              :name="'mode-' + index"
-              value="auto"
-              v-model="entry.mode"
-              :disabled="!isEditing"
-              @change="onModeChange(index, 'auto')"
-            />
-
-            <span class="ml-2 text-sm">Auto</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              :name="'mode-' + index"
-              value="manual"
-              v-model="entry.mode"
-              :disabled="!isEditing"
-              @change="onModeChange(index, 'manual')"
-            />
-            <span class="ml-2 text-sm">Manual</span>
-          </label>
-        </div>
-
-        <!-- Remarks -->
-        <div class="mt-2">
-          <label class="block text-sm">Remarks</label>
-          <input v-model="entry.remarks" class="w-full border p-1 rounded" :disabled="!isEditing" />
-        </div>
-
-        <!-- Auto Mode -->
-        <div v-if="entry.mode === 'auto'" class="mt-3">
-          <label class="block text-sm">Quantity <span class="req">*</span></label>
-          <!-- Quantity Input -->
-          <input
-            type="number"
-            v-model.number="entry.quantity"
-            min="0"
-            class="w-1/4 border p-1 rounded"
-            :disabled="!isEditing"
-          />
-
-          <!-- Generate Batches Button -->
-          <button
-            v-if="isEditing"
-            class="ml-4 px-3 py-1 border text-sm rounded text-green-700 border-green-600 hover:bg-green-600 hover:text-white"
-            @click="calculateAutoBatches(index)"
-            :disabled="!entry.quantity || entry.quantity <= 0"
-          >
-            Generate Batches
-          </button>
-
-          <p v-if="autoModeErrors[index]" class="text-red-600 text-sm mt-1">
-            {{ autoModeErrors[index] }}
-          </p>
-
-          <table v-if="entry.batches.length" class="w-full mt-2 text-sm border-collapse">
-            <thead>
-              <tr>
-                <th class="text-left p-1 border-b">Batch</th>
-                <th class="text-left p-1 border-b">Expiry</th>
-                <th class="text-left p-1 border-b">Selected Qty</th>
-                <th class="text-left p-1 border-b">Remaining</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="b in entry.batches" :key="b.batchId">
-                <td class="p-1">
-                  {{ findBatch(entry.drugId!, b.batchId)?.batchNo || 'Unknown' }}
-                </td>
-                <td class="p-1">
-                  {{ formatDate(findBatch(entry.drugId!, b.batchId)?.expiryDate || '') }}
-                </td>
-                <td class="p-1">{{ b.quantity }}</td>
-                <td class="p-1">{{ calculateRemaining(entry.drugId!, b.batchId, b.quantity) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Manual Mode -->
-        <div v-if="entry.mode === 'manual'" class="mt-3">
-          <table class="w-full text-sm border-collapse">
-            <thead>
-              <tr>
-                <th class="text-left p-1 border-b">Batch</th>
-                <th class="text-left p-1 border-b">Expiry</th>
-                <th class="text-left p-1 border-b">Available</th>
-                <th class="text-left p-1 border-b">Qty</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(batch, bIndex) in availableBatches[entry.drugId ?? -1] || []"
-                :key="batch.id"
-              >
-                <td class="p-1">{{ batch.batchNo }}</td>
-                <td class="p-1">{{ formatDate(batch.expiryDate) }}</td>
-                <td class="p-1">
-                  {{
-                    calculateRemaining(
-                      entry.drugId!,
-                      batch.id,
-                      entry.batches[bIndex]?.quantity ?? 0
-                    )
-                  }}
-                </td>
-                <td class="p-1">
-                  <input
-                    type="number"
-                    min="0"
-                    :disabled="!isEditing"
-                    v-model.number="entry.batches[bIndex].quantity"
-                    class="w-20 border rounded px-1"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Remove Drug Button -->
-        <button
-          @click="removeDrugEntry(index)"
-          class="mt-4 px-3 py-1 rounded-lg text-sm text-red-600 border border-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200"
-          v-if="isEditing"
-        >
-          Remove Drug
-        </button>
+    <div class="flex flex-col rounded-lg w-3/4 border border-gray-300 p-10">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-medium">
+          {{ existingId ? 'Update Prescription' : 'Create Prescription' }}
+        </h1>
       </div>
 
-      <!-- Add Drug Button -->
-      <button
-        v-if="isEditing"
-        @click="addDrugEntry"
-        class="mt-2 px-4 py-2 border rounded text-sm text-[#3f51b5]"
+      <!-- Read-only banner when dispensed -->
+      <div
+        v-if="isReadOnly"
+        class="mt-4 p-3 rounded bg-amber-50 border border-amber-200 text-amber-800 text-sm"
       >
-        Add Drug
-      </button>
+        This prescription has already been <strong>dispensed</strong> and can’t be edited.
+      </div>
 
-      <!-- Edit & Save Buttons -->
-      <div class="flex flex-row-reverse w-full mt-5 space-x-3 space-x-reverse">
-        <button
-          v-if="!isEditing && !isAdd"
-          @click="toggleEdit"
-          class="px-5 py-2 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5]"
+      <!-- Lines editor (shown when there is at least one line or an existing Rx) -->
+      <div>
+        <div
+          v-for="(drug, idx) in prescription.prescribedDrugs"
+          :key="idx"
+          class="mt-6 border border-gray-200 p-4 rounded-md"
         >
-          Edit
-        </button>
+          <div class="flex items-start gap-6">
+            <!-- Drug selector -->
+            <div class="w-2/5">
+              <label
+                class="block text-sm font-medium text-dark"
+                :for="`drug-${idx}`"
+                :input-id="`drug-${idx}`"
+              >
+                Drug <span class="text-red-600" v-if="!isReadOnly">*</span>
+              </label>
+              <DrugSearchSelect
+                v-model="drug.drugId"
+                :all-drugs="drugs"
+                :exclude-ids="selectedDrugIds"
+                :error="drugErrors[idx]?.drug"
+                :disabled="isReadOnly"
+                :input-id="`drug-${idx}`"
+                @update:modelValue="onDrugCommitted(idx, $event)"
+              />
 
-        <button
-          v-if="isEditing && !isAdd"
-          @click="submitData"
-          class="px-5 py-2 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5]"
-        >
-          Save
-        </button>
+              <!-- isPacked badge -->
+              <div class="mt-2">
+                <span
+                  v-if="drug.isPacked"
+                  class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200"
+                  title="This line is packed"
+                >
+                  <!-- tiny dot -->
+                  <span class="inline-block h-2 w-2 rounded-full bg-green-600"></span>
+                  Packed
+                </span>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200"
+                  title="This line is not packed"
+                >
+                  <span class="inline-block h-2 w-2 rounded-full bg-gray-400"></span>
+                  Not packed
+                </span>
+              </div>
+
+              <p v-if="drugErrors[idx]?.drug" class="text-xs text-red-600 mt-1">
+                {{ drugErrors[idx].drug }}
+              </p>
+            </div>
+
+            <!-- Requested Qty -->
+            <div class="w-1/5">
+              <label class="block text-sm font-medium text-dark">
+                Required Qty <span class="text-red-600" v-if="!isReadOnly">*</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                v-model.number="drug.requestedQty"
+                class="mt-1 w-full border p-2 rounded text-right disabled:bg-gray-50"
+                placeholder="e.g. 30"
+                :disabled="isReadOnly"
+              />
+              <p v-if="drugErrors[idx]?.qty" class="text-xs text-red-600 mt-1">
+                {{ drugErrors[idx].qty }}
+              </p>
+            </div>
+
+            <!-- Remarks (optional) -->
+            <div class="flex-1">
+              <label class="block text-sm font-medium text-dark" :for="`remarks-${idx}`">Remarks</label>
+              <textarea
+                :id="`remarks-${idx}`"
+                v-model="drug.remarks"
+                rows="2"
+                class="mt-1 w-full border p-2 rounded disabled:bg-gray-50
+                      resize-y overflow-y-auto overflow-x-hidden
+                      min-h-[2.5rem] max-h-40"
+                placeholder="Optional notes"
+                :disabled="isReadOnly"
+              />
+            </div>
+          </div>
+          <!-- Delete line -->
+          <div class="mt-4" v-if="!isReadOnly">
+            <button
+              class="px-3 py-1 rounded-lg text-sm text-red-600 border border-red-600 hover:bg-red-600 hover:text-white transition-colors"
+              @click="removeDrug(idx)"
+            >
+              Delete
+            </button>
+          </div>
+          <div class="my-4 border-t border-gray-200">
+            <!-- Summary bar: sits under the row, shows status + toggle -->
+            <div class="mt-3">
+              <div class="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-2 text-[#3f51b5] hover:underline disabled:opacity-60"
+                  @click="toggleBatches(idx)"
+                  :disabled="!drug.drugId || drug.drugId <= 0 || !drug.requestedQty"
+                  :aria-expanded="expandedRows[idx] ? 'true' : 'false'"
+                  :aria-controls="`alloc-panel-${idx}`"
+                >
+                  <svg viewBox="0 0 20 20" class="h-4 w-4 transition-transform"
+                      :class="expandedRows[idx] ? 'rotate-90' : ''" fill="currentColor">
+                    <path fill-rule="evenodd" d="M6 4l8 6-8 6V4z" clip-rule="evenodd" />
+                  </svg>
+                  <span>{{ expandedRows[idx] ? 'Hide allocation' : 'View allocation' }}</span>
+                </button>
+
+                <div class="text-gray-700">
+                  Allocated:
+                  <span :class="lineAllocated(drug) === Number(drug.requestedQty) ? 'text-green-700 font-medium' : 
+                    lineAllocated(drug) < Number(drug.requestedQty) ?  'text-amber-700 font-medium' : 'text-red-700 font-medium'">
+                    {{ lineAllocated(drug) }} / {{ Number(drug.requestedQty) || 0 }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dropdown panel BELOW the row -->
+            <transition name="fade">
+              <div
+                v-if="expandedRows[idx] && drug.drugId > 0"
+                :id="`alloc-panel-${idx}`"
+                class="mt-3 -mx-4 px-4 pb-4"
+                role="region"
+              >
+                <div>
+                  <BatchAllocator
+                    :key="`alloc-${idx}-${drug.drugId}`"
+                    :drug-id="drug.drugId"
+                    :requested-qty="Number(drug.requestedQty) || 0"
+                    v-model="drug.batches"
+                    v-model:isPacked="drug.isPacked"
+                    :disabled="isReadOnly"
+                  />
+                </div>
+              </div>
+            </transition>
+          </div>
+        </div>
+
+        <!-- Add another drug -->
+        <div class="mt-4" v-if="!isReadOnly">
+          <button
+            class="px-4 py-2 border rounded text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white"
+            @click="addDrug"
+          >
+            Add Drug
+          </button>
+        </div>
+        <!-- Actions -->
+        <div class="w-full mt-6 flex justify-end">
+          <div class="grid grid-cols-[max-content,max-content] gap-3">
+            <!-- Row 1 -->
+            <button
+              class="px-5 py-2 rounded-lg text-sm border"
+              @click="resetForm"
+              :disabled="submitting || isReadOnly || !isDirty"
+            >
+              Reset
+            </button>
+            <button
+              class="px-5 py-2 rounded-lg text-sm text-white bg-[#3f51b5] hover:opacity-90 disabled:opacity-60"
+              @click="submit"
+              :disabled="submitting || !prescription.prescribedDrugs.length || isReadOnly"
+            >
+              {{ submitting ? 'Saving…' : (existingId ? 'Save' : 'Create') }}
+            </button>
+
+            <!-- Row 2: Dispense spans both -->
+            <button
+              class="col-span-2 px-5 py-2 rounded-lg text-sm text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-60"
+              @click="onDispenseClick"
+              :disabled="submitting || isReadOnly || !canDispense"
+              title="All drugs must be packed"
+            >
+              {{ submitting ? 'Saving…' : 'Mark Dispensed & Save' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Confirmation dialog -->
+        <ConfirmationDialogue
+          :open="confirmDispenseOpen"
+          title="Dispense prescription?"
+          message="Once dispensed, this prescription becomes read-only and can’t be edited. Continue?"
+          confirm-text="Yes, dispense"
+          cancel-text="No, go back"
+          :close-on-backdrop="false"
+          :close-on-esc="false"
+          @confirm="confirmDispense"
+          @cancel="cancelDispense"
+        />
       </div>
     </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { fetchDrugs } from '@/features/pharmacy/api/pharmacy';
+import type { Drug } from '@/features/pharmacy/types/Drug';
+import type { Prescription } from '@/features/pharmacy/types/Prescription';
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useToast } from 'vue-toast-notification'
-import {
-  fetchPrescriptions,
-  fetchPrescriptionDrugs,
-  fetchBatchesByDrug,
-  upsertPrescription,
-  type PrescriptionDrugMeta,
-  type DrugBatchMeta,
-  type UpsertPrescriptionPayload
-} from '@features/patient-record/api/prescription'
-import type Patient from '@patient-record/types/Patient'
-import type { DrugPrescription, Prescription } from '@features/pharmacy/types/Prescription'
-import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
+import { createPrescription, fetchPrescriptionByVisit, updatePrescription } from '../api/prescription';
+import DrugSearchSelect from './DrugSearchSelect.vue';
+import BatchAllocator from './BatchAllocator.vue' // <- the component I gave earlier
+import ConfirmationDialogue from './ConfirmationDialogue.vue';
 
-interface FormBatchSelection {
-  batchId: number
-  quantity: number
-}
-interface DrugPrescriptionFormEntry {
-  drugId: number | null
-  mode: 'auto' | 'manual'
-  quantity?: number
-  remarks?: string
-  batches: FormBatchSelection[]
-}
 
-const props = defineProps<{
-  patientId: string
-  patientVid: string
-  patientData: Patient
-  isAdd?: boolean
-}>()
+// --- Props ---
+const props = defineProps<{ patientId: string | number; patientVid: string | number }>()
 
+// --- State ---
 const toast = useToast()
-const { isEditing, toggleEdit, save } = useEditableSection<any>()
+const drugs = ref<Drug[]>([])
+const prescription = ref<Prescription>({
+      patientId: Number(props.patientId),
+      vid: Number(props.patientVid),
+      prescribedDrugs: [],
+      isDispensed: false,
+    })
+const pristine = ref<Prescription>({
+      patientId: Number(props.patientId),
+      vid: Number(props.patientVid),
+      prescribedDrugs: [],
+      isDispensed: false,
+    })
+const existingId = ref<number | null>(null)
+const isReadOnly = ref<boolean>(false)
+const confirmDispenseOpen = ref<boolean>(false)
 
-// Reactive state
-const drugs = ref<PrescriptionDrugMeta[]>([])
-const availableBatches = ref<Record<number, DrugBatchMeta[]>>({})
-const prescribedDrugs = ref<DrugPrescriptionFormEntry[]>([])
-const existingPrescriptionId = ref<number | null>(null)
-const originalPrescriptionBatchQuantities = ref<Record<number, number>>({})
-const autoModeErrors = ref<Record<number, string>>({})
+const expandedRows = ref<Record<number, boolean>>({})
 
-onMounted(() => {
-  fetchPrescription()
-  fetchDrugs()
+const drugErrors = ref<Record<number, { drug?: string; qty?: string }>>({})
+
+const submitting = ref(false)
+
+const isDirty = computed(() => {
+  if (!pristine.value) return false
+  return JSON.stringify(prescription.value) !== JSON.stringify(pristine.value)
 })
 
-function calculateRemaining(drugId: number, batchId: number, currentQty: number): number {
-  const available = availableBatches.value[drugId]?.find((b) => b.id === batchId)
-  const availableQty = available?.quantity ?? 0
-  const originalPrescribedQty = originalPrescriptionBatchQuantities.value[batchId] ?? 0
-  return availableQty + originalPrescribedQty - currentQty
-}
+// --- Load existing prescription (by visit) & drugs ---
+onMounted(async () => {
+  try {
+    drugs.value = await fetchDrugs()
+  } catch {
+    drugs.value = []
+  }
 
-function onModeChange(index: number, newMode: 'auto' | 'manual') {
-  const entry = prescribedDrugs.value[index]
-  entry.mode = newMode
-  if (newMode === 'auto') {
-    entry.quantity = 0
-    entry.batches = []
+  await reloadExisting()
+})
+
+async function reloadExisting() {
+  let fetchedPrescription;
+  try {
+    fetchedPrescription = await fetchPrescriptionByVisit(props.patientId, props.patientVid)
+    if (fetchedPrescription?.isDispensed) {
+      isReadOnly.value = true;
+    }
+  } catch {
+    fetchedPrescription = null;
+  }
+
+  if (fetchedPrescription?.id) {
+    existingId.value = fetchedPrescription.id
+    prescription.value = fetchedPrescription
+    pristine.value = structuredClone(fetchedPrescription)
   } else {
-    entry.quantity = undefined
-    const drugId = entry.drugId
-    const batches = availableBatches.value[drugId ?? -1] || []
-    entry.batches = batches.map((b) => ({ batchId: b.id, quantity: 0 }))
+    existingId.value = null
   }
+  drugErrors.value = {}
 }
 
-async function fetchPrescription() {
-  const res = await fetchPrescriptions(props.patientId)
-  const prescription = (res && res.length > 0 ? res[0] : null) as Prescription | null
-  if (!prescription) return
-  existingPrescriptionId.value = prescription.id ?? null
-  prescribedDrugs.value = []
-  for (const pd of prescription.prescribedDrugs as DrugPrescription[]) {
-    const drugId = pd.drugId
-    const batches = pd.batches || []
-    const batchRes = await fetchBatchesByDrug(drugId)
-    availableBatches.value[drugId] = batchRes
-    const batchEntries: FormBatchSelection[] = batchRes.map((b) => {
-      const existing = batches.find((e) => e.batchId === b.id)
-      return { batchId: b.id, quantity: existing ? existing.quantity : 0 }
+const canDispense = computed(() => {
+  const rows = prescription.value.prescribedDrugs
+  if (!rows.length) return false
+  return rows.every(r => !!r.isPacked)
+})
+
+// Helper: get all selected drug ids
+const selectedDrugIds = computed(() =>
+  prescription.value.prescribedDrugs
+    .map(d => d.drugId)
+    .filter((id): id is number => typeof id === 'number' && id > 0)
+)
+
+function lineCanStayPacked(line: {
+  requestedQty?: number
+  batches?: Array<{ quantity: number }>
+}) {
+  const rq = Number(line.requestedQty) || 0
+  return rq > 0 && lineAllocated(line) === rq
+}
+
+// One watcher to rule them all
+watch(
+  () => prescription.value.prescribedDrugs.map(d => ({
+    rq: Number(d.requestedQty) || 0,
+    alloc: lineAllocated(d),
+    packed: !!d.isPacked,
+  })),
+  (rows) => {
+    rows.forEach((row, i) => {
+      const line = prescription.value.prescribedDrugs[i]
+      if (row.packed && !lineCanStayPacked(line)) {
+        line.isPacked = false
+      }
     })
-    prescribedDrugs.value.push({
-      drugId,
-      mode: batches.length > 0 ? 'manual' : 'auto',
-      quantity: pd.quantity,
-      remarks: pd.remarks,
-      batches: batchEntries
-    })
-    for (const be of batchEntries) {
-      originalPrescriptionBatchQuantities.value[be.batchId] = be.quantity
-    }
-  }
-}
+  },
+  { deep: true, immediate: true }
+)
 
-function calculateAutoBatches(index: number) {
-  const entry = prescribedDrugs.value[index]
-  const batches = availableBatches.value[entry.drugId ?? -1] || []
-  const totalAvailable = batches.reduce((sum, b) => sum + b.quantity, 0)
-  if (entry.quantity && entry.quantity > totalAvailable) {
-    autoModeErrors.value[index] = `Only ${totalAvailable} available. Reduce quantity.`
-    entry.batches = []
-    return
-  }
-  autoModeErrors.value[index] = ''
-  const sorted = [...batches].sort(
-    (a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()
-  )
-  const targetQty = entry.quantity ?? 0
-  if (!targetQty || targetQty <= 0) {
-    entry.batches = []
-    return
-  }
-  let remaining = targetQty
-  const result: FormBatchSelection[] = []
-  for (const b of sorted) {
-    if (remaining <= 0) break
-    const taken = Math.min(b.quantity, remaining)
-    result.push({ batchId: b.id, quantity: taken })
-    remaining -= taken
-  }
-  entry.batches = result
-}
 
-function findBatch(drugId: number, batchId: number) {
-  return availableBatches.value[drugId]?.find((b) => b.id === batchId)
-}
-
-async function fetchDrugs() {
-  drugs.value = await fetchPrescriptionDrugs()
-}
-
-async function onDrugChange(index: number) {
-  const entry = prescribedDrugs.value[index]
-  if (!entry.drugId) return
-  const response = await fetchBatchesByDrug(entry.drugId)
-  availableBatches.value[entry.drugId] = response
-  entry.batches = response.map((b) => ({ batchId: b.id, quantity: 0 }))
-}
-
-function addDrugEntry() {
-  prescribedDrugs.value.push({
-    drugId: null,
-    mode: 'auto',
-    quantity: undefined,
+// --- UI actions ---
+function addDrug() {
+  prescription.value.prescribedDrugs.push({
+    drugId: -1,
+    requestedQty: 0,
     remarks: '',
-    batches: []
+    batches: [],
+    isPacked: false,
   })
 }
-
-function removeDrugEntry(index: number) {
-  prescribedDrugs.value.splice(index, 1)
+function removeDrug(idx: number) {
+  prescription.value.prescribedDrugs.splice(idx, 1)
+  // clear errors for simplicity
+  drugErrors.value = {}
 }
 
-function buildPayload(): UpsertPrescriptionPayload | null {
-  for (const [i, entry] of prescribedDrugs.value.entries()) {
-    if (entry.mode === 'auto' && autoModeErrors.value[i]) {
-      toast.error(`Drug #${i + 1}: ${autoModeErrors.value[i]}`)
-      return null
-    }
-    if (!entry.drugId) {
-      toast.error(`Drug #${i + 1}: Please select a drug.`)
-      return null
-    }
-    if (entry.mode === 'auto' && (!entry.quantity || entry.quantity <= 0)) {
-      toast.error(`Drug #${i + 1}: Please specify quantity.`)
-      return null
-    }
-    if (entry.mode === 'manual' && !entry.batches.some((b) => b.quantity > 0)) {
-      toast.error(`Drug #${i + 1}: At least one batch must have quantity.`)
-      return null
-    }
-  }
-  return {
-    patientId: props.patientId,
-    visitId: props.patientVid,
-    entries: prescribedDrugs.value.map((entry) => ({
-      drugId: entry.drugId!,
-      dosage: '',
-      frequency: '',
-      quantity:
-        entry.mode === 'auto'
-          ? entry.quantity!
-          : entry.batches.reduce((sum, b) => sum + b.quantity, 0),
-      batchId: entry.batches.find((b) => b.quantity > 0)?.batchId ?? null
-    }))
+function onDrugCommitted(idx: number, _newId: number | null) {
+  const line = prescription.value.prescribedDrugs[idx]
+  // wipe allocations linked to prior drug
+  line.batches = []   // and any other per-drug fields (e.g., batchLocations)
+  line.isPacked = false
+  const e = { ...drugErrors.value }
+  if (e[idx]?.drug) delete e[idx].drug
+  drugErrors.value = e
+}
+
+function toggleBatches(idx: number) {
+  expandedRows.value[idx] = !expandedRows.value[idx]
+  if (expandedRows.value[idx]) {
+    nextTick(() => document.getElementById(`alloc-panel-${idx}`)?.scrollIntoView({behavior:'smooth', block:'nearest'}))
   }
 }
 
-async function submitData() {
-  const payload = buildPayload()
-  if (!payload) return
-  await save({
-    buildPayload: () => payload,
-    update: async () => {
-      await upsertPrescription(existingPrescriptionId.value, payload)
-    },
-    onSuccess: () => toast.success('Prescription saved successfully.')
-  })
+// tiny helpers for the summary line
+function lineAllocated(line: { batches?: Array<{ quantity: number }>}) {
+  const arr = Array.isArray(line.batches) ? line.batches : []
+  return arr.reduce((s, b) => s + (Number(b.quantity) || 0), 0)
 }
 
-function formatDate(date: string): string {
-  const d = new Date(date)
-  return isNaN(d.getTime()) ? date : d.toLocaleDateString()
+function resetForm() {
+  expandedRows.value = {}
+  if (existingId.value) {
+    reloadExisting()
+  } else {
+    prescription.value = {
+      patientId: Number(props.patientId),
+      vid: Number(props.patientVid),
+      prescribedDrugs: [],
+      isDispensed: false,
+    }
+    drugErrors.value = {}
+  }
 }
+
+// --- Validation ---
+function validate(): boolean {
+  if (isReadOnly.value) {
+    toast.error('This prescription has been dispensed and cannot be edited.')
+    return false
+  }
+  if (!prescription.value.prescribedDrugs.length) {
+    toast.error('Add at least one drug before saving.')
+    return false
+  }
+
+  let ok = true
+  const errs: Record<number, { drug?: string; qty?: string }> = {}
+
+  prescription.value.prescribedDrugs.forEach((d, idx) => {
+    const e: { drug?: string; qty?: string } = {}
+    if (!d.drugId || d.drugId <= 0) {
+      e.drug = 'Please select a drug.'
+      ok = false
+    }
+
+    const requested = Number(d.requestedQty) || 0
+    if (requested <= 0) {
+      e.qty = 'Quantity must be greater than 0.'
+      ok = false
+    }
+    const allocated = lineAllocated(d)
+    if (requested > 0 && allocated > requested) {
+      e.qty = `Allocated (${allocated}) cannot exceed requested (${requested}).`
+      toggleBatches(idx)
+      ok = false
+    }
+    if (Object.keys(e).length) errs[idx] = e
+  })
+
+  drugErrors.value = errs
+  return ok
+}
+
+// --- Save ---
+async function submit() {
+  if (!validate()) return
+  submitting.value = true
+  try {
+    if (existingId.value) {
+      await updatePrescription(prescription.value)
+      toast.success('Prescription saved.')
+      await reloadExisting()
+    } else {
+      const created = await createPrescription(prescription.value)
+      existingId.value = created.id ?? null
+      toast.success('Prescription created.')
+      await reloadExisting()
+    }
+  } catch (e: any) {
+    toast.error(e?.message ?? 'Failed to save prescription.')
+  } finally {
+    submitting.value = false
+  }
+}
+
+function onDispenseClick() {
+  if (submitting.value) return
+  if (!canDispense.value) {
+    toast.error('All drugs must be packed before dispensing.')
+    return
+  }
+  confirmDispenseOpen.value = true
+}
+
+async function confirmDispense() {
+  if (submitting.value) return
+  confirmDispenseOpen.value = false
+  const prev = !!prescription.value.isDispensed
+  try {
+    prescription.value.isDispensed = true
+    await submit()                    
+  } catch (e) {
+    prescription.value.isDispensed = prev
+    throw e
+  }
+}
+
+function cancelDispense() {
+  confirmDispenseOpen.value = false
+}
+
 </script>
-
-<style scoped>
-.req {
-  color: red;
-}
-h1 {
-  font-size: 1.25rem;
-  font-weight: 500;
-}
-</style>

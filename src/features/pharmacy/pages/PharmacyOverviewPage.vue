@@ -76,7 +76,15 @@
                     title="View locations"
                     @click="openLocations(b)"
                   >
-                    <EyeIcon class="h-5 w-5" aria-hidden="true" />
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      class="h-5 w-5"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M12 5c-5 0-9.27 3.11-10.71 7.5C3.73 16.89 8 20 12 20s8.27-3.11 10.71-7.5C20.27 8.11 16 5 12 5m0 12a4.5 4.5 0 1 1 0-9a4.5 4.5 0 0 1 0 9m0-7a2.5 2.5 0 1 0 0 5a2.5 2.5 0 0 0 0-5Z"
+                      />
+                    </svg>
                   </button>
                 </td>
               </tr>
