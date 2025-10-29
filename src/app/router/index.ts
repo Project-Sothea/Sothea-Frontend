@@ -5,8 +5,8 @@ import PatientDirectory from '@features/patient-directory/pages/PatientDirectory
 import PatientRecord from '@features/patient-record/pages/PatientRecordPage.vue'
 import PharmacyOverview from '@features/pharmacy/pages/PharmacyOverviewPage.vue'
 import PharmacyCreateBatch from '@features/pharmacy/pages/PharmacyCreateBatchPage.vue'
-import PharmacyDrugOverview from '@features/pharmacy/pages/PharmacyDrugOverviewPage.vue'
 import { useAuth } from '@features/auth/composables/useAuth'
+import PharmacyDrugPresentationOverviewPage from '@/features/pharmacy/pages/PharmacyDrugPresentationOverviewPage.vue'
 
 const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/sign-in' },
@@ -26,9 +26,9 @@ const routes: RouteRecordRaw[] = [
   { path: '/pharmacy', name: 'pharmacy-overview', component: PharmacyOverview },
   { path: '/pharmacy/batches/new', name: 'batch-new', component: PharmacyCreateBatch },
   {
-    path: '/pharmacy/drugs/:drugId',
+    path: '/pharmacy/presentations/:presentationId',
     name: 'drug-overview',
-    component: PharmacyDrugOverview,
+    component: PharmacyDrugPresentationOverviewPage,
     props: true
   }
 ]

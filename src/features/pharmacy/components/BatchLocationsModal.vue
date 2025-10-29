@@ -70,21 +70,18 @@
 
 <script setup lang="ts">
 import { ref, watch, onUnmounted, nextTick } from 'vue'
-import type { DrugBatch } from '@/features/pharmacy/types/DrugBatch'
+import type { BatchDetail } from '@/features/pharmacy/types/Batch'
 
-/** Props & v-model */
+// ─── Props & Emits ────────────────────────
 const props = defineProps<{
   open: boolean
-  batch: DrugBatch | null
+  batch: BatchDetail | null
 }>()
 
 const emit = defineEmits<{
   (e: 'update:open', v: boolean): void
   (e: 'close'): void
 }>()
-
-/** Focus trap-lite */
-const dialogEl = ref<HTMLElement | null>(null)
 
 const emitClose = () => {
   emit('update:open', false)
@@ -94,6 +91,8 @@ const emitClose = () => {
 const onKey = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && props.open) emitClose()
 }
+
+const dialogEl = ref<HTMLElement | null>(null)
 
 watch(
   () => props.open,
@@ -109,6 +108,7 @@ watch(
   { immediate: true }
 )
 
+// ─── Init ────────────────────────
 onUnmounted(() => window.removeEventListener('keydown', onKey))
 </script>
 
