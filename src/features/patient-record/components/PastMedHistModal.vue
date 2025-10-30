@@ -7,12 +7,217 @@
       <div class="flex flex-col">
         <!-- Header -->
         <div class="flex flex-row">
-          <div class="font-medium text-md w-1/3">Condition:</div>
+          <div class="font-medium text-md w-1/3"></div>
           <div class="font-medium text-md w-1/6">Yes</div>
           <div class="font-medium text-md w-1/6">No</div>
         </div>
       </div>
 
+      <div class="flex flex-col">
+        <!-- Header -->
+        <div class="flex flex-row">
+          <div class="font-medium text-md w-1/3">Current Symptoms</div>
+        </div>
+      </div>
+
+      <!-- Cough -->
+      <div class="flex flex-col mt-4">
+        <div class="flex flex-row">
+          <div class="font-normal text-sm w-1/3">Cough <span class="req">*</span></div>
+
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="cough"
+                class="w-4 h-4"
+                v-model="cough"
+                :value="true"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="cough"
+                class="w-4 h-4"
+                v-model="cough"
+                :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Fever -->
+      <div class="flex flex-col mt-4">
+        <div class="flex flex-row">
+          <div class="font-normal text-sm w-1/3">Fever <span class="req">*</span></div>
+
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="fever"
+                class="w-4 h-4"
+                v-model="fever"
+                :value="true"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="fever"
+                class="w-4 h-4"
+                v-model="fever"
+                :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blocked Nose -->
+      <div class="flex flex-col mt-4">
+        <div class="flex flex-row">
+          <div class="font-normal text-sm w-1/3">Blocked Nose <span class="req">*</span></div>
+
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="blockedNose"
+                class="w-4 h-4"
+                v-model="blockedNose"
+                :value="true"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="blockedNose"
+                class="w-4 h-4"
+                v-model="blockedNose"
+                :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sore Throat -->
+      <div class="flex flex-col mt-4">
+        <div class="flex flex-row">
+          <div class="font-normal text-sm w-1/3">Sore Throat <span class="req">*</span></div>
+
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="soreThroat"
+                class="w-4 h-4"
+                v-model="soreThroat"
+                :value="true"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="soreThroat"
+                class="w-4 h-4"
+                v-model="soreThroat"
+                :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Night Sweats -->
+      <div class="flex flex-col mt-4">
+        <div class="flex flex-row">
+          <div class="font-normal text-sm w-1/3">Night Sweats <span class="req">*</span></div>
+
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="nightSweats"
+                class="w-4 h-4"
+                v-model="nightSweats"
+                :value="true"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="nightSweats"
+                class="w-4 h-4"
+                v-model="nightSweats"
+                :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unintentional Weight Los -->
+      <div class="flex flex-col mt-4">
+        <div class="flex flex-row">
+          <div class="font-normal text-sm w-1/3">Unintentional Weight Loss <span class="req">*</span></div>
+
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="unintentionalWeightLoss"
+                class="w-4 h-4"
+                v-model="unintentionalWeightLoss"
+                :value="true"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="unintentionalWeightLoss"
+                class="w-4 h-4"
+                v-model="unintentionalWeightLoss"
+                :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col mt-4">
+        <!-- Header -->
+        <div class="flex flex-row">
+          <div class="font-medium text-md w-1/3">Conditions</div>
+        </div>
+      </div>
       <!-- Tuberculosis -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
@@ -37,6 +242,38 @@
                 name="tuberculosis"
                 class="w-4 h-4"
                 v-model="tuberculosis"
+                :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Has Tuberculosis been treated -->
+      <div class="flex flex-col mt-4" v-if="tuberculosis">
+        <div class="flex flex-row">
+          <div class="font-normal text-sm w-1/3">If Y to Tuberculosis, has it been treated? <span class="req">*</span></div>
+
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="tuberculosisHasBeenTreated"
+                class="w-4 h-4"
+                v-model="tuberculosisHasBeenTreated"
+                :value="true"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="tuberculosisHasBeenTreated"
+                class="w-4 h-4"
+                v-model="tuberculosisHasBeenTreated"
                 :value="false"
                 :disabled="!isEditing"
               />
@@ -244,7 +481,7 @@
       </div>
 
       <!-- Remarks -->
-      <div class="mt-4">
+      <div class="mt-4" v-if="sexuallyTransmittedDisease">
         <label>
           <label for="" class="mb-2 block text-sm font-normal text-dark"
             >If Y to STD, specify:
@@ -316,7 +553,16 @@ const props = defineProps<{
 
 const toast = useToast()
 
+const cough = ref<boolean | null>(null)
+const fever = ref<boolean | null>(null)
+const blockedNose = ref<boolean | null>(null)
+const soreThroat = ref<boolean | null>(null)
+const nightSweats = ref<boolean | null>(null)
+const unintentionalWeightLoss = ref<boolean | null>(null) 
+
 const tuberculosis = ref<boolean | null>(null)
+const tuberculosisHasBeenTreated = ref<boolean | null>(null)
+
 const diabetes = ref<boolean | null>(null)
 const hypertension = ref<boolean | null>(null)
 const hyperlipidemia = ref<boolean | null>(null)
@@ -334,7 +580,17 @@ watch(
     if (initialized || props.isAdd || !newVal) return
     const pastMedHist = newVal.pastmedicalhistory
     if (pastMedHist) {
+
+      cough.value = pastMedHist.cough
+      fever.value = pastMedHist.fever
+      blockedNose.value = pastMedHist.blockedNose
+      soreThroat.value = pastMedHist.soreThroat
+      nightSweats.value = pastMedHist.nightSweats
+      unintentionalWeightLoss.value = pastMedHist.unintentionalWeightLoss
+
       tuberculosis.value = pastMedHist.tuberculosis
+      tuberculosisHasBeenTreated.value = pastMedHist.tuberculosisHasBeenTreated
+
       diabetes.value = pastMedHist.diabetes
       hypertension.value = pastMedHist.hypertension
       hyperlipidemia.value = pastMedHist.hyperlipidemia
@@ -352,7 +608,15 @@ watch(
 function buildPayload(): PastMedicalHistory | null {
   if (
     !runChecks([
+      [cough.value !== null, 'Select Cough'],
+      [fever.value !== null, 'Select Fever'],
+      [blockedNose.value !== null, 'Select Blocked Nose'],
+      [soreThroat.value !== null, 'Select Sore Throat'],
+      [nightSweats.value !== null, 'Select Night Sweats'],
+      [unintentionalWeightLoss.value !== null, 'Select Unintentional Weight Loss'],
+      
       [tuberculosis.value !== null, 'Select Tuberculosis'],
+      [tuberculosis.value === false && tuberculosisHasBeenTreated.value !== null, 'Select Has Tuberculosis been treated before'],
       [diabetes.value !== null, 'Select Diabetes'],
       [hypertension.value !== null, 'Select Hypertension'],
       [hyperlipidemia.value !== null, 'Select Hyperlipidemia'],
@@ -363,7 +627,16 @@ function buildPayload(): PastMedicalHistory | null {
   )
     return null
   return {
+    cough: cough.value!,
+    fever: fever.value!,
+    blockedNose: blockedNose.value!,
+    soreThroat: soreThroat.value!,
+    nightSweats: nightSweats.value!,
+    unintentionalWeightLoss: unintentionalWeightLoss.value!,
+
     tuberculosis: tuberculosis.value!,
+    tuberculosisHasBeenTreated:tuberculosisHasBeenTreated.value!,
+
     diabetes: diabetes.value!,
     hypertension: hypertension.value!,
     hyperlipidemia: hyperlipidemia.value!,

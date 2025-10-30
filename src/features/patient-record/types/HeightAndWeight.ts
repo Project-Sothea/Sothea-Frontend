@@ -7,4 +7,7 @@ export default interface HeightAndWeight {
   bmiAnalysis: string
   paedsHeight: number | null
   paedsWeight: number | null
+
+  icopeLostWeightPastMonths: boolean
+  icopeNoDesireToEat: boolean
 }

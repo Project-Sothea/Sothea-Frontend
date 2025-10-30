@@ -84,7 +84,6 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
       [!!khmerName.value, 'Khmer Name is required'],
       [!!dob.value, 'Date of Birth is required'],
       [!!gender.value, 'Gender is required'],
-      [!!contactNo.value, 'Contact No. is required'],
       [!!regDate.value, 'Date Registered is required'],
       [!!queueNo.value, 'Queue Number is required'],
       [!!village.value, 'Village is required'],

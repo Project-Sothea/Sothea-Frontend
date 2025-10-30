@@ -62,6 +62,95 @@
           </div>
         </div>
 
+        <div class="mb-4">
+        
+          <div class="mt-1 flex flex-nowrap items-start gap-x-6">
+            <div class="text-sm text-dark basis-[26rem] shrink-0">
+              <span>Sent to Khmer Optics Optometrist? (if score for any eye is > 6/24)</span>
+              <span class="req">*</span>
+            </div>
+
+            <div class="flex items-center gap-6 pt-0.5">
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="sent-to-opto" class="w-4 h-4"
+                      v-model="sentToOpto" :value="true" :disabled="!isEditing" />
+                <span class="text-sm">Y</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="sent-to-opto" class="w-4 h-4"
+                      v-model="sentToOpto" :value="false" :disabled="!isEditing" />
+                <span class="text-sm">N</span>
+              </label>
+            </div>
+          </div>
+          <div class="mt-1 flex flex-nowrap items-start gap-x-6">
+            <div class="text-sm text-dark basis-[26rem] shrink-0">
+              <span>Referred for Prescription Glasses?</span>
+              <span class="req">*</span>
+            </div>
+
+            <div class="flex items-center gap-6 pt-0.5">
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="referred-for-glasses" class="w-4 h-4"
+                      v-model="referredForGlasses" :value="true" :disabled="!isEditing" />
+                <span class="text-sm">Y</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="referred-for-glasses" class="w-4 h-4"
+                      v-model="referredForGlasses" :value="false" :disabled="!isEditing" />
+                <span class="text-sm">N</span>
+              </label>
+            </div>
+          </div>
+        </div> 
+
+
+        <div class="mb-2">
+          <!-- Row 1 -->
+          <div class="text-sm font-medium text-dark">
+            ICOPE (60 yo and above):
+          </div>
+
+          <div class="mt-1 flex flex-nowrap items-start gap-x-6">
+            <div class="text-sm text-dark basis-[26rem] shrink-0">
+              <span>Do you have any eye problems (difficulty seeing far away, difficulty reading, eye disease?)</span>
+              <span class="req">*</span>
+            </div>
+
+            <div class="flex items-center gap-6 pt-0.5">
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="eye-problem" class="w-4 h-4"
+                      v-model="icopeEyeProblem" :value="true" :disabled="!isEditing" />
+                <span class="text-sm">Y</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="eye-problem" class="w-4 h-4"
+                      v-model="icopeEyeProblem" :value="false" :disabled="!isEditing" />
+                <span class="text-sm">N</span>
+              </label>
+            </div>
+          </div>
+          <div class="mt-1 flex flex-nowrap items-start gap-x-6">
+            <div class="text-sm text-dark basis-[26rem] shrink-0">
+              <span>Are you being treated for diabetes or high blood pressure?</span>
+              <span class="req">*</span>
+            </div>
+
+            <div class="flex items-center gap-6 pt-0.5">
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="diabetes-or-bp" class="w-4 h-4"
+                      v-model="icopeTreatedForDiabetesOrBp" :value="true" :disabled="!isEditing" />
+                <span class="text-sm">Y</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="diabetes-or-bp" class="w-4 h-4"
+                      v-model="icopeTreatedForDiabetesOrBp" :value="false" :disabled="!isEditing" />
+                <span class="text-sm">N</span>
+              </label>
+            </div>
+          </div>
+        </div> 
+
         <!-- Additional Intervention -->
         <div class="mt-4">
           <label for="" class="mb-2 block text-sm font-medium text-dark"
@@ -120,6 +209,13 @@ const props = defineProps<{
 
 const lEyeVision = ref<number | null>(null)
 const rEyeVision = ref<number | null>(null)
+
+const sentToOpto = ref <boolean>(false)
+const referredForGlasses = ref<boolean | null>(null)
+
+const icopeEyeProblem = ref<boolean | null>(null)
+const icopeTreatedForDiabetesOrBp = ref<boolean | null>(null)
+
 const additionalIntervention = ref<string | null>('')
 const { isEditing, toggleEdit, save, runChecks } = useEditableSection<VisualAcuity>()
 
@@ -133,10 +229,18 @@ watch(
       if (!visualAcuity) {
         lEyeVision.value = null
         rEyeVision.value = null
+        sentToOpto.value = false
+        referredForGlasses.value = null
+        icopeEyeProblem.value = null
+        icopeTreatedForDiabetesOrBp.value = null
         additionalIntervention.value = ''
       } else {
         lEyeVision.value = visualAcuity.lEyeVision
         rEyeVision.value = visualAcuity.rEyeVision
+        sentToOpto.value = visualAcuity.sentToOpto
+        referredForGlasses.value = visualAcuity.referredForGlasses
+        icopeEyeProblem.value = visualAcuity.icopeEyeProblem
+        icopeTreatedForDiabetesOrBp.value = visualAcuity.icopeTreatedForDiabetesOrBp
         additionalIntervention.value = visualAcuity.additionalIntervention
       }
     }
@@ -147,13 +251,21 @@ function buildPayload(): VisualAcuity | null {
   if (
     !runChecks([
       [lEyeVision.value !== null, 'Please fill in L eye vision'],
-      [rEyeVision.value !== null, 'Please fill in R eye vision']
+      [rEyeVision.value !== null, 'Please fill in R eye vision'],
+      [referredForGlasses.value !== null, 'Please answer whether the patient ws referred for prescription glasses'],
+      [icopeEyeProblem.value !== null, 'Please answer ICOPE question'],
+      [icopeTreatedForDiabetesOrBp.value !== null, 'Please answer ICOPE question'],
+
     ])
   )
     return null
   return {
     lEyeVision: lEyeVision.value!,
     rEyeVision: rEyeVision.value!,
+    sentToOpto: sentToOpto.value,
+    referredForGlasses: referredForGlasses.value!,
+    icopeEyeProblem: icopeEyeProblem.value!,
+    icopeTreatedForDiabetesOrBp: icopeTreatedForDiabetesOrBp.value!,
     additionalIntervention: additionalIntervention.value
   }
 }
