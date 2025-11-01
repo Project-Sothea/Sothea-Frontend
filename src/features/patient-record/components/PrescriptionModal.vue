@@ -26,8 +26,30 @@
         This prescription has already been <strong>dispensed</strong> by <strong>{{ rx?.dispenserName }}</strong> and can’t be edited.
       </div>
 
+      <section class="mt-6 rounded-2xl border border-gray-200 bg-white/90 shadow-sm">
+        <header class="flex items-center justify-between px-5 py-4 border-b">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-semibold">Patient Info</h2>
+          </div>
+        </header>
+
+      <div class="px-5 py-4 text-sm text-gray-900">
+        <span class="font-semibold">Drug Allergies:</span>
+        <span class="ml-1">{{ patientData?.admin?.drugAllergies ?? 'No Data' }}</span>
+      </div>
+      <div class="px-5 text-sm text-gray-900">
+        <span class="font-semibold">Diagnosis:</span>
+        <span class="ml-1">{{ patientData?.doctorsconsultation?.diagnosis ?? 'No Data' }}</span>
+      </div>
+      <div class="px-5 py-4 text-sm text-gray-900">
+        <span class="font-semibold">Drug Allergies:</span>
+        <span class="ml-1">{{ patientData?.doctorsconsultation?.treatment ?? 'No Data' }}</span>
+      </div>
+
+      </section>
+
       <!-- Notes -->
-      <section class="rounded-2xl border border-gray-200 bg-white/90 shadow-sm">
+      <section class="mt-6 rounded-2xl border border-gray-200 bg-white/90 shadow-sm">
         <header class="flex items-center justify-between px-5 py-4 border-b">
           <div class="flex items-center gap-2">
             <h2 class="text-base font-semibold">Notes</h2>
@@ -93,7 +115,7 @@
         <div class="px-5 py-4">
           <!-- Empty state -->
           <div
-            v-if="lines.length === 0"
+            v-if="uiLines.length === 0"
             class="rounded-lg border border-dashed p-8 text-center text-sm text-gray-500"
           >
             No lines yet.
@@ -103,8 +125,8 @@
           <!-- List -->
           <div v-else class="space-y-4">
             <div
-              v-for="(line, idx) in lines"
-              :key="idx"
+              v-for="(line, idx) in uiLines"
+              :key="line.id ?? (line as DraftLine)._uid ?? idx"
               class="rounded-lg border border-gray-200 p-4"
             >
               <PrescriptionLineRow
@@ -114,7 +136,7 @@
                 :all-presentations="presentations"
                 :exclude-presentation-ids="excludePresentationIds(idx)"
                 @refresh="refreshRx"
-                @discard-draft="discardLine(idx)"
+                @discard-draft="discardDraft((line as DraftLine)._uid)"
               />
             </div>
           </div>
@@ -154,9 +176,14 @@ import {
 import type { DrugPresentationView } from '@/features/pharmacy/types/Drug'
 import PrescriptionLineRow from './PrescriptionLineRow.vue'
 import { listDrugs, listPresentationsForDrug } from '@/features/pharmacy/api/drug'
+import type Patient from '../types/Patient'
 
 // ─── Props ────────────────────────────────────────────────────────────────
-const props = defineProps<{ patientId: string | number; patientVid: string | number }>()
+const props = defineProps<{
+  patientData?: Patient
+  patientId: string | number;
+  patientVid: string | number;
+}>()
 const pid = Number(props.patientId)
 const vid = Number(props.patientVid)
 
@@ -170,8 +197,18 @@ const dispensing = ref(false)
 // optional: preload this if you have an endpoint; otherwise child can remote-search
 const presentations = ref<DrugPresentationView[]>([])
 
-// Merge server lines + drafts for rendering
+// All existing server lines
 const lines = computed<Partial<PrescriptionLine>[]>(() => rx.value?.lines ?? [])
+
+// New draft lines which have not been added yet
+type DraftLine = Partial<PrescriptionLine> & { __draft: true; _uid: string }
+const draftLines = ref<DraftLine[]>([])
+
+// For Ui rendering
+const uiLines = computed<Partial<PrescriptionLine>[]>(() => [
+  ...(rx.value?.lines ?? []),
+  ...draftLines.value,
+])
 
 const isReadOnly = computed(() => !!rx?.value?.isDispensed)
 const allPacked = computed(() => (rx.value?.lines?.length ?? 0) > 0 && rx.value!.lines.every(l => l.isPacked))
@@ -229,7 +266,9 @@ async function saveHeader() {
 
 // ─── Lines: drafts management ────────────────────────────────────────────
 function addLine() {
-  lines.value.push({
+  draftLines.value.push({
+    __draft: true,
+    _uid: `d-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     presentationId: undefined,
     doseAmount: undefined,
     doseUnit: undefined,
@@ -240,19 +279,20 @@ function addLine() {
   })
 }
 
-function discardLine(idx: number) {
-  lines.value.splice(idx, 1)
+function discardDraft(uid?: string) {
+  if (!uid) return
+  const i = draftLines.value.findIndex(d => d._uid === uid)
+  if (i !== -1) draftLines.value.splice(i, 1)
 }
+
 
 // Helpers to avoid duplicate presentations across lines
 function excludePresentationIds(idx: number) {
   const chosen = new Set<number>()
-  lines.value.forEach((l, i) => {
+  uiLines.value.forEach((l, i) => {
     if (i === idx) return
-    if (!('__draft' in (l as any))) {
-      const id = (l as any).presentationId as number | undefined
-      if (id) chosen.add(id)
-    }
+    const id = (l as any).presentationId as number | undefined
+    if (id) chosen.add(id)
   })
   return Array.from(chosen)
 }

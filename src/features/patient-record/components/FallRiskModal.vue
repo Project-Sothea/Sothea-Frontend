@@ -265,46 +265,48 @@
         Refer to Physiotherapist
       </div>
 
-      <div class="font-medium text-lg mt-6">
-        ICOPE (60 yo and above):
-      </div>
-
-      <div class="mt-4 flex flex-nowrap items-start gap-x-6">
-        <div class="text-sm text-dark basis-[26rem] shrink-0">
-          <span>Completed 5 chair stands?</span>
-          <span class="req">*</span>
+      <div v-if="showIcope">
+        <div class="font-medium text-lg mt-6">
+          ICOPE (60 yo and above):
         </div>
 
-        <div class="flex items-center gap-6 pt-0.5">
-          <label class="inline-flex items-center gap-2">
-            <input type="radio" name="icopeCompleteChairStands" class="w-4 h-4"
-                  v-model="icopeCompleteChairStands" :value="true" :disabled="!isEditing" />
-            <span class="text-sm">Y</span>
-          </label>
-          <label class="inline-flex items-center gap-2">
-            <input type="radio" name="icopeCompleteChairStands" class="w-4 h-4"
-                  v-model="icopeCompleteChairStands" :value="false" :disabled="!isEditing" />
-            <span class="text-sm">N</span>
-          </label>
-        </div>
-      </div>
-      <div class="mt-4 flex flex-nowrap items-start gap-x-6">
-        <div class="text-sm text-dark basis-[26rem] shrink-0">
-          <span>Was it completed in 14 seconds?</span>
-          <span class="req">*</span>
-        </div>
+        <div class="mt-4 flex flex-nowrap items-start gap-x-6">
+          <div class="text-sm text-dark basis-[26rem] shrink-0">
+            <span>Completed 5 chair stands?</span>
+            <span class="req">*</span>
+          </div>
 
-        <div class="flex items-center gap-6 pt-0.5">
-          <label class="inline-flex items-center gap-2">
-            <input type="radio" name="icopeChairStandsTime" class="w-4 h-4"
-                  v-model="icopeChairStandsTime" :value="true" :disabled="!isEditing" />
-            <span class="text-sm">Y</span>
-          </label>
-          <label class="inline-flex items-center gap-2">
-            <input type="radio" name="icopeChairStandsTime" class="w-4 h-4"
-                  v-model="icopeChairStandsTime" :value="false" :disabled="!isEditing" />
-            <span class="text-sm">N</span>
-          </label>
+          <div class="flex items-center gap-6 pt-0.5">
+            <label class="inline-flex items-center gap-2">
+              <input type="radio" name="icopeCompleteChairStands" class="w-4 h-4"
+                    v-model="icopeCompleteChairStands" :value="true" :disabled="!isEditing" />
+              <span class="text-sm">Y</span>
+            </label>
+            <label class="inline-flex items-center gap-2">
+              <input type="radio" name="icopeCompleteChairStands" class="w-4 h-4"
+                    v-model="icopeCompleteChairStands" :value="false" :disabled="!isEditing" />
+              <span class="text-sm">N</span>
+            </label>
+          </div>
+        </div>
+        <div class="mt-4 flex flex-nowrap items-start gap-x-6">
+          <div class="text-sm text-dark basis-[26rem] shrink-0">
+            <span>Was it completed in 14 seconds?</span>
+            <span class="req">*</span>
+          </div>
+
+          <div class="flex items-center gap-6 pt-0.5">
+            <label class="inline-flex items-center gap-2">
+              <input type="radio" name="icopeChairStandsTime" class="w-4 h-4"
+                    v-model="icopeChairStandsTime" :value="true" :disabled="!isEditing" />
+              <span class="text-sm">Y</span>
+            </label>
+            <label class="inline-flex items-center gap-2">
+              <input type="radio" name="icopeChairStandsTime" class="w-4 h-4"
+                    v-model="icopeChairStandsTime" :value="false" :disabled="!isEditing" />
+              <span class="text-sm">N</span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -345,6 +347,7 @@ import { useEditableSection } from '@features/patient-record/composables/useEdit
 const props = defineProps<{
   patientId: string
   patientData: Patient | null
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -356,6 +359,10 @@ const semiTandemBalance = ref<number | null>(null)
 const tandemBalance = ref<number | null>(null)
 const gaitSpeedTest = ref<number | null>(null)
 const chairStandTest = ref<number | null>(null)
+
+const showIcope = computed<boolean>(() => 
+  props.age != null ? props.age >= 60 : true
+);
 
 const icopeCompleteChairStands = ref<boolean | null>(null)
 const icopeChairStandsTime = ref<boolean | null> (null)
@@ -405,8 +412,8 @@ function buildPayload(): FallRisk | null {
       [tandemBalance.value !== null, 'Select tandem balance'],
       [gaitSpeedTest.value !== null, 'Select gait balance'],
       [chairStandTest.value !== null, 'Select chair stand test'],
-      [icopeCompleteChairStands.value !== null, 'Answer ICOPE Questions'],
-      [icopeChairStandsTime.value !== null, 'Answer ICOPE Questions'],
+      [!showIcope.value || icopeCompleteChairStands.value !== null, 'Answer ICOPE Questions'],
+      [!showIcope.value || icopeChairStandsTime.value !== null, 'Answer ICOPE Questions'],
     ])
   )
     return null

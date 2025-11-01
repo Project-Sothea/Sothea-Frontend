@@ -131,7 +131,7 @@
           </div>
         </div>
 
-        <div class="mb-2">
+        <div class="mb-2" v-if="showIcope">
           <!-- Row 1 -->
           <div class="text-sm font-medium text-dark">
             ICOPE (60 yo and above):
@@ -269,6 +269,7 @@ import { useEditableSection } from '@features/patient-record/composables/useEdit
 const props = defineProps<{
   patientId: string
   patientData: Patient | null
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -279,6 +280,10 @@ const height = ref<number | null>(null)
 const weight = ref<number | null>(null)
 const paedsHeight = ref<number | null>(null)
 const paedsWeight = ref<number | null>(null)
+
+const showIcope = computed<boolean>(() => 
+  props.age != null ? props.age >= 60 : true
+);
 
 const icopeLostWeightPastMonths = ref<boolean | null> (null)
 const icopeNoDesireToEat = ref<boolean | null> (null)
@@ -343,7 +348,9 @@ function buildPayload(): HeightAndWeight | null {
   if (
     !runChecks([
       [height.value !== null, 'Enter height'],
-      [weight.value !== null, 'Enter weight']
+      [weight.value !== null, 'Enter weight'],
+      [!showIcope.value || icopeLostWeightPastMonths.value !== null, 'Answer ICOPE Questions'],
+      [!showIcope.value || icopeNoDesireToEat.value !== null, 'Answer ICOPE Questions'],
     ])
   )
     return null

@@ -210,7 +210,7 @@
       </div>
 
       <!-- icopeDifficultyChewing -->
-      <div class="flex flex-col mt-5">
+      <div class="flex flex-col mt-5" v-if="showIcope">
         <div class="font-medium text-sm">
           (ICOPE: 60 yo and above) Do you have difficulty chewing food? <span class="req">*</span>
         </div>
@@ -244,7 +244,7 @@
       </div>
 
       <!-- icopePainInMouth -->
-      <div class="flex flex-col mt-5">
+      <div class="flex flex-col mt-5" v-if="showIcope">
         <div class="font-medium text-sm">
           (ICOPE: 60 yo and above) Do you have pain in your mouth?<span class="req">*</span>
         </div>
@@ -1189,6 +1189,7 @@ import { useEditableSection } from '@features/patient-record/composables/useEdit
 const props = defineProps<{
   patientId?: string
   patientData?: Patient
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -1203,6 +1204,10 @@ const oralSymptoms = ref<boolean | null>(null)
 const drinkOtherWater = ref<boolean | null>(null)
 
 const riskForDentalCarries = ref<'Low Risk' | 'Middle Risk' | 'High Risk' | null>(null)
+
+const showIcope = computed<boolean>(() => 
+  props.age != null ? props.age >= 60 : true
+);
 
 const icopeDifficultyChewing = ref<boolean | null>(null)
 const icopePainInMouth = ref<boolean | null>(null)
@@ -1262,15 +1267,14 @@ const requiredFlags = computed(() => [
   drinkOtherWater.value,
   riskForDentalCarries.value,
   referralNeeded.value,
-  icopeDifficultyChewing.value,
-  icopePainInMouth.value,
 ])
 
 function buildPayload(): Dental | null {
   if (
     requiredFlags.value.some((v) => v === null) ||
     cleanTeethFreq.value === null ||
-    sugarConsumeFreq.value === null
+    sugarConsumeFreq.value === null ||
+    showIcope.value && (icopeDifficultyChewing.value === null || icopePainInMouth.value === null)
   ) {
     toast.error('Please fill in all required fields.')
     return null

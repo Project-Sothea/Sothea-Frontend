@@ -214,7 +214,7 @@
         </div>
 
         <!-- ICOPE: High blood pressure? -->
-        <div class="mb-2">
+        <div class="mb-2" v-if="showIcope">
           <!-- Row 1 -->
           <div class="text-sm font-medium text-dark">
             ICOPE (60 yo and above):
@@ -297,6 +297,7 @@ import { useEditableSection } from '@features/patient-record/composables/useEdit
 const props = defineProps<{
   patientId: string
   patientData: Patient | null
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -310,7 +311,13 @@ const diastolicBP2 = ref<number | null>(null)
 const hr1 = ref<number | null>(null)
 const hr2 = ref<number | null>(null)
 const randomBloodGlucoseMmolL = ref<number | null>(null)
+
+const showIcope = computed<boolean>(() => 
+  props.age != null ? props.age >= 60 : true
+);
+
 const icopeHighBp = ref<boolean | null> (null)
+
 const { isEditing, toggleEdit, save, runChecks } = useEditableSection<VitalStatistics>()
 
 const toast = useToast()
@@ -377,7 +384,7 @@ function buildPayload(): VitalStatistics | null {
       [hr2.value !== null, 'Please enter HR2'],
       [randomBloodGlucoseMmolL.value !== null, 'Please enter Random Blood Glucose (mmol/L)'],
       [avgHR.value !== null, 'Average HR cannot be empty'],
-      [icopeHighBp.value !== null, 'Please answer whether the patient has high BP']
+      [!showIcope.value || icopeHighBp.value !== null, 'Please answer ICOPE question']
     ])
   )
     return null

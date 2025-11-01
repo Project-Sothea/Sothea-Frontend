@@ -8,6 +8,6 @@ export default interface HeightAndWeight {
   paedsHeight: number | null
   paedsWeight: number | null
 
-  icopeLostWeightPastMonths: boolean
-  icopeNoDesireToEat: boolean
+  icopeLostWeightPastMonths: boolean | null
+  icopeNoDesireToEat: boolean | null
 }

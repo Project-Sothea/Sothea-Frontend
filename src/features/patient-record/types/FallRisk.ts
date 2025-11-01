@@ -8,6 +8,6 @@ export default interface FallRisk {
     chairStandTest: number
     fallRiskScore: number
     
-    icopeCompleteChairStands: boolean 
-    icopeChairStandsTime: boolean
+    icopeCompleteChairStands: boolean | null
+    icopeChairStandsTime: boolean | null
   }

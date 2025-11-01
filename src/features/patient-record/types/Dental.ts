@@ -10,8 +10,8 @@ export default interface Dental {
 
     riskForDentalCarries: 'Low Risk' | 'Middle Risk' | 'High Risk'
     
-    icopeDifficultyChewing: boolean
-    icopePainInMouth: boolean
+    icopeDifficultyChewing: boolean | null
+    icopePainInMouth: boolean | null
 
     dentalNotes: string | null
     referralNeeded: boolean

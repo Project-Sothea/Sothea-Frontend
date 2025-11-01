@@ -37,18 +37,30 @@
       </div>
 
       
-      <!-- Remarks -->
-      <div class="flex-1">
-        <label :for="`remarks-${uid}`" class="block text-sm font-medium text-dark">Line notes</label>
-        <textarea
-          :id="`remarks-${uid}`"
-          v-model="form.remarks"
-          rows="3"
-          class="mt-1 w-full border p-2 rounded disabled:bg-gray-50 min-h-[2.5rem] max-h-40"
-          placeholder="Optional notes for this line"
-          :disabled="readOnly || saving"
-        />
-      </div>
+    <!-- Remarks -->
+    <div class="flex-1">
+      <label :for="`remarks-${uid}`" class="block text-sm font-medium text-dark">
+        Line notes <span v-if="isBottleMode" class="text-red-600">*</span>
+      </label>
+      <textarea
+        :id="`remarks-${uid}`"
+        v-model="form.remarks"
+        rows="3"
+        class="mt-1 w-full border p-2 rounded disabled:bg-gray-50 min-h-[2.5rem] max-h-40"
+        :placeholder="isBottleMode ? `E.g. 'Take 5 mL q6h PRN'. Required.` : 'Optional'"
+        :disabled="readOnly || saving"
+      />
+      <!-- NEW: remarks error -->
+      <p v-if="errors.remarks" class="text-xs text-red-600 mt-1">{{ errors.remarks }}</p>
+      <span
+        v-if="isBottleMode && (editing || !isSaved)"
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-sm"
+        :class="notesPrescriptionClass"
+      >
+        Enter dosage instructions above
+      </span>
+    </div>
+
     </div>
     <div class="flex items-start gap-6" v-else>
       <!-- Presentation readout -->
@@ -130,7 +142,7 @@
         </div>
 
         <!-- Times per period -->
-        <div>
+        <div v-if="!isBottleMode">
           <label :for="`sched-freq-${uid}`" class="block text-xs text-gray-600 mb-1">Times per period</label>
           <input
             :id="`sched-freq-${uid}`" type="number" min="1"
@@ -141,7 +153,7 @@
         </div>
 
         <!-- Every N -->
-        <div>
+        <div v-if="!isBottleMode">
           <label :for="`sched-everyN-${uid}`" class="block text-xs text-gray-600 mb-1">Every N</label>
           <input
             :id="`sched-everyN-${uid}`" type="number" min="1"
@@ -152,7 +164,7 @@
         </div>
 
         <!-- Period unit -->
-        <div>
+        <div v-if="!isBottleMode">
           <label :for="`sched-kind-${uid}`" class="block text-xs text-gray-600 mb-1">Period unit</label>
           <select
             :id="`sched-kind-${uid}`" v-model="form.scheduleKind"
@@ -164,7 +176,7 @@
         </div>
 
         <!-- Duration -->
-        <div>
+        <div v-if="!isBottleMode">
           <label :for="`sched-duration-${uid}`" class="block text-xs text-gray-600 mb-1">Duration</label>
           <div class="flex items-center">
             <input
@@ -435,6 +447,7 @@ watch(() => form.presentationId, (newId, oldId) => {
 // ─── Dose unit choices based on selected presentation ────────────────────
 
 const selectedPresentation = computed(() => props.allPresentations?.find(p => p.id === form.presentationId!) )
+const isBottleMode = computed(() => form.doseUnit === 'bottle')
 
 function allowedDoseUnitsFor(p?: DrugPresentationView): UnitCode[] {
   if (!p) return []  // nothing until a presentation is chosen
@@ -473,11 +486,12 @@ watch(selectedPresentation, (p) => {
 
 // ─── Form Validation ─────────────────────────────────────────────────────────
 
-const errors = reactive<{ presentationId?: string; dose?: string; schedule?: string }>({})
+const errors = reactive<{ presentationId?: string; dose?: string; schedule?: string ; remarks?: string}>({})
 watch(() => form.presentationId, () => {
   errors.presentationId = undefined
   errors.dose = undefined
   errors.schedule = undefined
+  errors.remarks = undefined
 })
 
 watch([() => form.doseAmount, () => form.doseUnit], () => {
@@ -489,13 +503,16 @@ watch(
   () => { errors.schedule = undefined }
 )
 
+watch(() => form.remarks, () => { errors.remarks = undefined })
+
 function validate(): boolean {
   Object.assign(errors, { presentationId: undefined, dose: undefined, schedule: undefined })
   let ok = true
   if (!form.presentationId || form.presentationId <= 0) { errors.presentationId = 'Select a presentation.'; ok = false }
   if (!form.doseAmount || form.doseAmount <= 0) { errors.dose = 'Dose must be > 0.'; ok = false }
   if (!form.doseUnit) { errors.dose = (errors.dose ? errors.dose + ' ' : '') + 'Select a dose unit.'; ok = false }
-  if (!form.scheduleKind || !form.everyN || !form.frequencyPerSchedule || !form.duration) { errors.schedule = 'Complete the schedule.'; ok = false }
+  if (!isBottleMode.value && (!form.scheduleKind || !form.everyN || !form.frequencyPerSchedule || !form.duration)) { errors.schedule = 'Complete the schedule.'; ok = false }
+  if (isBottleMode.value && !form.remarks) { errors.remarks = 'Please enter dosage instruction above'; ok = false}
   return ok
 }
 
@@ -543,10 +560,10 @@ async function saveLine() {
       remarks: form.remarks,
       doseAmount: form.doseAmount!,
       doseUnit: form.doseUnit!,
-      scheduleKind: form.scheduleKind!,
-      everyN: form.everyN!,
-      frequencyPerSchedule: form.frequencyPerSchedule!,
-      duration: form.duration!,
+      scheduleKind: isBottleMode.value ? 'day' : form.scheduleKind!,
+      everyN: isBottleMode.value ? 1 : form.everyN!,
+      frequencyPerSchedule: isBottleMode.value ? 1 : form.frequencyPerSchedule!,
+      duration: isBottleMode.value ? 1 : form.duration!,
     }
     if (isSaved.value && props.line.id) {
       await updateLine(props.line.id, payload)
@@ -561,7 +578,6 @@ async function saveLine() {
     reloadAllocations()
     return true
   } catch (e: any) {
-    console.log(e)
     toast.error(e?.response.data.error ?? 'Failed to save line.')
   } finally {
     saving.value = false
@@ -636,6 +652,10 @@ function unitLabel(u?: UnitCode) {
 
 // A clearer, doctor-readable description of the regimen.
 const scheduleReadable = computed(() => {
+  if (isBottleMode.value && form.doseAmount && form.doseUnit) {
+    return `${form.doseAmount} ${unitLabel(form.doseUnit)}(s) total.`
+  }
+
   const k = form.scheduleKind ?? 'day'
   const every = Number(form.everyN ?? 0)
   const freq = Number(form.frequencyPerSchedule ?? 0)
@@ -677,6 +697,12 @@ const scheduleChipTitle = computed(() =>
   scheduleIncomplete.value
     ? 'Please complete dose and schedule fields'
     : 'Regimen preview'
+)
+
+const notesPrescriptionClass = computed(() =>
+  form.remarks
+    ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+    : 'bg-red-50 text-red-700 border-red-200'
 )
 
 // ─── Init ────────────────────────

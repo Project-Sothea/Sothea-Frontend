@@ -105,7 +105,7 @@
         </div> 
 
 
-        <div class="mb-2">
+        <div class="mb-2" v-if="showIcope">
           <!-- Row 1 -->
           <div class="text-sm font-medium text-dark">
             ICOPE (60 yo and above):
@@ -192,7 +192,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
@@ -203,6 +203,7 @@ import { useEditableSection } from '@features/patient-record/composables/useEdit
 const props = defineProps<{
   patientId: string
   patientData: Patient | null
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -212,6 +213,10 @@ const rEyeVision = ref<number | null>(null)
 
 const sentToOpto = ref <boolean>(false)
 const referredForGlasses = ref<boolean | null>(null)
+
+const showIcope = computed<boolean>(() => 
+  props.age != null ? props.age >= 60 : true
+);
 
 const icopeEyeProblem = ref<boolean | null>(null)
 const icopeTreatedForDiabetesOrBp = ref<boolean | null>(null)
@@ -253,9 +258,8 @@ function buildPayload(): VisualAcuity | null {
       [lEyeVision.value !== null, 'Please fill in L eye vision'],
       [rEyeVision.value !== null, 'Please fill in R eye vision'],
       [referredForGlasses.value !== null, 'Please answer whether the patient ws referred for prescription glasses'],
-      [icopeEyeProblem.value !== null, 'Please answer ICOPE question'],
-      [icopeTreatedForDiabetesOrBp.value !== null, 'Please answer ICOPE question'],
-
+      [!showIcope.value || icopeEyeProblem.value !== null, 'Please answer ICOPE question'],
+      [!showIcope.value || icopeTreatedForDiabetesOrBp.value !== null, 'Please answer ICOPE question'],
     ])
   )
     return null

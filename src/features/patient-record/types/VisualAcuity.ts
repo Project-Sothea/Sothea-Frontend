@@ -5,7 +5,7 @@ export default interface VisualAcuity {
   rEyeVision: number
   sentToOpto: boolean
   referredForGlasses: boolean
-  icopeEyeProblem: boolean
-  icopeTreatedForDiabetesOrBp: boolean
+  icopeEyeProblem: boolean | null
+  icopeTreatedForDiabetesOrBp: boolean | null
   additionalIntervention: string | null
 }
