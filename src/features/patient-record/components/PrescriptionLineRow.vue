@@ -440,8 +440,8 @@ function allowedDoseUnitsFor(p?: DrugPresentationView): UnitCode[] {
   if (!p) return []  // nothing until a presentation is chosen
   const out: UnitCode[] = []
   if (p.dispenseUnit) out.push(p.dispenseUnit as UnitCode)
-  if (p.strengthUnitNum) out.push(p.strengthUnitNum as UnitCode)
   if (p.strengthUnitDen) out.push(p.strengthUnitDen as UnitCode)
+  if (p.strengthUnitNum) out.push(p.strengthUnitNum as UnitCode)
   // de-duplicate while preserving order
   return Array.from(new Set(out))
 }
@@ -561,7 +561,8 @@ async function saveLine() {
     reloadAllocations()
     return true
   } catch (e: any) {
-    toast.error(e?.message ?? 'Failed to save line.')
+    console.log(e)
+    toast.error(e?.response.data.error ?? 'Failed to save line.')
   } finally {
     saving.value = false
   }
