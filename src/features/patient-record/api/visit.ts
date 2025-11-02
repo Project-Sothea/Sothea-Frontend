@@ -25,7 +25,6 @@ export interface AdminPayload {
   lastMenstrualPeriod: string | null
   drugAllergies: string | null
   sentToId: boolean | null
-  photo: string | null
 }
 
 // Responses as observed / required by callers
@@ -36,17 +35,31 @@ export interface AddVisitResponse {
   vid: number
 }
 
-export async function createPatient(admin: AdminPayload): Promise<CreatePatientResponse> {
-  const { data } = await http.post<CreatePatientResponse>('/patient', admin)
+export async function createPatient(
+  admin: AdminPayload,
+  photoFile?: File | null
+): Promise<CreatePatientResponse> {
+  const fd = new FormData()
+  fd.append('admin', JSON.stringify(admin))
+  if (photoFile) {
+    fd.append('photo', photoFile)
+  }
+  const { data } = await http.post<CreatePatientResponse>('/patient', fd)
   return data
 }
 
 // Accept either AdminPayload (used when creating new patient) or Admin (built from existing form) to avoid casts at call sites
 export async function addVisit(
   patientId: string | number,
-  admin: AdminPayload | Admin
+  admin: AdminPayload | Admin,
+  photoFile?: File | null
 ): Promise<AddVisitResponse> {
-  const { data } = await http.post<AddVisitResponse>(`/patient/${patientId}`, admin)
+  const fd = new FormData()
+  fd.append('admin', JSON.stringify(admin))
+  if (photoFile) {
+    fd.append('photo', photoFile)
+  }
+  const { data } = await http.post<AddVisitResponse>(`/patient/${patientId}`, fd)
   return data
 }
 
@@ -62,8 +75,16 @@ export async function patchVisit<T = unknown>(
 export async function updateAdmin(
   patientId: string | number,
   visitId: string | number,
-  admin: AdminPayload
+  admin: AdminPayload,
+  photoFile?: File | null
 ): Promise<void> {
+  if (photoFile) {
+    const fd = new FormData()
+    fd.append('admin', JSON.stringify(admin))
+    fd.append('photo', photoFile)
+    await patchVisit(patientId, visitId, fd)
+    return
+  }
   await patchVisit(patientId, visitId, { admin })
 }
 

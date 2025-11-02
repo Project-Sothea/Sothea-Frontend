@@ -43,7 +43,7 @@ const maxDate = ref(formatDateISO(new Date()))
 // Initialize with patient admin data if provided (for convenience when adding new visit)
 const adminInitial = props.patientData?.admin ? { ...props.patientData.admin } : undefined
 const formRef = useAdminForm({ initial: adminInitial })
-const { regDate, photo, selectedPhoto, buildPayload } = formRef
+const { regDate, photoFile, selectedPhoto, buildPayload } = formRef
 
 // Override regDate with "today" for a new visit scenario
 if (!regDate.value) regDate.value = formatDateISO(new Date())
@@ -60,7 +60,8 @@ async function submitData() {
   if (!admin) return
   isSubmitting.value = true
   try {
-    const response = await addVisit(props.patientId, admin)
+    console.log(photoFile.value)
+    const response = await addVisit(props.patientId, admin, photoFile.value)
     toast.success('New Patient Visit created successfully!')
     emit('patientVisitCreated', {
       id: props.patientId,
@@ -107,7 +108,7 @@ async function handleImageUpload(e: Event) {
     reader.onload = (ev) => {
       if (!ev.target || typeof ev.target.result !== 'string') return
       selectedPhoto.value = ev.target.result
-      photo.value = ev.target.result.split(',')[1] || null
+      photoFile.value = compressed
     }
     reader.readAsDataURL(compressed)
   } catch (err) {

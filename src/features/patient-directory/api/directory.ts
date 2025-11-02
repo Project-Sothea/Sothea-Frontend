@@ -7,9 +7,8 @@ export async function fetchDirectoryDefault(): Promise<PatientVisitMeta[]> {
   return data
 }
 
-export async function exportPatientDirectory(includePhoto = false): Promise<AxiosResponse<Blob>> {
+export async function exportPatientDirectory(): Promise<AxiosResponse<Blob>> {
   return http.get<Blob>('/export-db', {
-    responseType: 'blob',
-    params: { includePhoto }
+    responseType: 'blob'
   })
 }

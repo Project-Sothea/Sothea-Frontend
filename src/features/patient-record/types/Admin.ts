@@ -15,5 +15,4 @@ export default interface Admin {
   lastMenstrualPeriod: string | null // ISO date string
   drugAllergies: string | null
   sentToId: boolean
-  photo: string | null // base64 string
 }

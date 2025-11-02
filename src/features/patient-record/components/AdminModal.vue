@@ -55,6 +55,7 @@ import { createPatient, updateAdmin } from '@features/patient-record/api/visit'
 import { handleApiError } from '@shared/api/handleApiError'
 import { useAdminForm } from '@patient-record/composables/useAdminForm'
 import AdminFormFields from './AdminFormFields.vue'
+import { getPatientPhotoBlob } from '@patient-record/api/photo'
 
 const props = defineProps<{
   patientId?: string
@@ -94,16 +95,26 @@ const formRef = useAdminForm({
   onError: (m) => toast.error(m)
 })
 
-const { name, regDate, queueNo, photo, selectedPhoto, ageComputed, buildPayload, validate } =
+const { name, regDate, queueNo, photoFile, selectedPhoto, ageComputed, buildPayload, validate } =
   formRef
 
 if (props.isAdd && !regDate.value) regDate.value = formatDateISO(new Date())
 
-// Keep form in sync if parent passes a different patient
+// Keep form in sync if parent passes a different patient (admin fields only)
 watch(
   () => props.patientData?.admin,
   (next) => {
     if (!props.isAdd) formRef.reset(next || undefined)
+  }
+)
+
+// Load existing photo when patient id/vid becomes available or changes
+watch(
+  [() => props.isAdd, () => props.patientId, () => props.patientVid],
+  ([isAdd, pid, vid]) => {
+    if (!isAdd && pid && vid) {
+      loadExistingPhoto(pid as string, vid as string)
+    }
   },
   { immediate: true }
 )
@@ -118,7 +129,7 @@ async function submitData() {
     if (props.isAdd && !isEditing.value) {
       const payload = buildPayload()
       if (!payload) return
-      const response = await createPatient(payload)
+      const response = await createPatient(payload, photoFile.value)
       toast.success('New Patient created successfully!')
       emit('patientCreated', {
         id: String(response.id),
@@ -131,7 +142,7 @@ async function submitData() {
     } else if (!props.isAdd && isEditing.value && props.patientId && props.patientVid) {
       const payload = buildPayload()
       if (!payload) return
-      await updateAdmin(props.patientId, props.patientVid, payload)
+      await updateAdmin(props.patientId, props.patientVid, payload, photoFile.value)
       toast.success('Admin Details updated successfully!')
       emit('patientUpdated', {
         id: props.patientId,
@@ -181,13 +192,29 @@ async function handleImageUpload(e: Event) {
     reader.onload = (ev) => {
       if (!ev.target || typeof ev.target.result !== 'string') return
       selectedPhoto.value = ev.target.result
-      photo.value = ev.target.result.split(',')[1] || null
+      photoFile.value = compressed
     }
     reader.readAsDataURL(compressed)
   } catch (err) {
     console.error(err)
     selectedPhoto.value = ''
     toast.error('Image upload failed')
+  }
+}
+
+async function loadExistingPhoto(patientId: string, vid: string) {
+  try {
+    const blob = await getPatientPhotoBlob(patientId, vid)
+    // Revoke prior object URL (if any) to avoid leaks
+    if (selectedPhoto.value && selectedPhoto.value.startsWith('blob:')) {
+      URL.revokeObjectURL(selectedPhoto.value)
+    }
+    selectedPhoto.value = URL.createObjectURL(blob)
+  } catch (err: any) {
+    // 404 means no photo; ignore silently
+    if (err?.response?.status !== 404) {
+      console.warn('Failed to load existing photo', err)
+    }
   }
 }
 
