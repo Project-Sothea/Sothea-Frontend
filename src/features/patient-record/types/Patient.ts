@@ -8,7 +8,6 @@ import type FallRisk from "./FallRisk"
 import type Dental from "./Dental"
 import type DoctorsConsultation from "./DoctorsConsultation"
 import type Physiotherapy from "./Physiotherapy"
-import type { DrugPrescription } from "./Prescription"
 
 // The Patient type is a composite type that contains all the other types.
 export default interface Patient {
@@ -22,5 +21,4 @@ export default interface Patient {
   dental: Dental | null
   doctorsconsultation: DoctorsConsultation | null
   physiotherapy: Physiotherapy | null
-  prescription: DrugPrescription[] | null
 }

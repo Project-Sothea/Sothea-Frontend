@@ -213,6 +213,52 @@
           </div>
         </div>
 
+        <!-- ICOPE: High blood pressure? -->
+        <div class="mb-2" v-if="showIcope">
+          <!-- Row 1 -->
+          <div class="text-sm font-medium text-dark">
+            ICOPE (60 yo and above):
+          </div>
+
+          <!-- Row 2: text + radios side by side -->
+          <div class="mt-1 flex flex-wrap items-center gap-x-6 gap-y-2">
+            <div class="text-sm text-dark">
+              <span>High blood pressure?</span>
+              <span class="text-xs text-gray-600"> (BP ≥ 140/90 for 2 readings)</span>
+              <span class="req">*</span>
+            </div>
+
+            <!-- Y / N (sits just to the right of the text, not far right) -->
+            <div class="flex items-center gap-6">
+              <label class="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="icope-high-bp"
+                  class="w-4 h-4"
+                  v-model="icopeHighBp"
+                  :value="true"
+                  :disabled="!isEditing"
+                />
+                <span class="text-sm">Y</span>
+              </label>
+
+              <label class="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="icope-high-bp"
+                  class="w-4 h-4"
+                  v-model="icopeHighBp"
+                  :value="false"
+                  :disabled="!isEditing"
+                />
+                <span class="text-sm">N</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+
+
         <!-- Edit Button -->
         <div class="flex flex-row-reverse w-full mt-5">
           <button
@@ -251,6 +297,7 @@ import { useEditableSection } from '@features/patient-record/composables/useEdit
 const props = defineProps<{
   patientId: string
   patientData: Patient | null
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -264,6 +311,13 @@ const diastolicBP2 = ref<number | null>(null)
 const hr1 = ref<number | null>(null)
 const hr2 = ref<number | null>(null)
 const randomBloodGlucoseMmolL = ref<number | null>(null)
+
+const showIcope = computed<boolean>(() => 
+  props.age != null ? props.age >= 60 : true
+);
+
+const icopeHighBp = ref<boolean | null> (null)
+
 const { isEditing, toggleEdit, save, runChecks } = useEditableSection<VitalStatistics>()
 
 const toast = useToast()
@@ -283,6 +337,7 @@ watch(
         hr1.value = null
         hr2.value = null
         randomBloodGlucoseMmolL.value = null
+        icopeHighBp.value = null
       } else {
         temperature.value = vitalStatistics.temperature
         spO2.value = vitalStatistics.spO2
@@ -293,6 +348,7 @@ watch(
         hr1.value = vitalStatistics.hr1
         hr2.value = vitalStatistics.hr2
         randomBloodGlucoseMmolL.value = vitalStatistics.randomBloodGlucoseMmolL
+        icopeHighBp.value = vitalStatistics.icopeHighBp
       }
     }
   },
@@ -327,7 +383,8 @@ function buildPayload(): VitalStatistics | null {
       [hr1.value !== null, 'Please enter HR1'],
       [hr2.value !== null, 'Please enter HR2'],
       [randomBloodGlucoseMmolL.value !== null, 'Please enter Random Blood Glucose (mmol/L)'],
-      [avgHR.value !== null, 'Average HR cannot be empty']
+      [avgHR.value !== null, 'Average HR cannot be empty'],
+      [!showIcope.value || icopeHighBp.value !== null, 'Please answer ICOPE question']
     ])
   )
     return null
@@ -357,7 +414,8 @@ function buildPayload(): VitalStatistics | null {
     hr1: hr1.value!,
     hr2: hr2.value!,
     averageHR: avgHR.value!,
-    randomBloodGlucoseMmolL: randomBloodGlucoseMmolL.value!
+    randomBloodGlucoseMmolL: randomBloodGlucoseMmolL.value!,
+    icopeHighBp: icopeHighBp.value!
   }
 }
 

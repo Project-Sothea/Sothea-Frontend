@@ -131,6 +131,52 @@
           </div>
         </div>
 
+        <div class="mb-2" v-if="showIcope">
+          <!-- Row 1 -->
+          <div class="text-sm font-medium text-dark">
+            ICOPE (60 yo and above):
+          </div>
+
+          <div class="mt-1 flex flex-nowrap items-start gap-x-6">
+            <div class="text-sm text-dark basis-[26rem] shrink-0">
+              <span>Have you lost weight (>3kg) in the last 3 months?</span>
+              <span class="req">*</span>
+            </div>
+
+            <div class="flex items-center gap-6 pt-0.5">
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="lost-weight-3-months" class="w-4 h-4"
+                      v-model="icopeLostWeightPastMonths" :value="true" :disabled="!isEditing" />
+                <span class="text-sm">Y</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="lost-weight-3-months" class="w-4 h-4"
+                      v-model="icopeLostWeightPastMonths" :value="false" :disabled="!isEditing" />
+                <span class="text-sm">N</span>
+              </label>
+            </div>
+          </div>
+          <div class="mt-1 flex flex-nowrap items-start gap-x-6">
+            <div class="text-sm text-dark basis-[26rem] shrink-0">
+              <span>In the last 3 months, have you felt that you have no desire to eat?</span>
+              <span class="req">*</span>
+            </div>
+
+            <div class="flex items-center gap-6 pt-0.5">
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="no-desire-to-eat" class="w-4 h-4"
+                      v-model="icopeNoDesireToEat" :value="true" :disabled="!isEditing" />
+                <span class="text-sm">Y</span>
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input type="radio" name="no-desire-to-eat" class="w-4 h-4"
+                      v-model="icopeNoDesireToEat" :value="false" :disabled="!isEditing" />
+                <span class="text-sm">N</span>
+              </label>
+            </div>
+          </div>
+        </div> 
+
         <!-- Edit Button -->
         <div class="flex flex-row-reverse w-full mt-5">
           <button
@@ -223,6 +269,7 @@ import { useEditableSection } from '@features/patient-record/composables/useEdit
 const props = defineProps<{
   patientId: string
   patientData: Patient | null
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -233,6 +280,14 @@ const height = ref<number | null>(null)
 const weight = ref<number | null>(null)
 const paedsHeight = ref<number | null>(null)
 const paedsWeight = ref<number | null>(null)
+
+const showIcope = computed<boolean>(() => 
+  props.age != null ? props.age >= 60 : true
+);
+
+const icopeLostWeightPastMonths = ref<boolean | null> (null)
+const icopeNoDesireToEat = ref<boolean | null> (null)
+
 const { isEditing, toggleEdit, save, runChecks } = useEditableSection<HeightAndWeight>()
 const showHeightModal = ref(false)
 const showWeightModal = ref(false)
@@ -247,11 +302,18 @@ watch(
         weight.value = null
         paedsHeight.value = null
         paedsWeight.value = null
+
+        icopeLostWeightPastMonths.value = null
+        icopeNoDesireToEat.value = null
       } else {
         height.value = heightAndWeight.height
         weight.value = heightAndWeight.weight
         paedsHeight.value = heightAndWeight.paedsHeight
         paedsWeight.value = heightAndWeight.paedsWeight
+
+        icopeLostWeightPastMonths.value = heightAndWeight.icopeLostWeightPastMonths
+        icopeNoDesireToEat.value = heightAndWeight.icopeNoDesireToEat
+        
       }
     }
   },
@@ -286,7 +348,9 @@ function buildPayload(): HeightAndWeight | null {
   if (
     !runChecks([
       [height.value !== null, 'Enter height'],
-      [weight.value !== null, 'Enter weight']
+      [weight.value !== null, 'Enter weight'],
+      [!showIcope.value || icopeLostWeightPastMonths.value !== null, 'Answer ICOPE Questions'],
+      [!showIcope.value || icopeNoDesireToEat.value !== null, 'Answer ICOPE Questions'],
     ])
   )
     return null
@@ -301,13 +365,20 @@ function buildPayload(): HeightAndWeight | null {
   if (bmi.value === null) return (toast.error('Enter height & weight to calculate BMI'), null)
   if (bmianalysis.value === null)
     return (toast.error('Enter height & weight to calculate BMI Analysis'), null)
+   if (icopeLostWeightPastMonths.value === null)
+    return (toast.error('Please answer whether the patient has lost weight rapidly over the past 3 month'), null)
+   if (icopeNoDesireToEat.value === null)
+    return (toast.error('Please answer whether the patient has felt a sudden loss of appetite'), null)
   return {
     height: height.value!,
     weight: weight.value!,
     bmi: bmi.value!,
     bmiAnalysis: bmianalysis.value!,
     paedsHeight: paedsHeight.value || null,
-    paedsWeight: paedsWeight.value || null
+    paedsWeight: paedsWeight.value || null,
+
+    icopeLostWeightPastMonths: icopeLostWeightPastMonths.value!,
+    icopeNoDesireToEat: icopeNoDesireToEat.value!
   }
 }
 

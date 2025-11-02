@@ -4,111 +4,22 @@
       <h1>Dental</h1>
       <br />
 
-      <!-- pastYearDecay -->
-      <div class="flex flex-col mt-4">
-        <div class="font-medium text-sm">
-          Bacterial Exposure Question: Has anyone in the immediate family (including a caregiver)
-          had tooth decay or lost a tooth from tooth decay in the past year?
-          <span class="req">*</span>
-        </div>
-        <div class="flex flex-col items-start mt-2 space-y-2">
-          <label>
-            <input
-              type="radio"
-              name="pastYearDecay"
-              v-model="pastYearDecay"
-              :value="true"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">True</span>
-          </label>
-
-          <label>
-            <input
-              type="radio"
-              name="pastYearDecay"
-              v-model="pastYearDecay"
-              :value="false"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">False</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- brushTeethPain -->
-      <div class="flex flex-col mt-4">
-        <div class="font-medium text-sm">
-          Oral Symptoms Question: Does your child complain of tooth pain or bleeding gums when they
-          brush their teeth? <span class="req">*</span>
-        </div>
-        <div class="flex flex-col items-start mt-2 space-y-2">
-          <label>
-            <input
-              type="radio"
-              name="brushTeethPain"
-              v-model="brushTeethPain"
-              :value="true"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">True</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="brushTeethPain"
-              v-model="brushTeethPain"
-              :value="false"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">False</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- drinkOtherWater -->
-      <div class="flex flex-col mt-5">
-        <div class="font-medium text-sm">
-          Oral Hygiene Question: Does your child wake up to drink anything other than water
-          throughout the night? <span class="req">*</span>
-        </div>
-        <div class="flex flex-col items-start mt-5 space-y-2">
-          <label>
-            <input
-              type="radio"
-              name="drinkOtherWater"
-              v-model="drinkOtherWater"
-              :value="true"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">True</span>
-          </label>
-
-          <label>
-            <input
-              type="radio"
-              name="drinkOtherWater"
-              v-model="drinkOtherWater"
-              :value="false"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">False</span>
-          </label>
-        </div>
-      </div>
-
       <!-- cleanTeethFreq -->
       <div class="flex flex-row w-full mt-5">
         <div>
           <label for="cleanTeethFreq" class="mb-1 block text-sm font-medium text-dark">
-            How many days per week do you clean your child's teeth or supervise / monitor them brush
-            with fluoride toothpaste twice a day? <span class="req">*</span>
+            Oral hygiene:
+            How many days per week do you brush your teeth with fluoride toothpaste twice a day?
+            <span class="req">*</span>
           </label>
-          <div class="relative z-20 w-1/5">
+          <div class="relative z-20 w-64 md:w-80 text-left"> <!-- optional: ensure wrapper isn't centering -->
             <select
               v-model="cleanTeethFreq"
               :disabled="!isEditing"
-              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+              class="w-full appearance-none rounded-md border border-stroke bg-transparent
+                    py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6
+                    outline-none transition focus:border-primary active:border-primary
+                    disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="0">0</option>
               <option :value="1">1</option>
@@ -130,27 +41,237 @@
       <div class="flex flex-row w-full mt-5">
         <div>
           <label for="sugarConsumeFreq" class="mb-1 block text-sm font-medium text-dark">
-            Diet Question: On average, how many times daily does your child consume starch or sugar
-            (food or drinks) between meals? <span class="req">*</span>
+            Diet: On average, how many times daily do you consume starch or sugar (food or drinks) between meals?
+            <span class="req">*</span>
           </label>
-          <div class="relative z-20 w-1/5">
+          <div class="relative z-20 w-64 md:w-80 text-left"> <!-- optional: ensure wrapper isn't centering -->
             <select
               v-model="sugarConsumeFreq"
               :disabled="!isEditing"
-              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+              class="w-full appearance-none rounded-md border border-stroke bg-transparent
+                    py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6
+                    outline-none transition focus:border-primary active:border-primary
+                    disabled:cursor-default disabled:bg-gray-200"
             >
-              <option :value="0">0</option>
-              <option :value="1">1</option>
-              <option :value="2">2</option>
-              <option :value="3">3</option>
-              <option :value="4">4</option>
-              <option :value="5">5</option>
-              <option :value="6">6</option>
+              <option :value="'<1'">&lt;1</option>
+              <option :value="'2-3'">2-3</option>
+              <option :value="'4-5'">4-5</option>
+              <option :value="'≥6'">≥6</option>
             </select>
             <span class="absolute top-1/2 right-4 z-10 -translate-y-1/2">
               <img src="@/assets/chevrondown.svg" height="20" width="20" />
             </span>
           </div>
+        </div>
+      </div>
+
+      <!-- bacterialExposure -->
+      <div class="flex flex-col mt-4">
+        <div class="font-medium text-sm">
+          Bacterial exposure: Has anyone in the immediate family (including a caregiver)
+          had tooth decay or lost a tooth from tooth decay in the past year?<span class="req">*</span>
+        </div>
+
+        <!-- Yes / No -->
+        <div class="mt-3 flex items-start gap-8">
+          <label class="flex flex-col items-center text-sm">
+            <span>Yes</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="bacterialExposure"
+              v-model="bacterialExposure"
+              :value="true"
+              :disabled="!isEditing"
+            />
+          </label>
+
+          <label class="flex flex-col items-center text-sm">
+            <span>No</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="bacterialExposure"
+              v-model="bacterialExposure"
+              :value="false"
+              :disabled="!isEditing"
+            />
+          </label>
+        </div>
+
+        <!-- Subquestion appears only when Yes -->
+        <div v-if="bacterialExposure === true" class="mt-3 flex items-center gap-3">
+          <label for="bact-exp-count" class="text-sm">If yes, how many people?</label>
+          <input
+            id="bact-exp-count"
+            type="number"
+            min="1"
+            step="1"
+            v-model.number="numLossFromToothDecay"
+            :disabled="!isEditing"
+            class="w-24 bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm outline-none transition
+                  focus:border-primary disabled:cursor-default disabled:bg-gray-200"
+            placeholder="e.g. 2"
+          />
+        </div>
+      </div>
+
+
+      <!-- oralSymptoms -->
+      <div class="flex flex-col mt-5">
+        <div class="font-medium text-sm">
+          Oral symptoms: Do you have tooth pain or bleeding gums when you brush your teeth? <span class="req">*</span>
+        </div>
+        <div class="mt-3 flex items-start gap-8">
+          <label class="flex flex-col items-center text-sm">
+            <span>Yes</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="oralSymptoms"
+              v-model="oralSymptoms"
+              :value="true"
+              :disabled="!isEditing"
+            />
+          </label>
+
+          <label class="flex flex-col items-center text-sm">
+            <span>No</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="oralSymptoms"
+              v-model="oralSymptoms"
+              :value="false"
+              :disabled="!isEditing"
+            />
+          </label>
+        </div>
+      </div>
+
+      <!-- drinkOtherWater -->
+      <div class="flex flex-col mt-5">
+        <div class="font-medium text-sm">
+          Do you wake up to drink anything other than water throughout the night? <span class="req">*</span>
+        </div>
+        <div class="mt-3 flex items-start gap-8">
+          <label class="flex flex-col items-center text-sm">
+            <span>Yes</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="drinkOtherWater"
+              v-model="drinkOtherWater"
+              :value="true"
+              :disabled="!isEditing"
+            />
+          </label>
+
+          <label class="flex flex-col items-center text-sm">
+            <span>No</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="drinkOtherWater"
+              v-model="drinkOtherWater"
+              :value="false"
+              :disabled="!isEditing"
+            />
+          </label>
+        </div>
+      </div>
+
+      <!-- riskForDentalCarries -->
+      <div class="flex flex-row w-full mt-5">
+        <div>
+          <label for="riskForDentalCarries" class="mb-1 block text-sm font-medium text-dark">
+            Risk for Dental Carries
+            <span class="req">*</span>
+          </label>
+          <div class="relative z-20 w-64 md:w-80 text-left"> <!-- optional: ensure wrapper isn't centering -->
+            <select
+              v-model="riskForDentalCarries"
+              :disabled="!isEditing"
+              class="w-full appearance-none rounded-md border border-stroke bg-transparent
+                    py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6
+                    outline-none transition focus:border-primary active:border-primary
+                    disabled:cursor-default disabled:bg-gray-200"
+            >
+              <option :value="'Low Risk'">Low Risk</option>
+              <option :value="'Middle Risk'">Middle Risk</option>
+              <option :value="'High Risk'">High Risk</option>
+            </select>
+
+            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+              <img src="@/assets/chevrondown.svg" height="20" width="20" />
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- icopeDifficultyChewing -->
+      <div class="flex flex-col mt-5" v-if="showIcope">
+        <div class="font-medium text-sm">
+          (ICOPE: 60 yo and above) Do you have difficulty chewing food? <span class="req">*</span>
+        </div>
+
+        <!-- each column: label on top, radio below -->
+        <div class="mt-3 flex items-start gap-8">
+          <label class="flex flex-col items-center text-sm">
+            <span>Yes</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="icopeDifficultyChewing"
+              v-model="icopeDifficultyChewing"
+              :value="true"
+              :disabled="!isEditing"
+            />
+          </label>
+
+          <label class="flex flex-col items-center text-sm">
+            <span>No</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="icopeDifficultyChewing"
+              v-model="icopeDifficultyChewing"
+              :value="false"
+              :disabled="!isEditing"
+            />
+          </label>
+        </div>
+      </div>
+
+      <!-- icopePainInMouth -->
+      <div class="flex flex-col mt-5" v-if="showIcope">
+        <div class="font-medium text-sm">
+          (ICOPE: 60 yo and above) Do you have pain in your mouth?<span class="req">*</span>
+        </div>
+        <div class="mt-3 flex items-start gap-8">
+          <label class="flex flex-col items-center text-sm">
+            <span>Yes</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="icopePainInMouth"
+              v-model="icopePainInMouth"
+              :value="true"
+              :disabled="!isEditing"
+            />
+          </label>
+
+          <label class="flex flex-col items-center text-sm">
+            <span>No</span>
+            <input
+              class="mt-1 h-5 w-5"
+              type="radio"
+              name="icopePainInMouth"
+              v-model="icopePainInMouth"
+              :value="false"
+              :disabled="!isEditing"
+            />
+          </label>
         </div>
       </div>
 
@@ -1068,6 +1189,7 @@ import { useEditableSection } from '@features/patient-record/composables/useEdit
 const props = defineProps<{
   patientId?: string
   patientData?: Patient
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -1075,10 +1197,21 @@ const props = defineProps<{
 const toast = useToast()
 
 const cleanTeethFreq = ref<0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | null>(null)
-const sugarConsumeFreq = ref<0 | 1 | 2 | 3 | 4 | 5 | 6 | null>(null)
-const pastYearDecay = ref<boolean | null>(null)
-const brushTeethPain = ref<boolean | null>(null)
+const sugarConsumeFreq = ref<'<1' | '2-3' | '4-5' | '≥6' | null> (null)
+const bacterialExposure = ref<boolean | null>(null)
+const numLossFromToothDecay = ref<number>(0)
+const oralSymptoms = ref<boolean | null>(null)
 const drinkOtherWater = ref<boolean | null>(null)
+
+const riskForDentalCarries = ref<'Low Risk' | 'Middle Risk' | 'High Risk' | null>(null)
+
+const showIcope = computed<boolean>(() => 
+  props.age != null ? props.age >= 60 : true
+);
+
+const icopeDifficultyChewing = ref<boolean | null>(null)
+const icopePainInMouth = ref<boolean | null>(null)
+
 const dentalNotes = ref<string | null>('')
 const referralNeeded = ref<boolean | null>(null)
 const referralLoc = ref<string | null>('')
@@ -1101,11 +1234,19 @@ watch(
   (newVal) => {
     if (initialized || props.isAdd || !newVal?.dental) return
     const dental = newVal.dental
+
     cleanTeethFreq.value = dental.cleanTeethFreq
     sugarConsumeFreq.value = dental.sugarConsumeFreq
-    pastYearDecay.value = dental.pastYearDecay
-    brushTeethPain.value = dental.brushTeethPain
+    bacterialExposure.value = dental.bacterialExposure
+    numLossFromToothDecay.value = dental.numLossFromToothDecay
+    oralSymptoms.value = dental.oralSymptoms
     drinkOtherWater.value = dental.drinkOtherWater
+
+    riskForDentalCarries.value = dental.riskForDentalCarries
+
+    icopeDifficultyChewing.value = dental.icopeDifficultyChewing
+    icopePainInMouth.value = dental.icopePainInMouth
+
     dentalNotes.value = dental.dentalNotes
     referralNeeded.value = dental.referralNeeded
     referralLoc.value = dental.referralLoc
@@ -1118,27 +1259,40 @@ watch(
 )
 
 const requiredFlags = computed(() => [
-  pastYearDecay.value,
-  brushTeethPain.value,
+  cleanTeethFreq.value,
+  sugarConsumeFreq.value,
+  bacterialExposure.value,
+  numLossFromToothDecay.value,
+  oralSymptoms.value,
   drinkOtherWater.value,
-  referralNeeded.value
+  riskForDentalCarries.value,
+  referralNeeded.value,
 ])
 
 function buildPayload(): Dental | null {
   if (
     requiredFlags.value.some((v) => v === null) ||
     cleanTeethFreq.value === null ||
-    sugarConsumeFreq.value === null
+    sugarConsumeFreq.value === null ||
+    showIcope.value && (icopeDifficultyChewing.value === null || icopePainInMouth.value === null)
   ) {
     toast.error('Please fill in all required fields.')
     return null
   }
   return {
+
     cleanTeethFreq: cleanTeethFreq.value,
     sugarConsumeFreq: sugarConsumeFreq.value,
-    pastYearDecay: pastYearDecay.value!,
-    brushTeethPain: brushTeethPain.value!,
+    bacterialExposure: bacterialExposure.value!,
+    numLossFromToothDecay: numLossFromToothDecay.value,
+    oralSymptoms: oralSymptoms.value!,
     drinkOtherWater: drinkOtherWater.value!,
+
+    riskForDentalCarries: riskForDentalCarries.value!,
+
+    icopeDifficultyChewing: icopeDifficultyChewing.value!,
+    icopePainInMouth: icopePainInMouth.value!,
+
     dentalNotes: dentalNotes.value,
     referralNeeded: referralNeeded.value!,
     referralLoc: referralLoc.value,

@@ -1,410 +1,333 @@
 <template>
-  <div class="flex items-center justify-center">
-    <div class="flex flex-col rounded-lg w-3/4 max-h-fit border border-gray-300 p-10">
-      <h1>Pharmacy</h1>
-      <br />
+  <div class="flex items-start justify-center">
+    <div class="w-full max-w-5xl px-4 py-6">
+      <!-- Title -->
+      <div class="flex items-center justify-between mb-2">
+        <h1 class="text-2xl font-semibold">
+          {{ rx?.id ? 'Update Prescription' : 'Create Prescription' }}
+        </h1>
 
-      <div
-        v-for="(entry, index) in prescribedDrugs"
-        :key="index"
-        class="mb-6 border border-gray-200 p-4 rounded-md"
-      >
-        <!-- Drug Selector -->
-        <div class="mb-2">
-          <label class="block text-sm font-medium text-dark">Drug <span class="req">*</span></label>
-          <select
-            v-model.number="entry.drugId"
-            @change="onDrugChange(index)"
-            class="w-1/2 border p-1 rounded"
-          >
-            <option :value="null">Select a drug</option>
-            <option v-for="drug in drugs" :key="drug.id" :value="drug.id">{{ drug.name }}</option>
-          </select>
-        </div>
-
-        <!-- Mode Toggle -->
-        <div class="flex space-x-4 mt-2">
-          <label>
-            <input
-              type="radio"
-              :name="'mode-' + index"
-              value="auto"
-              v-model="entry.mode"
-              :disabled="!isEditing"
-              @change="onModeChange(index, 'auto')"
-            />
-
-            <span class="ml-2 text-sm">Auto</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              :name="'mode-' + index"
-              value="manual"
-              v-model="entry.mode"
-              :disabled="!isEditing"
-              @change="onModeChange(index, 'manual')"
-            />
-            <span class="ml-2 text-sm">Manual</span>
-          </label>
-        </div>
-
-        <!-- Remarks -->
-        <div class="mt-2">
-          <label class="block text-sm">Remarks</label>
-          <input v-model="entry.remarks" class="w-full border p-1 rounded" :disabled="!isEditing" />
-        </div>
-
-        <!-- Auto Mode -->
-        <div v-if="entry.mode === 'auto'" class="mt-3">
-          <label class="block text-sm">Quantity <span class="req">*</span></label>
-          <!-- Quantity Input -->
-          <input
-            type="number"
-            v-model.number="entry.quantity"
-            min="0"
-            class="w-1/4 border p-1 rounded"
-            :disabled="!isEditing"
-          />
-
-          <!-- Generate Batches Button -->
-          <button
-            v-if="isEditing"
-            class="ml-4 px-3 py-1 border text-sm rounded text-green-700 border-green-600 hover:bg-green-600 hover:text-white"
-            @click="calculateAutoBatches(index)"
-            :disabled="!entry.quantity || entry.quantity <= 0"
-          >
-            Generate Batches
-          </button>
-
-          <p v-if="autoModeErrors[index]" class="text-red-600 text-sm mt-1">
-            {{ autoModeErrors[index] }}
-          </p>
-
-          <table v-if="entry.batches.length" class="w-full mt-2 text-sm border-collapse">
-            <thead>
-              <tr>
-                <th class="text-left p-1 border-b">Batch</th>
-                <th class="text-left p-1 border-b">Expiry</th>
-                <th class="text-left p-1 border-b">Selected Qty</th>
-                <th class="text-left p-1 border-b">Remaining</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="b in entry.batches" :key="b.batchId">
-                <td class="p-1">
-                  {{ findBatch(entry.drugId!, b.batchId)?.batchNo || 'Unknown' }}
-                </td>
-                <td class="p-1">
-                  {{ formatDate(findBatch(entry.drugId!, b.batchId)?.expiryDate || '') }}
-                </td>
-                <td class="p-1">{{ b.quantity }}</td>
-                <td class="p-1">{{ calculateRemaining(entry.drugId!, b.batchId, b.quantity) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Manual Mode -->
-        <div v-if="entry.mode === 'manual'" class="mt-3">
-          <table class="w-full text-sm border-collapse">
-            <thead>
-              <tr>
-                <th class="text-left p-1 border-b">Batch</th>
-                <th class="text-left p-1 border-b">Expiry</th>
-                <th class="text-left p-1 border-b">Available</th>
-                <th class="text-left p-1 border-b">Qty</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(batch, bIndex) in availableBatches[entry.drugId ?? -1] || []"
-                :key="batch.id"
-              >
-                <td class="p-1">{{ batch.batchNo }}</td>
-                <td class="p-1">{{ formatDate(batch.expiryDate) }}</td>
-                <td class="p-1">
-                  {{
-                    calculateRemaining(
-                      entry.drugId!,
-                      batch.id,
-                      entry.batches[bIndex]?.quantity ?? 0
-                    )
-                  }}
-                </td>
-                <td class="p-1">
-                  <input
-                    type="number"
-                    min="0"
-                    :disabled="!isEditing"
-                    v-model.number="entry.batches[bIndex].quantity"
-                    class="w-20 border rounded px-1"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Remove Drug Button -->
-        <button
-          @click="removeDrugEntry(index)"
-          class="mt-4 px-3 py-1 rounded-lg text-sm text-red-600 border border-red-600 hover:bg-red-600 hover:text-white transition-colors duration-200"
-          v-if="isEditing"
+        <!-- status chip -->
+        <span
+          v-if="rx"
+          class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs"
+          :class="isReadOnly ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-emerald-300 bg-emerald-50 text-emerald-700'"
         >
-          Remove Drug
-        </button>
+          <span class="inline-block h-2 w-2 rounded-full" :class="isReadOnly ? 'bg-amber-500' : 'bg-emerald-500'"></span>
+          {{ isReadOnly ? 'Dispensed' : 'Open' }}
+        </span>
       </div>
 
-      <!-- Add Drug Button -->
-      <button
-        v-if="isEditing"
-        @click="addDrugEntry"
-        class="mt-2 px-4 py-2 border rounded text-sm text-[#3f51b5]"
+      <!-- Read-only banner -->
+      <div
+        v-if="isReadOnly"
+        class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm"
       >
-        Add Drug
-      </button>
+        This prescription has already been <strong>dispensed</strong> by <strong>{{ rx?.dispenserName }}</strong> and can’t be edited.
+      </div>
 
-      <!-- Edit & Save Buttons -->
-      <div class="flex flex-row-reverse w-full mt-5 space-x-3 space-x-reverse">
-        <button
-          v-if="!isEditing && !isAdd"
-          @click="toggleEdit"
-          class="px-5 py-2 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5]"
-        >
-          Edit
-        </button>
+      <section class="mt-6 rounded-2xl border border-gray-200 bg-white/90 shadow-sm">
+        <header class="flex items-center justify-between px-5 py-4 border-b">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-semibold">Patient Info</h2>
+          </div>
+        </header>
 
-        <button
-          v-if="isEditing && !isAdd"
-          @click="submitData"
-          class="px-5 py-2 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5]"
-        >
-          Save
-        </button>
+      <div class="px-5 py-4 text-sm text-gray-900">
+        <span class="font-semibold">Drug Allergies:</span>
+        <span class="ml-1">{{ patientData?.admin?.drugAllergies ?? 'No Data' }}</span>
+      </div>
+      <div class="px-5 text-sm text-gray-900">
+        <span class="font-semibold">Diagnosis:</span>
+        <span class="ml-1">{{ patientData?.doctorsconsultation?.diagnosis ?? 'No Data' }}</span>
+      </div>
+      <div class="px-5 py-4 text-sm text-gray-900">
+        <span class="font-semibold">Drug Allergies:</span>
+        <span class="ml-1">{{ patientData?.doctorsconsultation?.treatment ?? 'No Data' }}</span>
+      </div>
+
+      </section>
+
+      <!-- Notes -->
+      <section class="mt-6 rounded-2xl border border-gray-200 bg-white/90 shadow-sm">
+        <header class="flex items-center justify-between px-5 py-4 border-b">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-semibold">Notes</h2>
+            <span
+              v-if="!isReadOnly && rx && headerNotes !== (rx.notes || '')"
+              class="text-xs text-gray-500"
+            >
+              Unsaved changes
+            </span>
+          </div>
+          <div class="text-xs text-gray-400">
+            {{ (headerNotes || '').length }}/300
+          </div>
+        </header>
+
+        <div class="px-5 py-4">
+          <textarea
+            v-model="headerNotes"
+            maxlength="300"
+            rows="3"
+            placeholder="Add any instructions for the pharmacist (optional)…"
+            :disabled="isReadOnly || headerSaving"
+            class="block w-full resize-y rounded-xl border border-gray-200 bg-white p-3 text-sm placeholder:text-gray-400
+                   focus:outline-none focus:ring-4 focus:ring-[#3f51b5]/20"
+          />
+          <div class="mt-3 flex items-center justify-end gap-3">
+            <button
+              v-if="!isReadOnly && rx && headerNotes !== (rx.notes || '')"
+              class="text-sm text-gray-600 hover:text-gray-900 underline underline-offset-2"
+              type="button"
+              @click="headerNotes = rx?.notes || ''"
+            >
+              Discard Changes
+            </button>
+            <button
+              class="px-5 py-2 rounded-lg text-sm text-white bg-[#3f51b5] hover:bg-[#32469e]
+                     shadow-sm hover:shadow disabled:opacity-60 disabled:shadow-none transition"
+              @click="saveHeader"
+              :disabled="isReadOnly || headerSaving || headerNotes === rx?.notes"
+            >
+              <span v-if="headerSaving">Saving…</span>
+              <span v-else>Save Notes</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lines -->
+      <section class="mt-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <header class="flex items-center justify-between px-5 py-4 border-b">
+          <h2 class="text-base font-semibold">Lines</h2>
+          <button
+            v-if="!isReadOnly"
+            class="px-3 py-1.5 rounded-lg text-sm text-[#3f51b5] border border-[#3f51b5]
+                   hover:bg-[#3f51b5] hover:text-white transition disabled:opacity-60"
+            @click="addLine"
+            :disabled="!rx"
+          >
+            + Add Line
+          </button>
+        </header>
+
+        <div class="px-5 py-4">
+          <!-- Empty state -->
+          <div
+            v-if="uiLines.length === 0"
+            class="rounded-lg border border-dashed p-8 text-center text-sm text-gray-500"
+          >
+            No lines yet.
+            <span v-if="!isReadOnly">Click <strong>“+ Add Line”</strong> to get started.</span>
+          </div>
+
+          <!-- List -->
+          <div v-else class="space-y-4">
+            <div
+              v-for="(line, idx) in uiLines"
+              :key="line.id ?? (line as DraftLine)._uid ?? idx"
+              class="rounded-lg border border-gray-200 p-4"
+            >
+              <PrescriptionLineRow
+                :rx-id="rx!.id"
+                :line="line"
+                :read-only="isReadOnly"
+                :all-presentations="presentations"
+                :exclude-presentation-ids="excludePresentationIds(idx)"
+                @refresh="refreshRx"
+                @discard-draft="discardDraft((line as DraftLine)._uid)"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer actions -->
+      <div class="w-full mt-6 flex justify-end">
+        <div class="grid grid-cols-[max-content] gap-3">
+          <button
+            class="px-5 py-2 rounded-lg text-sm text-white bg-orange-500 hover:bg-orange-600
+                   shadow-sm hover:shadow disabled:opacity-60 transition"
+            @click="onDispense"
+            :disabled="!rx || isReadOnly || !allPacked || dispensing"
+            :title="!allPacked ? 'All lines must be packed' : ''"
+          >
+            {{ dispensing ? 'Dispensing…' : 'Mark Dispensed' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
+
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'vue-toast-notification'
+import type { Prescription, PrescriptionLine } from '@/features/pharmacy/types/Prescription'
 import {
-  fetchPrescriptions,
-  fetchPrescriptionDrugs,
-  fetchBatchesByDrug,
-  upsertPrescription,
-  type PrescriptionDrugMeta,
-  type DrugBatchMeta,
-  type UpsertPrescriptionPayload
-} from '@features/patient-record/api/prescription'
-import type Patient from '@patient-record/types/Patient'
-import type { DrugPrescription, Prescription } from '@features/pharmacy/types/Prescription'
-import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
+  getPrescriptionByVisit,
+  getPrescriptionByID,
+  createPrescription,
+  updatePrescription,
+  dispensePrescription,
+} from '@/features/pharmacy/api/prescription'
+import type { DrugPresentationView } from '@/features/pharmacy/types/Drug'
+import PrescriptionLineRow from './PrescriptionLineRow.vue'
+import { listDrugs, listPresentationsForDrug } from '@/features/pharmacy/api/drug'
+import type Patient from '../types/Patient'
 
-interface FormBatchSelection {
-  batchId: number
-  quantity: number
-}
-interface DrugPrescriptionFormEntry {
-  drugId: number | null
-  mode: 'auto' | 'manual'
-  quantity?: number
-  remarks?: string
-  batches: FormBatchSelection[]
-}
-
+// ─── Props ────────────────────────────────────────────────────────────────
 const props = defineProps<{
-  patientId: string
-  patientVid: string
-  patientData: Patient
-  isAdd?: boolean
+  patientData?: Patient
+  patientId: string | number;
+  patientVid: string | number;
 }>()
+const pid = Number(props.patientId)
+const vid = Number(props.patientVid)
 
+// ─── State ───────────────────────────────────────────────────────────────
 const toast = useToast()
-const { isEditing, toggleEdit, save } = useEditableSection<any>()
+const rx = ref<Prescription | null>(null)
+const headerNotes = ref<string>('')
+const headerSaving = ref(false)
+const dispensing = ref(false)
 
-// Reactive state
-const drugs = ref<PrescriptionDrugMeta[]>([])
-const availableBatches = ref<Record<number, DrugBatchMeta[]>>({})
-const prescribedDrugs = ref<DrugPrescriptionFormEntry[]>([])
-const existingPrescriptionId = ref<number | null>(null)
-const originalPrescriptionBatchQuantities = ref<Record<number, number>>({})
-const autoModeErrors = ref<Record<number, string>>({})
+// optional: preload this if you have an endpoint; otherwise child can remote-search
+const presentations = ref<DrugPresentationView[]>([])
 
-onMounted(() => {
-  fetchPrescription()
-  fetchDrugs()
+// All existing server lines
+const lines = computed<Partial<PrescriptionLine>[]>(() => rx.value?.lines ?? [])
+
+// New draft lines which have not been added yet
+type DraftLine = Partial<PrescriptionLine> & { __draft: true; _uid: string }
+const draftLines = ref<DraftLine[]>([])
+
+// For Ui rendering
+const uiLines = computed<Partial<PrescriptionLine>[]>(() => [
+  ...(rx.value?.lines ?? []),
+  ...draftLines.value,
+])
+
+const isReadOnly = computed(() => !!rx?.value?.isDispensed)
+const allPacked = computed(() => (rx.value?.lines?.length ?? 0) > 0 && rx.value!.lines.every(l => l.isPacked))
+
+// ─── Lifecycle ───────────────────────────────────────────────────────────
+onMounted(async () => {
+  await Promise.all([ensureHeader(), loadPresentations()]) 
 })
 
-function calculateRemaining(drugId: number, batchId: number, currentQty: number): number {
-  const available = availableBatches.value[drugId]?.find((b) => b.id === batchId)
-  const availableQty = available?.quantity ?? 0
-  const originalPrescribedQty = originalPrescriptionBatchQuantities.value[batchId] ?? 0
-  return availableQty + originalPrescribedQty - currentQty
-}
-
-function onModeChange(index: number, newMode: 'auto' | 'manual') {
-  const entry = prescribedDrugs.value[index]
-  entry.mode = newMode
-  if (newMode === 'auto') {
-    entry.quantity = 0
-    entry.batches = []
-  } else {
-    entry.quantity = undefined
-    const drugId = entry.drugId
-    const batches = availableBatches.value[drugId ?? -1] || []
-    entry.batches = batches.map((b) => ({ batchId: b.id, quantity: 0 }))
-  }
-}
-
-async function fetchPrescription() {
-  const res = await fetchPrescriptions(props.patientId)
-  const prescription = (res && res.length > 0 ? res[0] : null) as Prescription | null
-  if (!prescription) return
-  existingPrescriptionId.value = prescription.id ?? null
-  prescribedDrugs.value = []
-  for (const pd of prescription.prescribedDrugs as DrugPrescription[]) {
-    const drugId = pd.drugId
-    const batches = pd.batches || []
-    const batchRes = await fetchBatchesByDrug(drugId)
-    availableBatches.value[drugId] = batchRes
-    const batchEntries: FormBatchSelection[] = batchRes.map((b) => {
-      const existing = batches.find((e) => e.batchId === b.id)
-      return { batchId: b.id, quantity: existing ? existing.quantity : 0 }
-    })
-    prescribedDrugs.value.push({
-      drugId,
-      mode: batches.length > 0 ? 'manual' : 'auto',
-      quantity: pd.quantity,
-      remarks: pd.remarks,
-      batches: batchEntries
-    })
-    for (const be of batchEntries) {
-      originalPrescriptionBatchQuantities.value[be.batchId] = be.quantity
-    }
-  }
-}
-
-function calculateAutoBatches(index: number) {
-  const entry = prescribedDrugs.value[index]
-  const batches = availableBatches.value[entry.drugId ?? -1] || []
-  const totalAvailable = batches.reduce((sum, b) => sum + b.quantity, 0)
-  if (entry.quantity && entry.quantity > totalAvailable) {
-    autoModeErrors.value[index] = `Only ${totalAvailable} available. Reduce quantity.`
-    entry.batches = []
+async function ensureHeader() {
+  // Try to load existing by visit
+  const existing = await getPrescriptionByVisit(pid, vid)
+  if (existing) {
+    rx.value = await getPrescriptionByID(existing.id)
+    headerNotes.value = rx.value.notes ?? ''
     return
   }
-  autoModeErrors.value[index] = ''
-  const sorted = [...batches].sort(
-    (a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()
-  )
-  const targetQty = entry.quantity ?? 0
-  if (!targetQty || targetQty <= 0) {
-    entry.batches = []
-    return
+  // Otherwise create a fresh header immediately (draft)
+  const created = await createPrescription({ patientId: pid, vid, notes: '' })
+  rx.value = created
+  headerNotes.value = ''
+}
+
+async function loadPresentations() {
+  const drugs = await listDrugs()
+  presentations.value = (
+    await Promise.all(
+      drugs.map(d => listPresentationsForDrug(d.id))
+    )
+  ).flat();
+}
+
+async function refreshRx() {
+  if (!rx.value?.id) return
+  const fresh = await getPrescriptionByID(rx.value.id)
+  rx.value = fresh
+  headerNotes.value = fresh.notes ?? ''
+  await loadPresentations()
+}
+
+// ─── Header save ─────────────────────────────────────────────────────────
+async function saveHeader() {
+  if (!rx.value) return
+  headerSaving.value = true
+  try {
+    await updatePrescription(rx.value.id, { patientId: pid, vid,  notes: headerNotes.value })
+    toast.success('Notes saved.')
+    await refreshRx()
+  } catch (e: any) {
+    toast.error(e?.message ?? 'Failed to save notes.')
+  } finally {
+    headerSaving.value = false
   }
-  let remaining = targetQty
-  const result: FormBatchSelection[] = []
-  for (const b of sorted) {
-    if (remaining <= 0) break
-    const taken = Math.min(b.quantity, remaining)
-    result.push({ batchId: b.id, quantity: taken })
-    remaining -= taken
-  }
-  entry.batches = result
 }
 
-function findBatch(drugId: number, batchId: number) {
-  return availableBatches.value[drugId]?.find((b) => b.id === batchId)
-}
-
-async function fetchDrugs() {
-  drugs.value = await fetchPrescriptionDrugs()
-}
-
-async function onDrugChange(index: number) {
-  const entry = prescribedDrugs.value[index]
-  if (!entry.drugId) return
-  const response = await fetchBatchesByDrug(entry.drugId)
-  availableBatches.value[entry.drugId] = response
-  entry.batches = response.map((b) => ({ batchId: b.id, quantity: 0 }))
-}
-
-function addDrugEntry() {
-  prescribedDrugs.value.push({
-    drugId: null,
-    mode: 'auto',
-    quantity: undefined,
-    remarks: '',
-    batches: []
+// ─── Lines: drafts management ────────────────────────────────────────────
+function addLine() {
+  draftLines.value.push({
+    __draft: true,
+    _uid: `d-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    presentationId: undefined,
+    doseAmount: undefined,
+    doseUnit: undefined,
+    scheduleKind: 'day',
+    everyN: 1,
+    frequencyPerSchedule: 1,
+    duration: 7
   })
 }
 
-function removeDrugEntry(index: number) {
-  prescribedDrugs.value.splice(index, 1)
+function discardDraft(uid?: string) {
+  if (!uid) return
+  const i = draftLines.value.findIndex(d => d._uid === uid)
+  if (i !== -1) draftLines.value.splice(i, 1)
 }
 
-function buildPayload(): UpsertPrescriptionPayload | null {
-  for (const [i, entry] of prescribedDrugs.value.entries()) {
-    if (entry.mode === 'auto' && autoModeErrors.value[i]) {
-      toast.error(`Drug #${i + 1}: ${autoModeErrors.value[i]}`)
-      return null
-    }
-    if (!entry.drugId) {
-      toast.error(`Drug #${i + 1}: Please select a drug.`)
-      return null
-    }
-    if (entry.mode === 'auto' && (!entry.quantity || entry.quantity <= 0)) {
-      toast.error(`Drug #${i + 1}: Please specify quantity.`)
-      return null
-    }
-    if (entry.mode === 'manual' && !entry.batches.some((b) => b.quantity > 0)) {
-      toast.error(`Drug #${i + 1}: At least one batch must have quantity.`)
-      return null
-    }
-  }
-  return {
-    patientId: props.patientId,
-    visitId: props.patientVid,
-    entries: prescribedDrugs.value.map((entry) => ({
-      drugId: entry.drugId!,
-      dosage: '',
-      frequency: '',
-      quantity:
-        entry.mode === 'auto'
-          ? entry.quantity!
-          : entry.batches.reduce((sum, b) => sum + b.quantity, 0),
-      batchId: entry.batches.find((b) => b.quantity > 0)?.batchId ?? null
-    }))
-  }
-}
 
-async function submitData() {
-  const payload = buildPayload()
-  if (!payload) return
-  await save({
-    buildPayload: () => payload,
-    update: async () => {
-      await upsertPrescription(existingPrescriptionId.value, payload)
-    },
-    onSuccess: () => toast.success('Prescription saved successfully.')
+// Helpers to avoid duplicate presentations across lines
+function excludePresentationIds(idx: number) {
+  const chosen = new Set<number>()
+  uiLines.value.forEach((l, i) => {
+    if (i === idx) return
+    const id = (l as any).presentationId as number | undefined
+    if (id) chosen.add(id)
   })
+  return Array.from(chosen)
 }
 
-function formatDate(date: string): string {
-  const d = new Date(date)
-  return isNaN(d.getTime()) ? date : d.toLocaleDateString()
+// ─── Dispense ────────────────────────────────────────────────────────────
+async function onDispense() {
+  if (!rx.value?.id) return
+  if (!allPacked.value) {
+    toast.error('All lines must be packed before dispensing.')
+    return
+  }
+  dispensing.value = true
+  try {
+    const updated = await dispensePrescription(rx.value.id)
+    rx.value = updated
+    toast.success('Prescription dispensed')
+  } catch (err: any) {
+    toast.error(err?.message ?? 'Failed to dispense prescription.')
+  } finally {
+    dispensing.value = false
+  }
 }
 </script>
 
 <style scoped>
-.req {
-  color: red;
+.list-fade-enter-active,
+.list-fade-leave-active {
+  transition: all 160ms ease;
 }
-h1 {
-  font-size: 1.25rem;
-  font-weight: 500;
+.list-fade-enter-from {
+  opacity: 0;
+  transform: translateY(2px);
+}
+.list-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-2px);
 }
 </style>

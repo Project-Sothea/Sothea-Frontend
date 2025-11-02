@@ -58,8 +58,8 @@
           <div class="ml-2 w-1/4">
             <label class="mb-1 block text-sm font-medium text-dark">Age</label>
             <input
-              :value="form.ageComputed"
-              disabled
+              :value="form.ageComputed.value"
+              readonly
               type="number"
               class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2"
             />
@@ -87,8 +87,8 @@
         <div class="flex flex-row w-full mb-2">
           <div class="w-1/2">
             <label class="mb-1 block text-sm font-medium text-dark"
-              >Contact No. <span class="req">*</span></label
-            >
+              >Contact No. 
+            </label>
             <div class="relative">
               <input
                 v-model="contactNo"
@@ -177,18 +177,21 @@
         </div>
       </div>
       <div class="w-1/3">
-        <label class="mb-1 block text-sm font-medium text-dark"
-          >Village <span class="req">*</span></label
-        >
+        <label class="mb-1 block text-sm font-medium text-dark">
+          Village <span class="req">*</span>
+        </label>
         <div class="relative">
-          <input
+          <select
             v-model="village"
             :disabled="disabled"
-            type="text"
-            placeholder="Village"
             class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
-          />
-          <span class="absolute top-1/2 left-4 -translate-y-1/2">
+          >
+            <option value="v1">Srae Ou</option>
+            <option value="v2">Krang Svat</option>
+          </select>
+
+          <!-- left icon stays the same -->
+          <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none">
             <img src="@/assets/house.svg" width="20" height="20" />
           </span>
         </div>

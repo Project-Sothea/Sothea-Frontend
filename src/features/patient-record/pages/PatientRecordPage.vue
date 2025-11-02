@@ -27,6 +27,7 @@
             :patientId="String(id || createdPatientId || '')"
             :patientVid="String(vid || createdVisitVid || '')"
             :patientData="patient"
+            :age="age"
             @patientCreated="handlePatientCreated"
             @patientUpdated="handlePatientUpdated"
             @patientVisitCreated="handlePatientVisitCreated"

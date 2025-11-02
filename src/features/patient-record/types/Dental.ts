@@ -2,13 +2,21 @@ export default interface Dental {
     id?: number
     vid?: number
     cleanTeethFreq: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 
-    sugarConsumeFreq: 0 | 1 | 2 | 3 | 4 | 5 | 6
-    pastYearDecay: boolean
-    brushTeethPain: boolean
+    sugarConsumeFreq: '<1' | '2-3' | '4-5' | '≥6'
+    bacterialExposure: boolean
+    numLossFromToothDecay: number
+    oralSymptoms: boolean
     drinkOtherWater: boolean
+
+    riskForDentalCarries: 'Low Risk' | 'Middle Risk' | 'High Risk'
+    
+    icopeDifficultyChewing: boolean | null
+    icopePainInMouth: boolean | null
+
     dentalNotes: string | null
     referralNeeded: boolean
     referralLoc: string | null
+
     tooth11: boolean | null
     tooth12: boolean | null
     tooth13: boolean | null

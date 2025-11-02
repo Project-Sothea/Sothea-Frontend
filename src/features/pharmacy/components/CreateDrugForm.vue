@@ -1,107 +1,99 @@
 <template>
-  <div class="container max-w-lg mx-auto mt-8 p-6 shadow rounded bg-white">
-    <h2 class="text-2xl font-semibold mb-6">Create Drug</h2>
+  <Teleport to="body">
+    <Transition name="fade">
+      <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-black/40" />
+        <div class="relative z-10 w-full max-w-lg mx-4 rounded-2xl bg-white shadow-xl" @click.stop>
+          <div class="flex items-center justify-between px-5 py-4 border-b">
+            <h3 class="text-lg font-semibold">Create Drug</h3>
+            <button class="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100" @click="$emit('close')">✕</button>
+          </div>
 
-    <form @submit.prevent="handleSubmit">
-      <!-- ── Name (required) ───────────────────────────────────── -->
-      <label class="block mb-4">
-        <span class="text-gray-700"> Name <span class="text-red-500">*</span> </span>
-        <input
-          v-model.trim="form.name"
-          type="text"
-          :class="inputClass(errors.name)"
-          placeholder="e.g. Paracetamol"
-        />
-        <p v-if="errors.name" class="text-red-600 text-sm mt-1">
-          {{ errors.name }}
-        </p>
-      </label>
+          <div class="px-5 py-4">
+            <label class="block mb-3">
+              <span class="text-gray-700">Generic name <span class="text-red-600">*</span></span>
+              <input v-model.trim="drug.genericName" :class="inputClass(errors.genericName)" placeholder="e.g. Paracetamol" />
+              <p v-if="errors.genericName" class="err">{{ errors.genericName }}</p>
+            </label>
 
-      <!-- ── Unit (optional) ──────────────────────────────────── -->
-      <label class="block mb-4">
-        <span class="text-gray-700"> Unit <span class="text-xs">(e.g. tablet, mL)</span> </span>
-        <input
-          v-model.trim="form.unit"
-          type="text"
-          class="mt-1 block w-full rounded border px-3 py-2"
-          placeholder="tablet / mg / mL …"
-        />
-      </label>
+            <label class="block mb-3">
+              <span class="text-gray-700">Brand name</span>
+              <input v-model.trim="drug.brandName" :class="inputClass()" placeholder="e.g. Panadol" />
+            </label>
 
-      <!-- ── Default size (optional & numeric) ────────────────── -->
-      <label class="block mb-4">
-        <span class="text-gray-700">Default Size</span>
-        <input
-          v-model.number="form.default_size"
-          type="number"
-          min="1"
-          class="mt-1 block w-full rounded border px-3 py-2"
-          placeholder="e.g. 500"
-        />
-      </label>
+            <label class="block mb-3">
+              <span class="text-gray-700">ATC code</span>
+              <input v-model.trim="drug.atcCode" :class="inputClass()" placeholder="e.g. N02BE01" />
+            </label>
 
-      <!-- ── Notes (optional) ─────────────────────────────────── -->
-      <label class="block mb-6">
-        <span class="text-gray-700">Notes</span>
-        <textarea v-model.trim="form.notes" class="mt-1 block w-full rounded border px-3 py-2" />
-      </label>
+            <label class="block mb-3">
+              <span class="text-gray-700">Notes</span>
+              <textarea v-model.trim="drug.notes" class="mt-1 block w-full rounded border px-3 py-2" />
+            </label>
 
-      <!-- ── Save button ──────────────────────────────────────── -->
-      <button
-        type="submit"
-        :disabled="submitting || !isValid"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded disabled:opacity-60"
-      >
-        {{ submitting ? 'Saving…' : 'Save' }}
-      </button>
-    </form>
-  </div>
+            <div class="flex items-center justify-end gap-2 mt-4">
+              <button class="btn-gray" :disabled="submitting" @click="$emit('close')">Cancel</button>
+              <button class="btn-indigo" :disabled="submitting" @click="submit">{{ submitting ? 'Saving…' : 'Save' }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
-import type { Drug } from '@features/pharmacy/types/Drug'
-import { createDrug } from '@features/pharmacy/api/pharmacy'
+import type { Drug } from '../types/Drug';
+import { createDrug } from '../api/drug';
 
-/* ── toast helper ───────────────────────────────────────────── */
+// ─── Props & Emits ────────────────────────
+
+const props = defineProps<{ open: boolean; presetName?: string }>()
+const emit = defineEmits<{ (e:'close'): void; (e:'created', d:Drug): void }>()
+
+// ─── UI & State ────────────────────────
 const toast = useToast()
-
-/* ── emit to parent (so parent can update list) ─────────────── */
-const emit = defineEmits<{
-  (e: 'created', newDrug: Drug): void
-}>()
-
-/* ── reactive form model ────────────────────────────────────── */
-const form = ref<Partial<Drug>>({
-  name: '',
-  unit: '',
-  default_size: undefined,
-  notes: ''
-})
 const submitting = ref(false)
-
-/* ── validation helpers ────────────────────────────────────── */
-const errors = computed(() => {
-  const e: Record<string, string> = {}
-  if (!form.value.name?.trim()) e.name = 'Name is required.'
-  return e
+const drug = ref<Omit<Drug, 'id'>>({
+    genericName: '',
+    brandName: '',
+    atcCode: '',
+    isActive: true,
+    notes: ''
 })
-const isValid = computed(() => Object.keys(errors.value).length === 0)
+const errors = ref<Record<string,string>>({})
 
-const inputClass = (err?: string) =>
-  `mt-1 block w-full rounded border px-3 py-2 ${err ? 'border-red-500' : 'border-gray-300'}`
+watch(() => props.open, (v) => {
+  if (v && props.presetName && !drug.value.genericName) drug.value.genericName = props.presetName
+})
 
-/* ── submit handler ────────────────────────────────────────── */
-const handleSubmit = async () => {
-  if (!isValid.value) return
+const inputClass = (err?: string) => ['mt-1 block w-full rounded border px-3 py-2', err ? 'border-red-500':'border-gray-300'].join(' ')
 
+// ─── Submission & Validation ────────────────────────
+
+function validate() {
+  const e: Record<string,string> = {}
+  if (!drug.value.genericName?.trim()) e.genericName = 'Required.'
+  errors.value = e
+  return Object.keys(e).length === 0
+}
+
+async function submit() {
+  if (!validate()) return
   submitting.value = true
   try {
-    const data = await createDrug(form.value as Omit<Drug, 'id'>)
-    toast.success(`Drug “${data.name}” created`)
-    emit('created', data)
-    form.value = { name: '', unit: '', default_size: undefined, notes: '' }
+    const d = await createDrug(drug.value)
+    toast.success(`Drug “${d.genericName}” created`)
+    emit('created', d)
+    drug.value = {
+        genericName: '',
+        brandName: '',
+        atcCode: '',
+        isActive: true,
+        notes: ''
+    }
   } catch (e) {
     console.error(e)
     toast.error('Failed to create drug')
@@ -110,3 +102,13 @@ const handleSubmit = async () => {
   }
 }
 </script>
+
+<style scoped>
+.err{ color:#ef4444; font-size:.875rem; margin-top:.25rem; }
+.fade-enter-active,.fade-leave-active{ transition: opacity 150ms ease; }
+.fade-enter-from,.fade-leave-to{ opacity:0; }
+.btn-indigo{ background:#4f46e5;color:#fff;padding:.5rem 1rem;border-radius:.25rem }
+.btn-indigo:hover{ background:#4338ca }
+.btn-gray{ background:#d1d5db;color:#000;padding:.5rem 1rem;border-radius:.25rem }
+.btn-gray:hover{ background:#9ca3af }
+</style>

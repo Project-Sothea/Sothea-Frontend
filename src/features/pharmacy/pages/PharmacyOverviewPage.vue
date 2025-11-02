@@ -19,7 +19,7 @@
           <button :class="tab === 'batches' ? activeBtn : inactiveBtn" @click="tab = 'batches'">
             All&nbsp;Batches
           </button>
-          <button :class="tab === 'drugs' ? activeBtn : inactiveBtn" @click="tab = 'drugs'">
+          <button :class="tab === 'presentations' ? activeBtn : inactiveBtn" @click="tab = 'presentations'">
             By&nbsp;Drug
           </button>
         </div>
@@ -46,10 +46,10 @@
             <thead>
               <tr>
                 <th class="th">Batch&nbsp;ID</th>
-                <th class="th">Drug</th>
-                <th class="th">Qty</th>
+                <th class="th">Drug Presentation</th>
+                <th class="th">Total Qty</th>
                 <th class="th">Expiry</th>
-                <th class="th">Location</th>
+                <th class="th">View Locations</th>
               </tr>
             </thead>
             <tbody>
@@ -58,18 +58,33 @@
                 :key="b.id"
                 :class="idx % 2 ? 'odd-row' : 'even-row'"
               >
-                <td class="td">{{ b.batch_no }}</td>
+                <td class="td">{{ b.batchNumber }}</td>
                 <td class="td">
-                  <router-link
-                    :to="`/pharmacy/drugs/${b.drug_id}`"
-                    class="text-blue-600 hover:underline"
-                  >
-                    {{ drugName(b.drug_id) }}
-                  </router-link>
+                  <PresentationLabel
+                    :drug="drugForBatch(b)"
+                    :pres="presentationsById.get(b.presentationId)!"
+                  />
                 </td>
-                <td class="td">{{ b.quantity }}</td>
-                <td class="td">{{ fmtDate(b.expiry_date) }}</td>
-                <td class="td">{{ b.location ?? '-' }}</td>
+                <td class="td">{{ batchTotalQty(b) }}</td>
+                <td class="td">{{ fmtDate(b.expiryDate) }}</td>
+                <td class="td">
+                  <button
+                    class="icon-btn"
+                    aria-label="View locations"
+                    title="View locations"
+                    @click="openLocations(b)"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      class="h-5 w-5"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M12 5c-5 0-9.27 3.11-10.71 7.5C3.73 16.89 8 20 12 20s8.27-3.11 10.71-7.5C20.27 8.11 16 5 12 5m0 12a4.5 4.5 0 1 1 0-9a4.5 4.5 0 0 1 0 9m0-7a2.5 2.5 0 1 0 0 5a2.5 2.5 0 0 0 0-5Z"
+                      />
+                    </svg>
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -78,7 +93,7 @@
           <table v-else class="min-w-full leading-normal">
             <thead>
               <tr>
-                <th class="th">Drug</th>
+                <th class="th">Presentation</th>
                 <th class="th">Total&nbsp;Qty</th>
                 <th class="th">Earliest&nbsp;Expiry</th>
                 <th class="th">#&nbsp;Batches</th>
@@ -86,25 +101,24 @@
             </thead>
             <tbody>
               <tr
-                v-for="(row, idx) in drugRows"
+                v-for="(row, idx) in filteredPresentationRows"
                 :key="row.id"
                 :class="idx % 2 ? 'odd-row' : 'even-row'"
               >
                 <td class="px-4 py-2">
-                  <router-link
-                    :to="`/pharmacy/drugs/${row.id}`"
-                    class="text-blue-600 hover:underline"
-                  >
-                    {{ row.name }}
-                  </router-link>
+                  <PresentationLabel
+                    :drug="row.drug"
+                    :pres="row.presentation"
+                  />
                 </td>
                 <td class="td">{{ row.totalQty }}</td>
                 <td class="td">{{ fmtDate(row.earliestExpiry) }}</td>
-                <td class="td">{{ row.count }}</td>
+                <td class="td">{{ row.numBatches }}</td>
               </tr>
             </tbody>
           </table>
         </div>
+        <BatchLocationsModal v-model:open="showLocations" :batch="selectedBatch" />
       </div>
     </div>
   </div>
@@ -113,90 +127,193 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
-import {
-  fetchDrugs as apiFetchDrugs,
-  fetchBatches as apiFetchBatches
-} from '@features/pharmacy/api/pharmacy'
+import BatchLocationsModal from '../components/BatchLocationsModal.vue'
+import { listBatchesByPresentation } from '../api/batch'
+import { listDrugs, listPresentationsForDrug } from '../api/drug'
+import type { BatchDetail, DrugBatchLocation } from '../types/Batch'
+import type { Drug, DrugPresentationView } from '../types/Drug'
 
-/* ---------------- state ---------------- */
-const tab = ref<'batches' | 'drugs'>('batches')
-const drugs = ref<any[]>([])
-const batches = ref<any[]>([])
+import PresentationLabel from '../components/PresentationLabel.vue'
+import { fmtDate } from '../types/Util'
+
+
+// ---------------- state ----------------
+const tab = ref<'batches' | 'presentations'>('batches')
+
+// raw data
+const drugs = ref<Drug[]>([])
+const presentationsByDrug = ref<Record<number, DrugPresentationView[]>>({})
+const presentationsById = ref<Map<number, DrugPresentationView>>(new Map())
+
+// We’ll hold batches “flattened” with presentationId; we’ll derive drugId via presentationsById
+type BatchRow = BatchDetail & { presentationId: number }
+const batches = ref<BatchRow[]>([])
+
 const searchTerm = ref('')
 
-/* ---------------- API calls ---------------- */
-const fetchDrugs = async () => {
-  drugs.value = await apiFetchDrugs()
+// modal state
+const showLocations = ref(false)
+const selectedBatch = ref<BatchRow | null>(null)
+
+// ---------------- fetchers ----------------
+async function loadAll() {
+  // 1) Drugs
+  drugs.value = await listDrugs()
+
+  // 2) Presentations per drug (in parallel)
+  const pairs = await Promise.all(
+    drugs.value.map(async d => {
+      const res = await listPresentationsForDrug(d.id)
+      return [d.id, res] as const
+    })
+  )
+
+  const pbd: Record<number, DrugPresentationView[]> = {}
+  const presMap = new Map<number, DrugPresentationView>()
+  for (const [drugId, presList] of pairs) {
+    pbd[drugId] = presList
+    for (const p of presList) presMap.set(p.id, p)
+  }
+  presentationsByDrug.value = pbd
+  presentationsById.value = presMap
+
+  // 3) Batches per presentation (in parallel)
+  const allPresentationIds = [...presMap.keys()]
+  const batchGroups = await Promise.all(
+    allPresentationIds.map(async pid => {
+      const list = await listBatchesByPresentation(pid)
+      // attach presentationId so we can backtrack to drug later
+      return list.map(b => ({ ...b, presentationId: pid } as BatchRow))
+    })
+  )
+  batches.value = batchGroups.flat()
 }
 
-const fetchBatches = async () => {
-  const data = await apiFetchBatches()
-  batches.value = Array.isArray(data) ? [...data] : []
+// ---------------- helpers ----------------
+const drugById = computed(() => {
+  const m = new Map<number, Drug>()
+  for (const d of drugs.value) m.set(d.id, d)
+  return m
+})
+
+function drugIdForBatch(b: BatchRow): number | null {
+  const pres = presentationsById.value.get(b.presentationId)
+  return pres?.drugId ?? null
 }
 
-/* ---------------- helpers ---------------- */
-const fmtDate = (s: string) => {
-  if (!s || s === '–') return '–' // keep dash
-  const d = new Date(s)
-  return isNaN(+d) ? s : d.toLocaleDateString() // fall back to raw string
+function drugForBatch(b: BatchRow): Drug | null {
+  const id = drugIdForBatch(b)
+  if (id == null) return null
+  // NOTE: your Drug type uses genericName (not name)
+  return drugById.value.get(id) ?? null
 }
-const drugName = (id: number) => drugs.value.find((d) => d.id === id)?.name ?? 'Unknown'
 
-/* ---------------- client-side search ---------------- */
+function batchTotalQty(b: BatchRow): number {
+  // If your BatchDetail has a server-computed total, prefer it:
+  if (typeof b.quantity === 'number') return b.quantity
+  // else, sum locations if present (often you won’t have them on overview)
+  const locs = b.batchLocations as DrugBatchLocation[] | undefined
+  if (!Array.isArray(locs)) return 0
+  return locs.reduce((sum, r) => sum + (r.quantity ?? 0), 0)
+}
+
+// ---------------- client-side search ----------------
 const filteredBatches = computed(() => {
-  const term = searchTerm.value.toLowerCase()
+  const term = searchTerm.value.trim().toLowerCase()
   if (!term) return batches.value
-  return batches.value.filter((b: any) => {
-    return (
-      b.batch_no.toLowerCase().includes(term) ||
-      drugName(b.drug_id).toLowerCase().includes(term) ||
-      (b.location || '').toLowerCase().includes(term)
-    )
+
+  return batches.value.filter(b => {
+    const byBatchNum = (b.batchNumber ?? '').toLowerCase().includes(term)
+    const drug = drugForBatch(b)
+    const byDrug = drug?.genericName.toLowerCase().includes(term) ||
+      drug?.brandName?.toLowerCase().includes(term)
+    const byLocs = b.batchLocations.some(bL => bL.location.toLowerCase().includes(term))
+    return byBatchNum || byDrug || byLocs
   })
 })
 
-/* ---------------- aggregate for By-Drug view ---------------- */
-const drugRows = computed(() => {
-  const map = new Map<
-    number,
-    { id: number; name: string; totalQty: number; earliestExpiry: string; count: number }
-  >()
+// ---------------- aggregate for "By Drug" view ----------------
+// all presentations flattened (so rows show even if 0 batches)
+const allPresentations = computed(() => {
+  const out: DrugPresentationView[] = []
+  for (const list of Object.values(presentationsByDrug.value)) {
+    if (Array.isArray(list)) out.push(...list)
+  }
+  return out
+})
 
-  drugs.value.forEach((d) => {
-    map.set(d.id, {
-      id: d.id,
-      name: d.name,
+const presentationRows = computed(() => {
+  type Row = {
+    id: number
+    drug: Drug | null
+    presentation: DrugPresentationView
+    totalQty: number
+    earliestExpiryMs: number | null
+    numBatches: number
+  }
+  const map = new Map<number, Row>()
+
+  // seed from presentations
+  for (const p of allPresentations.value) {
+    const d = drugById.value.get(p.drugId)
+    map.set(p.id, {
+      id: p.id,
+      drug: d ?? null,
+      presentation: p,
       totalQty: 0,
-      earliestExpiry: '–', // display dash when no batches at all
-      count: 0
+      earliestExpiryMs: null,
+      numBatches: 0,
     })
-  })
+  }
 
-  filteredBatches.value.forEach((b: any) => {
-    const row = map.get(b.drug_id)!
-    row.totalQty += b.quantity
-    row.count += 1
-
-    // choose earliest expiry among that drug’s batches
-    if (row.earliestExpiry === '–' || new Date(b.expiry_date) < new Date(row.earliestExpiry)) {
-      row.earliestExpiry = b.expiry_date
+  // fold in batches (you already have batches with b.presentationId)
+  for (const b of batches.value) {
+    const row = map.get(b.presentationId)
+    if (!row) continue
+    row.totalQty += batchTotalQty(b)
+    row.numBatches += 1
+    const ms = Date.parse(b.expiryDate)
+    if (!Number.isNaN(ms)) {
+      row.earliestExpiryMs = row.earliestExpiryMs == null ? ms : Math.min(row.earliestExpiryMs, ms)
     }
-  })
+  }
 
-  return Array.from(map.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  return Array.from(map.values())
+    .map(r => ({
+      ...r,
+      earliestExpiry: r.earliestExpiryMs == null
+        ? '–'
+        : new Date(r.earliestExpiryMs).toLocaleDateString('en-SG'),
+    }))
+    .sort((a, b) => a.presentation.displayLabel.localeCompare(b.presentation.displayLabel))
+})
+
+const filteredPresentationRows = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase()
+  if (!term) return presentationRows.value
+  return presentationRows.value.filter(r =>
+    r.presentation.displayLabel.toLowerCase().includes(term) ||
+    r.drug?.genericName.toLowerCase().includes(term) ||
+    r.drug?.brandName?.toLowerCase().includes(term)
   )
 })
 
-/* ---------------- init ---------------- */
-onMounted(async () => {
-  await Promise.all([fetchDrugs(), fetchBatches()])
-})
 
-/* ---------------- styling helpers ---------------- */
+// ---------------- modal ----------------
+const openLocations = (b: BatchRow) => {
+  selectedBatch.value = b
+  showLocations.value = true
+  // If your modal fetches locations by batchId internally, nothing else to do here.
+}
+
+// ---------------- init ----------------
+onMounted(loadAll)
+
+// ---------------- styling helpers (as before) ----------------
 const activeBtn = 'bg-indigo-600 text-white px-4 py-2 rounded transition-colors'
 const inactiveBtn = 'bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colors'
 </script>
+
 
 <style scoped>
 .table {
