@@ -27,8 +27,8 @@ export interface UseAdminForm {
   lastMenstrualPeriod: Ref<string | null>
   drugAllergies: Ref<string | null>
   sentToId: Ref<boolean | null>
-  photo: Ref<string | null>
   selectedPhoto: Ref<string>
+  photoFile: Ref<File | null>
   isMale: Ref<boolean>
   ageComputed: Ref<number | null>
   // helpers
@@ -61,8 +61,8 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
   )
   const drugAllergies = ref<string | null>(initial?.drugAllergies ?? '')
   const sentToId = ref<boolean | null>(initial?.sentToId ?? null)
-  const photo = ref<string | null>(initial?.photo ?? null)
-  const selectedPhoto = ref(initial?.photo ? `data:image/png;base64,${initial.photo}` : '')
+  const selectedPhoto = ref('')
+  const photoFile = ref<File | null>(null)
   const isMale = computed(() => gender.value === 'M')
 
   function calculateAge(dateString: string | null): number | null {
@@ -118,8 +118,7 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
         ? new Date(lastMenstrualPeriod.value).toISOString()
         : null,
       drugAllergies: (drugAllergies.value || '').trim() || null,
-      sentToId: sentToId.value,
-      photo: photo.value || null
+      sentToId: sentToId.value
     }
   }
 
@@ -144,8 +143,8 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
       : null
     drugAllergies.value = src?.drugAllergies ?? ''
     sentToId.value = src?.sentToId ?? null
-    photo.value = src?.photo ?? null
-    selectedPhoto.value = src?.photo ? `data:image/png;base64,${src.photo}` : ''
+  selectedPhoto.value = ''
+  photoFile.value = null
     // isMale is computed now; no manual assignment needed
   }
 
@@ -163,8 +162,8 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
     lastMenstrualPeriod,
     drugAllergies,
     sentToId,
-    photo,
     selectedPhoto,
+    photoFile,
     isMale,
     ageComputed: ageComputed as Ref<number | null>,
     buildPayload,
