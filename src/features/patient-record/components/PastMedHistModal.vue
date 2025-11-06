@@ -616,7 +616,7 @@ function buildPayload(): PastMedicalHistory | null {
       [unintentionalWeightLoss.value !== null, 'Select Unintentional Weight Loss'],
       
       [tuberculosis.value !== null, 'Select Tuberculosis'],
-      [tuberculosis.value === false && tuberculosisHasBeenTreated.value !== null, 'Select Has Tuberculosis been treated before'],
+      [tuberculosis.value === false || tuberculosisHasBeenTreated.value !== null, 'Select Has Tuberculosis been treated before'],
       [diabetes.value !== null, 'Select Diabetes'],
       [hypertension.value !== null, 'Select Hypertension'],
       [hyperlipidemia.value !== null, 'Select Hyperlipidemia'],

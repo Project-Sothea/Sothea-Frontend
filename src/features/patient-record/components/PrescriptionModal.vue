@@ -42,7 +42,7 @@
         <span class="ml-1">{{ patientData?.doctorsconsultation?.diagnosis ?? 'No Data' }}</span>
       </div>
       <div class="px-5 py-4 text-sm text-gray-900">
-        <span class="font-semibold">Drug Allergies:</span>
+        <span class="font-semibold">Treatment:</span>
         <span class="ml-1">{{ patientData?.doctorsconsultation?.treatment ?? 'No Data' }}</span>
       </div>
 
