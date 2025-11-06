@@ -86,9 +86,7 @@
         <!-- Row 3 -->
         <div class="flex flex-row w-full mb-2">
           <div class="w-1/2">
-            <label class="mb-1 block text-sm font-medium text-dark"
-              >Contact No. 
-            </label>
+            <label class="mb-1 block text-sm font-medium text-dark">Contact No. </label>
             <div class="relative">
               <input
                 v-model="contactNo"
@@ -186,8 +184,8 @@
             :disabled="disabled"
             class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
           >
-            <option value="v1">Srae Ou</option>
-            <option value="v2">Krang Svat</option>
+            <option value="SO">Srae Ou</option>
+            <option value="KS">Krang Svat</option>
           </select>
 
           <!-- left icon stays the same -->
