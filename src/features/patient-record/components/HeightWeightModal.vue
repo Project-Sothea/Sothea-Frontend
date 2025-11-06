@@ -365,10 +365,6 @@ function buildPayload(): HeightAndWeight | null {
   if (bmi.value === null) return (toast.error('Enter height & weight to calculate BMI'), null)
   if (bmianalysis.value === null)
     return (toast.error('Enter height & weight to calculate BMI Analysis'), null)
-   if (icopeLostWeightPastMonths.value === null)
-    return (toast.error('Please answer whether the patient has lost weight rapidly over the past 3 month'), null)
-   if (icopeNoDesireToEat.value === null)
-    return (toast.error('Please answer whether the patient has felt a sudden loss of appetite'), null)
   return {
     height: height.value!,
     weight: weight.value!,
