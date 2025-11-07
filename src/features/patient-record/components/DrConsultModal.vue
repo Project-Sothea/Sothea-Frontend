@@ -7,7 +7,7 @@
       <div class="flex flex-col">
         <!-- Header -->
         <div class="flex flex-row">
-          <div class="font-medium text-md w-1/3">Condition</div>
+          <div class="font-medium text-md w-1/3">Condition<span class="req">*</span></div>
           <div class="font-medium text-md w-1/6">Yes</div>
           <div class="font-medium text-md w-1/6">No</div>
         </div>
@@ -16,7 +16,7 @@
       <!-- Well -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">WELL <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">WELL</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -48,7 +48,7 @@
       <!-- MSK -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">MSK <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">MSK</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -80,7 +80,7 @@
       <!-- CVS -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">CVS <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">CVS</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -112,7 +112,7 @@
       <!-- Respi -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Respi <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Respi</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -144,7 +144,7 @@
       <!-- GU -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">GU <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">GU</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -176,7 +176,7 @@
       <!-- GIT -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">GIT <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">GIT</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -208,7 +208,7 @@
       <!-- EYE -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">EYE <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">EYE</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -240,7 +240,7 @@
       <!-- DERM -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">DERM <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">DERM</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -271,7 +271,7 @@
       <!-- Others -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row items-center">
-          <div class="font-normal text-sm w-1/3">Others: <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Others:</div>
 
           <div class="flex w-1/3">
             <input
@@ -448,7 +448,7 @@ const gu = ref<boolean | null>(null)
 const git = ref<boolean | null>(null)
 const eye = ref<boolean | null>(null)
 const derm = ref<boolean | null>(null)
-const others = ref<string>('')
+const others = ref<string | null>('')
 const consultationNotes = ref<string | null>('')
 const diagnosis = ref<string | null>('')
 const treatment = ref<string | null>('')
@@ -486,15 +486,15 @@ watch(
 function buildPayload(): DoctorsConsultation | null {
   if (
     !runChecks([
-      [well.value !== null, 'Indicate if patient is well'],
-      [msk.value !== null, 'Indicate MSK'],
-      [cvs.value !== null, 'Indicate CVS'],
-      [respi.value !== null, 'Indicate Respi'],
-      [gu.value !== null, 'Indicate GU'],
-      [git.value !== null, 'Indicate GIT'],
-      [eye.value !== null, 'Indicate Eye'],
-      [derm.value !== null, 'Indicate Derm'],
-      [others.value.trim() !== '', 'Specify Others'],
+      [well.value !== null ||
+      msk.value !== null ||
+      cvs.value !== null ||
+      respi.value !== null ||
+      gu.value !== null ||
+      git.value !== null ||
+      eye.value !== null ||
+      derm.value !== null ||
+      (others.value !== null && others.value.trim() !== ''), 'Please indicate at least one condition status'],
       [referralNeeded.value !== null, 'Indicate referral need']
     ])
   )
@@ -508,7 +508,7 @@ function buildPayload(): DoctorsConsultation | null {
     git: git.value!,
     eye: eye.value!,
     derm: derm.value!,
-    others: others.value.trim(),
+    others: others.value ? others.value.trim() : others.value,
     consultationNotes: consultationNotes.value || '',
     diagnosis: diagnosis.value || '',
     treatment: treatment.value || '',
