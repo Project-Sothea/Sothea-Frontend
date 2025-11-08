@@ -42,7 +42,9 @@ export interface PrescriptionLine {
     scheduleKind: ScheduleKind // "hour" | "day" | "week" | "month"
     everyN: number
     frequencyPerSchedule: number // administrations per schedule period
+
     duration: number // in units of scheduleKind
+    durationUnit: ScheduleKind // "day" | "hour" | "week" | "month"
 
     totalToDispense: number // Computed by backend (in presentation’s dispense unit)
     dispenseUnit: UnitCode
@@ -72,8 +74,9 @@ export interface PrescriptionLinePostData {
     scheduleKind: ScheduleKind // "hour" | "day" | "week" | "month"
     everyN: number
     frequencyPerSchedule: number // administrations per schedule period
-    duration: number
 
+    duration: number
+    durationUnit: ScheduleKind 
 }
 
 export interface LineAllocation {

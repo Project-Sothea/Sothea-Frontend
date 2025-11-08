@@ -185,11 +185,21 @@
               class="w-24 border p-2 rounded text-right disabled:bg-gray-50"
               placeholder="e.g. 7" :disabled="readOnly || saving"
             />
-            <span class="ml-2 text-sm text-gray-500 whitespace-nowrap">
-              {{ pluralize(1, form.scheduleKind ?? 'day') }}
-            </span>
           </div>
         </div>
+
+        <!-- Duration unit -->
+        <div v-if="!isBottleMode">
+          <label :for="`sched-kind-${uid}`" class="block text-xs text-gray-600 mb-1">Duration unit</label>
+          <select
+            :id="`sched-kind-${uid}`" v-model="form.durationUnit"
+            class="w-28 border p-2 rounded disabled:bg-gray-50"
+            :disabled="readOnly || saving"
+          >
+            <option v-for="k in DURATION_UNITS" :key="k" :value="k">{{ k }}</option>
+          </select>
+        </div>
+
       </div>
 
       <div
@@ -322,7 +332,7 @@ import PresentationSelector from './PresentationSelector.vue'
 import type { PrescriptionLine, PrescriptionLinePostData } from '@/features/pharmacy/types/Prescription'
 import type { DrugPresentationView } from '@/features/pharmacy/types/Drug'
 import { createLine, updateLine, deleteLine as apiDeleteLine, listLineAllocations } from '@/features/pharmacy/api/prescription'
-import { fmtDate, type UnitCode , UNIT_LABELS, SCHEDULE_KINDS} from '@/features/pharmacy/types/Util'
+import { fmtDate, type UnitCode , UNIT_LABELS, SCHEDULE_KINDS, type ScheduleKind} from '@/features/pharmacy/types/Util'
 import PrescriptionBatchAllocator from './PrescriptionBatchAllocator.vue'
 import ConfirmationDialogue from './ConfirmationDialogue.vue'
 
@@ -350,6 +360,7 @@ const form = reactive<Partial<PrescriptionLine>>({
   everyN: 1,
   frequencyPerSchedule: 1,
   duration: 7,
+  durationUnit: 'day',
   remarks: '',
 })
 
@@ -373,14 +384,14 @@ const presentationLabel = computed(() => {
 // Fields you care about for dirty checking
 const SNAPSHOT_KEYS = [
   'presentationId','doseAmount','doseUnit',
-  'scheduleKind','everyN','frequencyPerSchedule','duration','remarks',
+  'scheduleKind','everyN','frequencyPerSchedule','duration','durationUnit','remarks',
 ] as const
 type K = (typeof SNAPSHOT_KEYS)[number]
 
 // Normalize so comparisons are stable
 const norm = (k: K, v: unknown) => {
   if (k === 'remarks') return String(v ?? '').trim()
-  if (['doseAmount','everyN','frequencyPerSchedule','duration'].includes(k)) {
+  if (['doseAmount','everyN','frequencyPerSchedule','duration','durationUnit'].includes(k)) {
     return v == null ? null : Number(v)
   }
   return v ?? null
@@ -411,6 +422,7 @@ function seedFromLine() {
     form.everyN = L.everyN
     form.frequencyPerSchedule = L.frequencyPerSchedule
     form.duration = L.duration
+    form.durationUnit = L.durationUnit
     form.remarks = L.remarks
   } else {
     // draft defaults
@@ -421,6 +433,7 @@ function seedFromLine() {
     form.everyN = 1
     form.frequencyPerSchedule = 1
     form.duration = 7
+    form.durationUnit = 'day'
     form.remarks = ''
   }
   seeding.value = false
@@ -499,19 +512,35 @@ watch([() => form.doseAmount, () => form.doseUnit], () => {
 })
 
 watch(
-  [() => form.scheduleKind, () => form.everyN, () => form.frequencyPerSchedule, () => form.duration],
+  [() => form.scheduleKind, () => form.everyN, () => form.frequencyPerSchedule,
+  () => form.duration, () => form.durationUnit],
   () => { errors.schedule = undefined }
 )
 
 watch(() => form.remarks, () => { errors.remarks = undefined })
+
+// Helper to check if a number has at most 2 decimal places
+function hasMaxTwoDecimals(value: number | undefined): boolean {
+  if (value == null) return true
+  // Convert to string to check decimal places
+  const str = value.toString()
+  const decimalIndex = str.indexOf('.')
+  if (decimalIndex === -1) return true // No decimal point, so 0 decimal places
+  const decimalPart = str.substring(decimalIndex + 1)
+  return decimalPart.length <= 2
+}
 
 function validate(): boolean {
   Object.assign(errors, { presentationId: undefined, dose: undefined, schedule: undefined })
   let ok = true
   if (!form.presentationId || form.presentationId <= 0) { errors.presentationId = 'Select a presentation.'; ok = false }
   if (!form.doseAmount || form.doseAmount <= 0) { errors.dose = 'Dose must be > 0.'; ok = false }
+  if (form.doseAmount && !hasMaxTwoDecimals(form.doseAmount)) {
+    errors.dose = (errors.dose ? errors.dose + ' ' : '') + 'Dose must have at most 2 decimal places.'
+    ok = false
+  }
   if (!form.doseUnit) { errors.dose = (errors.dose ? errors.dose + ' ' : '') + 'Select a dose unit.'; ok = false }
-  if (!isBottleMode.value && (!form.scheduleKind || !form.everyN || !form.frequencyPerSchedule || !form.duration)) { errors.schedule = 'Complete the schedule.'; ok = false }
+  if (!isBottleMode.value && (!form.scheduleKind || !form.everyN || !form.frequencyPerSchedule || !form.duration || !form.durationUnit)) { errors.schedule = 'Complete the schedule.'; ok = false }
   if (isBottleMode.value && !form.remarks) { errors.remarks = 'Please enter dosage instruction above'; ok = false}
   return ok
 }
@@ -564,6 +593,7 @@ async function saveLine() {
       everyN: isBottleMode.value ? 1 : form.everyN!,
       frequencyPerSchedule: isBottleMode.value ? 1 : form.frequencyPerSchedule!,
       duration: isBottleMode.value ? 1 : form.duration!,
+      durationUnit: isBottleMode.value ? 'day' : form.durationUnit!
     }
     if (isSaved.value && props.line.id) {
       await updateLine(props.line.id, payload)
@@ -640,6 +670,8 @@ async function toggleAlloc() {
 
 // ─── Convert Dosing Instructions into Human Readable ────────────────────────
 
+const DURATION_UNITS: ScheduleKind[] = ['day', 'week']
+
 // Pluralize a word (very simple; adjust if you localize)
 function pluralize(n: number, word: string) {
   return n === 1 ? word : `${word}s`
@@ -660,6 +692,7 @@ const scheduleReadable = computed(() => {
   const every = Number(form.everyN ?? 0)
   const freq = Number(form.frequencyPerSchedule ?? 0)
   const dur  = Number(form.duration ?? 0)
+  const durUnit = form.durationUnit ??  'day'
 
   if (!form.doseAmount || !form.doseUnit) {
     return 'Set Dosage'
@@ -674,7 +707,7 @@ const scheduleReadable = computed(() => {
   const dosePart = `${form.doseAmount} ${unitLabel(form.doseUnit)}`
 
   // Example: "the dose, 3× per day, for 7 days."
-  return `${dosePart}, ${freq}× ${periodPhrase}, for ${dur} ${pluralize(dur, k)}.`
+  return `${dosePart}, ${freq}× ${periodPhrase}, for ${dur} ${pluralize(dur, durUnit)}.`
 })
 
 const scheduleIncomplete = computed(() => {
@@ -683,7 +716,8 @@ const scheduleIncomplete = computed(() => {
   const every = Number(form.everyN ?? 0)
   const freq  = Number(form.frequencyPerSchedule ?? 0)
   const dur   = Number(form.duration ?? 0)
-  const schedOk = !!(k && every > 0 && freq > 0 && dur > 0)
+  const durUnit = form.durationUnit
+  const schedOk = !!(k && every > 0 && freq > 0 && dur > 0 && durUnit)
   return !(doseOk && schedOk)
 })
 
