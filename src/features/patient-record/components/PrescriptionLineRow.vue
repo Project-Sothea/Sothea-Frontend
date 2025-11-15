@@ -339,13 +339,21 @@ import ConfirmationDialogue from './ConfirmationDialogue.vue'
 // ─── Props & Emits ───────────────────────────────────────────────────────
 const props = defineProps<{
   rxId: number
-  line: Partial<PrescriptionLine>
+  line: Partial<PrescriptionLine> // current line state (with unsaved edits, if any)
   readOnly?: boolean
   allPresentations?: DrugPresentationView[]
   excludePresentationIds?: number[]
+  hasUnsavedEdits?: boolean
+  originalLine?: Partial<PrescriptionLine> // Original server data (without unsaved edits)
 }>()
 
-const emit = defineEmits<{ (e: 'refresh'): void; (e: 'discard-draft'): void }>()
+const emit = defineEmits<{ 
+  (e: 'refresh'): void
+  (e: 'discard-draft'): void
+  (e: 'update-line-edit', lineId: number, data: Partial<PrescriptionLine>): void
+  (e: 'clear-line-edit', lineId: number): void
+  (e: 'update-draft-line', uid: string, data: Partial<PrescriptionLine>): void
+}>()
 
 const toast = useToast()
 const uid = Math.random().toString(36).slice(2)
@@ -412,20 +420,35 @@ function resetBaseline() { baseKey.value = currKey.value }
 const seeding = ref(false)
 
 // Seed form from incoming line
-function seedFromLine() {
+async function seedFromLine() {
+  seeding.value = true
   const L = props.line
   if (L && L.id) {
-    form.presentationId = L.presentationId
+    // For saved lines, use the line data (which may include unsaved edits from parent)
+    // Set doseUnit BEFORE presentationId to prevent watch from interfering
     form.doseAmount = L.doseAmount
     form.doseUnit = L.doseUnit
+    form.presentationId = L.presentationId
     form.scheduleKind = L.scheduleKind
     form.everyN = L.everyN
     form.frequencyPerSchedule = L.frequencyPerSchedule
     form.duration = L.duration
     form.durationUnit = L.durationUnit
     form.remarks = L.remarks
+  } else if ((L as any).__draft && (L as any)._uid) {
+    // For draft lines, use existing data if available (preserves user input)
+    const draftLine = L as any
+    form.doseAmount = draftLine.doseAmount
+    form.doseUnit = draftLine.doseUnit
+    form.presentationId = draftLine.presentationId
+    form.scheduleKind = draftLine.scheduleKind ?? 'day'
+    form.everyN = draftLine.everyN ?? 1
+    form.frequencyPerSchedule = draftLine.frequencyPerSchedule ?? 1
+    form.duration = draftLine.duration ?? 7
+    form.durationUnit = draftLine.durationUnit ?? 'day'
+    form.remarks = draftLine.remarks ?? ''
   } else {
-    // draft defaults
+    // New draft defaults
     form.presentationId = undefined
     form.doseAmount = undefined
     form.doseUnit = undefined
@@ -436,13 +459,49 @@ function seedFromLine() {
     form.durationUnit = 'day'
     form.remarks = ''
   }
+  // Wait for next tick to ensure all computed properties and watches have settled
+  await nextTick()
   seeding.value = false
-  resetBaseline()
+  
+  // Set baseline to original server data (if available), otherwise use current form state
+  // This ensures dirty state works correctly when draft is restored
+  if (L && L.id && props.originalLine) {
+    // Use original server data as baseline for dirty checking
+    const orig = props.originalLine
+    const origForm = {
+      presentationId: orig.presentationId,
+      doseAmount: orig.doseAmount,
+      doseUnit: orig.doseUnit,
+      scheduleKind: orig.scheduleKind,
+      everyN: orig.everyN,
+      frequencyPerSchedule: orig.frequencyPerSchedule,
+      duration: orig.duration,
+      durationUnit: orig.durationUnit,
+      remarks: orig.remarks,
+    }
+    baseKey.value = JSON.stringify(SNAPSHOT_KEYS.map(k => [k, norm(k, (origForm as any)[k])]))
+  }
 }
 
+// Watch for line changes and reseed form automatically
+// This handles: initial load, draft restoration, save/discard, server refresh
+// Don't reseed when actively editing - form state is the source of truth during editing
 watch(() => props.line, () => {
+  if (seeding.value) return // Prevent infinite loops during seeding
+  if (editing.value && isSaved.value) return // Don't reseed while actively editing saved lines
+  
   seedFromLine()
-  editing.value = !isSaved.value   // whenever a new line comes in, default to view for saved lines
+  // For saved lines: if there are unsaved edits, put in edit mode; otherwise view mode
+  // For draft lines: always in edit mode
+  editing.value = !isSaved.value || (isSaved.value && props.hasUnsavedEdits === true)
+}, { immediate: true, deep: true })
+
+// Watch for changes to hasUnsavedEdits prop (e.g., when draft is restored)
+watch(() => props.hasUnsavedEdits, (hasEdits) => {
+  if (isSaved.value && hasEdits && !editing.value) {
+    // If this saved line has unsaved edits, put it in edit mode
+    editing.value = true
+  }
 }, { immediate: true })
 
 function resetNonPresentationFields() {
@@ -477,6 +536,7 @@ const allowedDoseUnits = computed<UnitCode[]>(() => allowedDoseUnitsFor(selected
 
 watch(selectedPresentation, (p) => {
   if (!p) return
+  if (seeding.value) return // Don't auto-set doseUnit during seeding - let seedFromLine handle it
   if (!form.doseUnit || !allowedDoseUnits.value.includes(form.doseUnit)) {
     if (allowedDoseUnits.value.includes('tab' as UnitCode) && p.dosageFormCode === 'TAB'){
       form.doseUnit = 'tab'
@@ -519,6 +579,55 @@ watch(
 
 watch(() => form.remarks, () => { errors.remarks = undefined })
 
+// Emit form changes for saved lines in edit mode (debounced)
+let updateTimer: ReturnType<typeof setTimeout> | undefined = undefined
+watch(() => form, () => {
+  if (seeding.value) return // Don't emit during seeding
+  const lineId = props.line.id
+  const draftUid = (props.line as any)._uid
+  
+  if (isSaved.value && editing.value && lineId) {
+    // Clear any pending update
+    if (updateTimer) {
+      clearTimeout(updateTimer)
+    }
+    // Debounce updates to avoid too many emissions
+    updateTimer = setTimeout(() => {
+      const editData: Partial<PrescriptionLine> = {
+        presentationId: form.presentationId,
+        doseAmount: form.doseAmount,
+        doseUnit: form.doseUnit,
+        scheduleKind: form.scheduleKind,
+        everyN: form.everyN,
+        frequencyPerSchedule: form.frequencyPerSchedule,
+        duration: form.duration,
+        durationUnit: form.durationUnit,
+        remarks: form.remarks,
+      }
+      emit('update-line-edit', lineId, editData)
+    }, 300)
+  } else if (!isSaved.value && draftUid) {
+    // For draft lines, emit updates immediately (debounced) to update the parent's draftLines array
+    if (updateTimer) {
+      clearTimeout(updateTimer)
+    }
+    updateTimer = setTimeout(() => {
+      const draftData: Partial<PrescriptionLine> = {
+        presentationId: form.presentationId,
+        doseAmount: form.doseAmount,
+        doseUnit: form.doseUnit,
+        scheduleKind: form.scheduleKind,
+        everyN: form.everyN,
+        frequencyPerSchedule: form.frequencyPerSchedule,
+        duration: form.duration,
+        durationUnit: form.durationUnit,
+        remarks: form.remarks,
+      }
+      emit('update-draft-line', draftUid, draftData)
+    }, 300)
+  }
+}, { deep: true })
+
 // Helper to check if a number has at most 2 decimal places
 function hasMaxTwoDecimals(value: number | undefined): boolean {
   if (value == null) return true
@@ -549,29 +658,62 @@ function validate(): boolean {
 
 function startEditing() {
   editing.value = true
+  expanded.value = false
+  // Immediately emit current form state when starting to edit
+  if (isSaved.value && props.line.id) {
+    const editData: Partial<PrescriptionLine> = {
+      presentationId: form.presentationId,
+      doseAmount: form.doseAmount,
+      doseUnit: form.doseUnit,
+      scheduleKind: form.scheduleKind,
+      everyN: form.everyN,
+      frequencyPerSchedule: form.frequencyPerSchedule,
+      duration: form.duration,
+      durationUnit: form.durationUnit,
+      remarks: form.remarks,
+    }
+    emit('update-line-edit', props.line.id, editData)
+  }
 }
 
 function discardEditing() {
-  seedFromLine()
-  Object.assign(errors, { presentationId: undefined, dose: undefined, schedule: undefined })
+  // Set editing to false first so watch can reseed
   editing.value = false
+  // Clear unsaved edits - watch on props.line will handle reseeding automatically
+  if (isSaved.value && props.line.id) {
+    emit('clear-line-edit', props.line.id)
+  }
+  // Reset form and errors
+  Object.assign(errors, { presentationId: undefined, dose: undefined, schedule: undefined })
 }
 
 const saving = ref(false)
 
 async function onClickSave() { 
-  if (isSaved.value  && form.presentationId !== props.line.presentationId) {
+  // Check if presentation changed (compare against original server value, not props.line which may have unsaved edits)
+  const originalPresentationId = props.originalLine?.presentationId ?? props.line.presentationId
+  const presentationChanged = isSaved.value && form.presentationId !== originalPresentationId
+  
+  // Check if line has allocations
+  const hasAllocations = props.line.allocations && props.line.allocations.length > 0
+  
+  // Show warning if presentation changed AND line has allocations
+  if (presentationChanged && hasAllocations) {
     showPresChangeWarn.value = true
     return
   }
+  
+  // Also validate that presentation is set
+  if (!form.presentationId || form.presentationId <= 0) {
+    errors.presentationId = 'Select a presentation.'
+    return
+  }
+  
   await saveAndExitEditingMode()
 }
 
 async function saveAndExitEditingMode() {
-  const success = await saveLine()
-  if (isSaved.value && success) {
-    editing.value = false
-  }
+  await saveLine()
 }
 
 async function confirmSaveAfterChange() {
@@ -598,12 +740,19 @@ async function saveLine() {
     if (isSaved.value && props.line.id) {
       await updateLine(props.line.id, payload)
       toast.success(`Line #${props.line.id} saved`)
+      // Clear unsaved edits after successful save
+      emit('clear-line-edit', props.line.id)
+      // Set editing to false before refresh so watch can reseed
+      editing.value = false
+      // Close batch allocator after edit
+      expanded.value = false
     } else {
       await createLine(props.rxId, payload)
       toast.success('Line created')
       emit('discard-draft')
     }
     emit('refresh')
+    // Watch on props.line will handle reseeding automatically after refresh
     resetBaseline()
     reloadAllocations()
     return true
