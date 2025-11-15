@@ -548,7 +548,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type PastMedicalHistory from '@patient-record/types/PastMedicalHistory'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
@@ -578,130 +578,46 @@ const sexuallyTransmittedDisease = ref<boolean | null>(null)
 const specifiedSTDs = ref<string | null>('')
 const others = ref<string | null>('')
 
-const draftFields = [
-  bindRef('cough', cough),
-  bindRef('fever', fever),
-  bindRef('blockedNose', blockedNose),
-  bindRef('soreThroat', soreThroat),
-  bindRef('nightSweats', nightSweats),
-  bindRef('unintentionalWeightLoss', unintentionalWeightLoss),
-  bindRef('tuberculosis', tuberculosis),
-  bindRef('tuberculosisHasBeenTreated', tuberculosisHasBeenTreated),
-  bindRef('diabetes', diabetes),
-  bindRef('hypertension', hypertension),
-  bindRef('hyperlipidemia', hyperlipidemia),
-  bindRef('chronicJointPains', chronicJointPains),
-  bindRef('chronicMuscleAches', chronicMuscleAches),
-  bindRef('sexuallyTransmittedDisease', sexuallyTransmittedDisease),
-  bindRef('specifiedSTDs', specifiedSTDs),
-  bindRef('others', others)
-]
-
-const pastMedHistDraftStorageKey = computed(() => {
-  if (!props.patientId || !props.patientVid) return null
-  return `patient-record:draft:${props.patientId}:${props.patientVid}:pastMedicalHistory`
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<PastMedicalHistory>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:pastMedicalHistory`
+  }),
+  fields: [
+    { key: 'cough', ref: cough },
+    { key: 'fever', ref: fever },
+    { key: 'blockedNose', ref: blockedNose },
+    { key: 'soreThroat', ref: soreThroat },
+    { key: 'nightSweats', ref: nightSweats },
+    { key: 'unintentionalWeightLoss', ref: unintentionalWeightLoss },
+    { key: 'tuberculosis', ref: tuberculosis },
+    { key: 'tuberculosisHasBeenTreated', ref: tuberculosisHasBeenTreated },
+    { key: 'diabetes', ref: diabetes },
+    { key: 'hypertension', ref: hypertension },
+    { key: 'hyperlipidemia', ref: hyperlipidemia },
+    { key: 'chronicJointPains', ref: chronicJointPains },
+    { key: 'chronicMuscleAches', ref: chronicMuscleAches },
+    { key: 'sexuallyTransmittedDisease', ref: sexuallyTransmittedDisease },
+    { key: 'specifiedSTDs', ref: specifiedSTDs },
+    { key: 'others', ref: others },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved past medical history draft from this device.',
 })
 
-const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey, runChecks } = useEditableSection<PastMedicalHistory>({
-  draft: {
-    key: pastMedHistDraftStorageKey,
-    fields: draftFields,
-    autoRestore: false
-  }
-})
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
 
-const initialized = ref(false)
-const draftRestored = ref(false)
-
-watch(
-  () => draftStorageKey.value,
-  () => {
-    if (draftRestored.value) return
-    if (props.isAdd) return
-    // Try to restore draft when storage key becomes available
-    // This happens before initialization completes
-    draftRestored.value = restoreDraft() || draftRestored.value
-  },
-  { immediate: true }
-)
-
-function initialize(patientData: Patient | undefined) {
-  // Don't re-initialize if already initialized, in add mode, or currently editing
-  // This prevents overwriting form values with stale data after saving
-  if (initialized.value || props.isAdd || isEditing.value) return
-  
-  // Wait for patientData to actually be loaded (not null/undefined)
-  // This prevents initializing with null data on page refresh
-  if (!patientData) return
-
-  const pastMedHist = patientData.pastmedicalhistory
-  if (!pastMedHist) {
-    // No saved past medical history data - try to restore draft if available
-    initialized.value = true
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-
-  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
-  cough.value = pastMedHist.cough
-  fever.value = pastMedHist.fever
-  blockedNose.value = pastMedHist.blockedNose
-  soreThroat.value = pastMedHist.soreThroat
-  nightSweats.value = pastMedHist.nightSweats
-  unintentionalWeightLoss.value = pastMedHist.unintentionalWeightLoss
-
-  tuberculosis.value = pastMedHist.tuberculosis
-  tuberculosisHasBeenTreated.value = pastMedHist.tuberculosisHasBeenTreated
-
-  diabetes.value = pastMedHist.diabetes
-  hypertension.value = pastMedHist.hypertension
-  hyperlipidemia.value = pastMedHist.hyperlipidemia
-  chronicJointPains.value = pastMedHist.chronicJointPains
-  chronicMuscleAches.value = pastMedHist.chronicMuscleAches
-  sexuallyTransmittedDisease.value = pastMedHist.sexuallyTransmittedDisease
-  specifiedSTDs.value = pastMedHist.specifiedSTDs
-  others.value = pastMedHist.others
-
-  initialized.value = true
-  // Don't restore draft when we have saved data - it would overwrite it
-  draftRestored.value = true
-}
-
-function resetData() {
-  initialized.value = false
-  if (!props.patientData?.pastmedicalhistory) {
-    cough.value = null
-    fever.value = null
-    blockedNose.value = null
-    soreThroat.value = null
-    nightSweats.value = null
-    unintentionalWeightLoss.value = null
-    tuberculosis.value = null
-    tuberculosisHasBeenTreated.value = null
-    diabetes.value = null
-    hypertension.value = null
-    hyperlipidemia.value = null
-    chronicJointPains.value = null
-    chronicMuscleAches.value = null
-    sexuallyTransmittedDisease.value = null
-    specifiedSTDs.value = null
-    others.value = null
-    initialized.value = true
-    // Try to restore draft if available
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-  initialize(props.patientData)
-}
-
-// Initialize once
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal) => initialize(newVal),
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.pastmedicalhistory || null)
+  },
   { immediate: true }
 )
 
@@ -769,7 +685,8 @@ async function submitData() {
 function discardEdit() {
   discardChanges({
     onDiscard: () => {
-      resetData()
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.pastmedicalhistory || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

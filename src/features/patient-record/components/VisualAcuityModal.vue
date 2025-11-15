@@ -204,7 +204,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type VisualAcuity from '@patient-record/types/VisualAcuity'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
@@ -229,103 +229,39 @@ const icopeTreatedForDiabetesOrBp = ref<boolean | null>(null)
 
 const additionalIntervention = ref<string | null>('')
 
-const draftFields = [
-  bindRef('lEyeVision', lEyeVision),
-  bindRef('rEyeVision', rEyeVision),
-  bindRef('sentToOpto', sentToOpto),
-  bindRef('referredForGlasses', referredForGlasses),
-  bindRef('icopeEyeProblem', icopeEyeProblem),
-  bindRef('icopeTreatedForDiabetesOrBp', icopeTreatedForDiabetesOrBp),
-  bindRef('additionalIntervention', additionalIntervention)
-]
-
-const visualAcuityDraftStorageKey = computed(() => {
-  if (!props.patientId || !props.patientVid) return null
-  return `patient-record:draft:${props.patientId}:${props.patientVid}:visualAcuity`
-})
-
-const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey, runChecks } = useEditableSection<VisualAcuity>({
-  draft: {
-    key: visualAcuityDraftStorageKey,
-    fields: draftFields,
-    autoRestore: false
-  }
-})
-
 const toast = useToast()
 
-const initialized = ref(false)
-const draftRestored = ref(false)
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<VisualAcuity>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:visualAcuity`
+  }),
+  fields: [
+    { key: 'lEyeVision', ref: lEyeVision },
+    { key: 'rEyeVision', ref: rEyeVision },
+    { key: 'sentToOpto', ref: sentToOpto },
+    { key: 'referredForGlasses', ref: referredForGlasses },
+    { key: 'icopeEyeProblem', ref: icopeEyeProblem },
+    { key: 'icopeTreatedForDiabetesOrBp', ref: icopeTreatedForDiabetesOrBp },
+    { key: 'additionalIntervention', ref: additionalIntervention },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved visual acuity draft from this device.',
+})
 
-watch(
-  () => draftStorageKey.value,
-  () => {
-    if (draftRestored.value) return
-    if (props.isAdd) return
-    // Try to restore draft when storage key becomes available
-    // This happens before initialization completes
-    draftRestored.value = restoreDraft() || draftRestored.value
-  },
-  { immediate: true }
-)
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
 
-function initialize(patientData: Patient | null) {
-  // Don't re-initialize if already initialized, in add mode, or currently editing
-  // This prevents overwriting form values with stale data after saving
-  if (initialized.value || props.isAdd || isEditing.value) return
-  
-  // Wait for patientData to actually be loaded (not null/undefined)
-  // This prevents initializing with null data on page refresh
-  if (!patientData) return
-
-  const visualAcuity = patientData.visualacuity
-  if (!visualAcuity) {
-    // No saved visual acuity data - try to restore draft if available
-    initialized.value = true
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-
-  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
-  lEyeVision.value = visualAcuity.lEyeVision
-  rEyeVision.value = visualAcuity.rEyeVision
-  sentToOpto.value = visualAcuity.sentToOpto
-  referredForGlasses.value = visualAcuity.referredForGlasses
-  icopeEyeProblem.value = visualAcuity.icopeEyeProblem
-  icopeTreatedForDiabetesOrBp.value = visualAcuity.icopeTreatedForDiabetesOrBp
-  additionalIntervention.value = visualAcuity.additionalIntervention
-
-  initialized.value = true
-  // Don't restore draft when we have saved data - it would overwrite it
-  draftRestored.value = true
-}
-
-function resetData() {
-  initialized.value = false
-  if (!props.patientData?.visualacuity) {
-    lEyeVision.value = null
-    rEyeVision.value = null
-    sentToOpto.value = false
-    referredForGlasses.value = null
-    icopeEyeProblem.value = null
-    icopeTreatedForDiabetesOrBp.value = null
-    additionalIntervention.value = ''
-    initialized.value = true
-    // Try to restore draft if available
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-  initialize(props.patientData)
-}
-
-// Initialize once
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal) => initialize(newVal),
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.visualacuity || null)
+  },
   { immediate: true }
 )
 function buildPayload(): VisualAcuity | null {
@@ -371,7 +307,8 @@ async function submitData() {
 function discardEdit() {
   discardChanges({
     onDiscard: () => {
-      resetData()
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.visualacuity || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

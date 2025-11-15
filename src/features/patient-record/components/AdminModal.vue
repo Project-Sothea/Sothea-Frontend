@@ -62,7 +62,7 @@ import { handleApiError } from '@shared/api/handleApiError'
 import { useAdminForm } from '@patient-record/composables/useAdminForm'
 import AdminFormFields from './AdminFormFields.vue'
 import { getPatientPhotoBlob } from '@patient-record/api/photo'
-import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 import type { AdminPayload } from '@features/patient-record/api/visit'
 
 const props = defineProps<{
@@ -126,115 +126,44 @@ const {
 
 if (props.isAdd && !regDate.value) regDate.value = formatDateISO(new Date())
 
-// Set up draft fields (excluding photo fields as they can't be serialized)
-const draftFields = [
-  bindRef('name', name),
-  bindRef('khmerName', khmerName),
-  bindRef('dob', dob),
-  bindRef('gender', gender),
-  bindRef('contactNo', contactNo),
-  bindRef('regDate', regDate),
-  bindRef('queueNo', queueNo),
-  bindRef('village', village),
-  bindRef('familyGroup', familyGroup),
-  bindRef('pregnant', pregnant),
-  bindRef('lastMenstrualPeriod', lastMenstrualPeriod),
-  bindRef('drugAllergies', drugAllergies),
-  bindRef('sentToId', sentToId)
-]
-
-const adminDraftStorageKey = computed(() => {
-  if (!props.patientId || !props.patientVid) return null
-  return `patient-record:draft:${props.patientId}:${props.patientVid}:admin`
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<AdminPayload>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:admin`
+  }),
+  fields: [
+    { key: 'name', ref: name },
+    { key: 'khmerName', ref: khmerName },
+    { key: 'dob', ref: dob },
+    { key: 'gender', ref: gender },
+    { key: 'contactNo', ref: contactNo },
+    { key: 'regDate', ref: regDate },
+    { key: 'queueNo', ref: queueNo },
+    { key: 'village', ref: village },
+    { key: 'familyGroup', ref: familyGroup },
+    { key: 'pregnant', ref: pregnant },
+    { key: 'lastMenstrualPeriod', ref: lastMenstrualPeriod },
+    { key: 'drugAllergies', ref: drugAllergies },
+    { key: 'sentToId', ref: sentToId },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved admin details draft from this device.',
 })
 
-const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey } = useEditableSection<AdminPayload>({
-  draft: {
-    key: adminDraftStorageKey,
-    fields: draftFields,
-    autoRestore: false
-  }
-})
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges } = formDraft
 
-const initialized = ref(false)
-const draftRestored = ref(false)
-
-watch(
-  () => draftStorageKey.value,
-  () => {
-    if (draftRestored.value) return
-    if (props.isAdd) return
-    // Try to restore draft when storage key becomes available
-    // This happens before initialization completes
-    draftRestored.value = restoreDraft() || draftRestored.value
-  },
-  { immediate: true }
-)
-
-function initialize(patientData: Patient | undefined) {
-  // Don't re-initialize if already initialized, in add mode, or currently editing
-  // This prevents overwriting form values with stale data after saving
-  if (initialized.value || props.isAdd || isEditing.value) return
-  
-  // Wait for patientData to actually be loaded (not null/undefined)
-  // This prevents initializing with null data on page refresh
-  if (!patientData) return
-
-  const admin = patientData.admin
-  if (!admin) {
-    // No saved admin data - draft should already be restored by the watch above
-    // If not, try one more time
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    initialized.value = true
-    return
-  }
-
-  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
-  reset(admin)
-  initialized.value = true
-  // Don't restore draft when we have saved data - it would overwrite it
-  draftRestored.value = true
-}
-
-function resetData() {
-  initialized.value = false
-  if (!props.patientData?.admin) {
-    reset(undefined)
-    initialized.value = true
-    // Try to restore draft if available
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-  initialize(props.patientData)
-}
-
-// Initialize once
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal) => initialize(newVal),
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.admin || null)
+  },
   { immediate: true }
-)
-
-// Keep form in sync if parent passes a different patient (admin fields only)
-// But only if not editing and already initialized
-// Don't reset if we just restored a draft - the draft values should take precedence
-watch(
-  () => props.patientData?.admin,
-  (next, prev) => {
-    // Only reset if:
-    // 1. Not in add mode
-    // 2. Not currently editing
-    // 3. Already initialized
-    // 4. Haven't restored a draft (draft takes precedence)
-    // 5. The admin data actually changed (not just initial load)
-    if (!props.isAdd && !isEditing.value && initialized.value && !draftRestored.value && prev !== undefined) {
-      reset(next || undefined)
-    }
-  }
 )
 
 // Load existing photo when patient id/vid becomes available or changes
@@ -356,7 +285,9 @@ async function saveChanges() {
 function discardEdit() {
   discardChanges({
     onDiscard: () => {
-      resetData()
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.admin || null, true)
+      reset(props.patientData?.admin || undefined)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

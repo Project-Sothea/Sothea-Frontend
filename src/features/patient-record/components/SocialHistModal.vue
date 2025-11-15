@@ -196,7 +196,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type SocialHistory from '@patient-record/types/SocialHistory'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
@@ -212,100 +212,38 @@ const cigarettesPerDay = ref<number | null>(null)
 const alcoholHistory = ref<boolean | null>(null)
 const howRegular = ref<string | null>('')
 
-const draftFields = [
-  bindRef('pastSmokingHistory', pastSmokingHistory),
-  bindRef('numberOfYears', numberOfYears),
-  bindRef('currentSmokingHistory', currentSmokingHistory),
-  bindRef('cigarettesPerDay', cigarettesPerDay),
-  bindRef('alcoholHistory', alcoholHistory),
-  bindRef('howRegular', howRegular)
-]
-
-const socialHistDraftStorageKey = computed(() => {
-  if (!props.patientId || !props.patientVid) return null
-  return `patient-record:draft:${props.patientId}:${props.patientVid}:socialHistory`
-})
-
-const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey, runChecks } = useEditableSection<SocialHistory>({
-  draft: {
-    key: socialHistDraftStorageKey,
-    fields: draftFields,
-    autoRestore: false
-  }
-})
-
 const toast = useToast()
 
-const initialized = ref(false)
-const draftRestored = ref(false)
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<SocialHistory>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:socialHistory`
+  }),
+  fields: [
+    { key: 'pastSmokingHistory', ref: pastSmokingHistory },
+    { key: 'numberOfYears', ref: numberOfYears },
+    { key: 'currentSmokingHistory', ref: currentSmokingHistory },
+    { key: 'cigarettesPerDay', ref: cigarettesPerDay },
+    { key: 'alcoholHistory', ref: alcoholHistory },
+    { key: 'howRegular', ref: howRegular },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved social history draft from this device.',
+})
 
-watch(
-  () => draftStorageKey.value,
-  () => {
-    if (draftRestored.value) return
-    if (props.isAdd) return
-    // Try to restore draft when storage key becomes available
-    // This happens before initialization completes
-    draftRestored.value = restoreDraft() || draftRestored.value
-  },
-  { immediate: true }
-)
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
 
-function initialize(patientData: Patient | null) {
-  // Don't re-initialize if already initialized, in add mode, or currently editing
-  // This prevents overwriting form values with stale data after saving
-  if (initialized.value || props.isAdd || isEditing.value) return
-  
-  // Wait for patientData to actually be loaded (not null/undefined)
-  // This prevents initializing with null data on page refresh
-  if (!patientData) return
-
-  const socialHistory = patientData.socialhistory
-  if (!socialHistory) {
-    // No saved social history data - try to restore draft if available
-    initialized.value = true
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-
-  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
-  pastSmokingHistory.value = socialHistory.pastSmokingHistory
-  numberOfYears.value = socialHistory.numberOfYears
-  currentSmokingHistory.value = socialHistory.currentSmokingHistory
-  cigarettesPerDay.value = socialHistory.cigarettesPerDay
-  alcoholHistory.value = socialHistory.alcoholHistory
-  howRegular.value = socialHistory.howRegular
-
-  initialized.value = true
-  // Don't restore draft when we have saved data - it would overwrite it
-  draftRestored.value = true
-}
-
-function resetData() {
-  initialized.value = false
-  if (!props.patientData?.socialhistory) {
-    pastSmokingHistory.value = null
-    numberOfYears.value = null
-    currentSmokingHistory.value = null
-    cigarettesPerDay.value = null
-    alcoholHistory.value = null
-    howRegular.value = null
-    initialized.value = true
-    // Try to restore draft if available
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-  initialize(props.patientData)
-}
-
-// Initialize once
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal) => initialize(newVal),
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.socialhistory || null)
+  },
   { immediate: true }
 )
 
@@ -357,7 +295,8 @@ async function submitData() {
 function discardEdit() {
   discardChanges({
     onDiscard: () => {
-      resetData()
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.socialhistory || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

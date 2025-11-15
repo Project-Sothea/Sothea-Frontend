@@ -93,6 +93,8 @@ export interface LineAllocation {
 	expiryDate: ISODateString 
 }
 
+export type DraftLine = Partial<PrescriptionLine> & { __draft: true; _uid: string }
+
 export interface SetAllocationsPostData {
     allocations: {
         batchLocationId: number

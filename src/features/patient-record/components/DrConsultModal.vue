@@ -433,7 +433,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type DoctorsConsultation from '@patient-record/types/DoctorsConsultation'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
@@ -460,125 +460,45 @@ const referralNeeded = ref<boolean | null>(null)
 const referralLoc = ref<string | null>('')
 const remarks = ref<string | null>('')
 
-const draftFields = [
-  bindRef('well', well),
-  bindRef('msk', msk),
-  bindRef('cvs', cvs),
-  bindRef('respi', respi),
-  bindRef('gu', gu),
-  bindRef('git', git),
-  bindRef('eye', eye),
-  bindRef('derm', derm),
-  bindRef('others', others),
-  bindRef('consultationNotes', consultationNotes),
-  bindRef('diagnosis', diagnosis),
-  bindRef('treatment', treatment),
-  bindRef('referralNeeded', referralNeeded),
-  bindRef('referralLoc', referralLoc),
-  bindRef('remarks', remarks)
-]
-
-const drConsultDraftStorageKey = computed(() => {
-  if (!props.patientId || !props.patientVid) return null
-  return `patient-record:draft:${props.patientId}:${props.patientVid}:doctorsConsultation`
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<DoctorsConsultation>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:doctorsConsultation`
+  }),
+  fields: [
+    { key: 'well', ref: well },
+    { key: 'msk', ref: msk },
+    { key: 'cvs', ref: cvs },
+    { key: 'respi', ref: respi },
+    { key: 'gu', ref: gu },
+    { key: 'git', ref: git },
+    { key: 'eye', ref: eye },
+    { key: 'derm', ref: derm },
+    { key: 'others', ref: others },
+    { key: 'consultationNotes', ref: consultationNotes },
+    { key: 'diagnosis', ref: diagnosis },
+    { key: 'treatment', ref: treatment },
+    { key: 'referralNeeded', ref: referralNeeded },
+    { key: 'referralLoc', ref: referralLoc },
+    { key: 'remarks', ref: remarks },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved doctor consultation draft from this device.',
 })
 
-const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey, runChecks } = useEditableSection<DoctorsConsultation>({
-  draft: {
-    key: drConsultDraftStorageKey,
-    fields: draftFields,
-    autoRestore: false
-  }
-})
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
 
-const initialized = ref(false)
-const draftRestored = ref(false)
-
-watch(
-  () => draftStorageKey.value,
-  () => {
-    if (draftRestored.value) return
-    if (props.isAdd) return
-    // Try to restore draft when storage key becomes available
-    // This happens before initialization completes
-    draftRestored.value = restoreDraft() || draftRestored.value
-  },
-  { immediate: true }
-)
-
-function initialize(patientData: Patient | null) {
-  // Don't re-initialize if already initialized, in add mode, or currently editing
-  // This prevents overwriting form values with stale data after saving
-  if (initialized.value || props.isAdd || isEditing.value) return
-  
-  // Wait for patientData to actually be loaded (not null/undefined)
-  // This prevents initializing with null data on page refresh
-  if (!patientData) return
-
-  const d = patientData.doctorsconsultation
-  if (!d) {
-    // No saved doctors consultation data - try to restore draft if available
-    initialized.value = true
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-
-  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
-  well.value = d.well
-  msk.value = d.msk
-  cvs.value = d.cvs
-  respi.value = d.respi
-  gu.value = d.gu
-  git.value = d.git
-  eye.value = d.eye
-  derm.value = d.derm
-  others.value = d.others
-  consultationNotes.value = d.consultationNotes
-  diagnosis.value = d.diagnosis
-  treatment.value = d.treatment
-  referralNeeded.value = d.referralNeeded
-  referralLoc.value = d.referralLoc
-  remarks.value = d.remarks
-
-  initialized.value = true
-  // Don't restore draft when we have saved data - it would overwrite it
-  draftRestored.value = true
-}
-
-function resetData() {
-  initialized.value = false
-  if (!props.patientData?.doctorsconsultation) {
-    well.value = null
-    msk.value = null
-    cvs.value = null
-    respi.value = null
-    gu.value = null
-    git.value = null
-    eye.value = null
-    derm.value = null
-    others.value = null
-    consultationNotes.value = null
-    diagnosis.value = null
-    treatment.value = null
-    referralNeeded.value = null
-    referralLoc.value = null
-    remarks.value = null
-    initialized.value = true
-    // Try to restore draft if available
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-  initialize(props.patientData)
-}
-
-// Initialize once
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal) => initialize(newVal),
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.doctorsconsultation || null)
+  },
   { immediate: true }
 )
 
@@ -635,7 +555,8 @@ async function submitData() {
 function discardEdit() {
   discardChanges({
     onDiscard: () => {
-      resetData()
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.doctorsconsultation || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

@@ -1190,7 +1190,7 @@ import type Patient from '@features/patient-record/types/Patient'
 import { updateSection } from '@features/patient-record/api/visit'
 import type Dental from '@features/patient-record/types/Dental'
 import { ref, watch, computed, type Ref } from 'vue'
-import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId?: string
@@ -1224,137 +1224,55 @@ const referralLoc = ref<string | null>('')
 const teeth = Array.from({ length: 48 }, () => ref<boolean | null>(null))
 const toothRefs: Record<string, (typeof teeth)[0]> = {}
 
-const draftFields: Array<ReturnType<typeof bindRef>> = [
-  bindRef('cleanTeethFreq', cleanTeethFreq),
-  bindRef('sugarConsumeFreq', sugarConsumeFreq),
-  bindRef('bacterialExposure', bacterialExposure),
-  bindRef('numLossFromToothDecay', numLossFromToothDecay),
-  bindRef('oralSymptoms', oralSymptoms),
-  bindRef('drinkOtherWater', drinkOtherWater),
-  bindRef('riskForDentalCarries', riskForDentalCarries),
-  bindRef('icopeDifficultyChewing', icopeDifficultyChewing),
-  bindRef('icopePainInMouth', icopePainInMouth),
-  bindRef('dentalNotes', dentalNotes),
-  bindRef('referralNeeded', referralNeeded),
-  bindRef('referralLoc', referralLoc),
+// Build fields array including dynamic tooth fields
+const draftFields = [
+  { key: 'cleanTeethFreq', ref: cleanTeethFreq },
+  { key: 'sugarConsumeFreq', ref: sugarConsumeFreq },
+  { key: 'bacterialExposure', ref: bacterialExposure },
+  { key: 'numLossFromToothDecay', ref: numLossFromToothDecay },
+  { key: 'oralSymptoms', ref: oralSymptoms },
+  { key: 'drinkOtherWater', ref: drinkOtherWater },
+  { key: 'riskForDentalCarries', ref: riskForDentalCarries },
+  { key: 'icopeDifficultyChewing', ref: icopeDifficultyChewing },
+  { key: 'icopePainInMouth', ref: icopePainInMouth },
+  { key: 'dentalNotes', ref: dentalNotes },
+  { key: 'referralNeeded', ref: referralNeeded },
+  { key: 'referralLoc', ref: referralLoc },
 ]
 
+// Add tooth fields dynamically
 for (let quadrant = 1; quadrant <= 4; quadrant++) {
   for (let position = 1; position <= 8; position++) {
     const toothKey = `tooth${quadrant}${position}`
     const toothRef = teeth[(quadrant - 1) * 8 + (position - 1)]
     toothRefs[toothKey] = toothRef
-    draftFields.push(bindRef(toothKey, toothRef))
+    draftFields.push({ key: toothKey, ref: toothRef })
   }
 }
 
-const dentalDraftStorageKey = computed(() => {
-  if (!props.patientId || !props.patientVid) return null
-  return `patient-record:draft:${props.patientId}:${props.patientVid}:dental`
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<Dental>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:dental`
+  }),
+  fields: draftFields,
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved dental draft from this device.',
 })
 
-const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey } = useEditableSection<Dental>({
-  draft: {
-    key: dentalDraftStorageKey,
-    fields: draftFields,
-    autoRestore: false
-  }
-})
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges } = formDraft
 
-const initialized = ref(false)
-const draftRestored = ref(false)
-
-watch(
-  () => draftStorageKey.value,
-  () => {
-    if (draftRestored.value) return
-    if (props.isAdd) return
-    // Try to restore draft when storage key becomes available
-    // This happens before initialization completes
-    draftRestored.value = restoreDraft() || draftRestored.value
-  },
-  { immediate: true }
-)
-
-function initialize(patientData: Patient | undefined) {
-  // Don't re-initialize if already initialized, in add mode, or currently editing
-  // This prevents overwriting form values with stale data after saving
-
-  if (initialized.value || props.isAdd || isEditing.value) return
-  
-  // Wait for patientData to actually be loaded (not null/undefined)
-  // This prevents initializing with null data on page refresh
-  if (!patientData) return
-
-  const dental = patientData.dental
-  if (!dental) {
-    // No saved dental data - try to restore draft if available
-    initialized.value = true
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-
-  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
-  cleanTeethFreq.value = dental.cleanTeethFreq
-  sugarConsumeFreq.value = dental.sugarConsumeFreq
-  bacterialExposure.value = dental.bacterialExposure
-  numLossFromToothDecay.value = dental.numLossFromToothDecay
-  oralSymptoms.value = dental.oralSymptoms
-  drinkOtherWater.value = dental.drinkOtherWater
-
-  riskForDentalCarries.value = dental.riskForDentalCarries
-
-  icopeDifficultyChewing.value = dental.icopeDifficultyChewing
-  icopePainInMouth.value = dental.icopePainInMouth
-
-  dentalNotes.value = dental.dentalNotes
-  referralNeeded.value = dental.referralNeeded
-  referralLoc.value = dental.referralLoc
-  Object.keys(toothRefs).forEach((key) => {
-    toothRefs[key].value = dental[key as keyof Dental] as boolean | null
-  })
-  initialized.value = true
-  // Don't restore draft when we have saved data - it would overwrite it
-  draftRestored.value = true
-}
-
-function resetData() {
-  initialized.value = false
-  if (!props.patientData?.dental) {
-    cleanTeethFreq.value = null
-    sugarConsumeFreq.value = null
-    bacterialExposure.value = null
-    numLossFromToothDecay.value = 0
-    oralSymptoms.value = null
-    drinkOtherWater.value = null
-
-    riskForDentalCarries.value = null
-
-    icopeDifficultyChewing.value = null
-    icopePainInMouth.value = null
-
-    dentalNotes.value = null
-    referralNeeded.value = null
-    referralLoc.value = null
-    Object.keys(toothRefs).forEach((key) => {
-      toothRefs[key].value = null
-    })
-    initialized.value = true
-    // Try to restore draft if available
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return 
-  }
-  initialize(props.patientData)
-}
-
-// Initialize once
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal) => initialize(newVal),
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.dental || null)
+  },
   { immediate: true }
 )
 
@@ -1451,7 +1369,8 @@ async function submitData() {
 function discardEdit() {
   discardChanges({
     onDiscard: () => {
-      resetData()
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.dental || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

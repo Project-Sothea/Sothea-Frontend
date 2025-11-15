@@ -275,7 +275,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type Physiotherapy from '@patient-record/types/Physiotherapy'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
@@ -296,107 +296,39 @@ const howMuchFatigue = ref<0 | 1 | 2 | 3 | 4 | 5 | null>(null)
 const anxiousLowMood = ref<0 | 1 | 2 | 3 | 4 | 5 | null>(null)
 const medicationManageSymptoms = ref<'Never' | 'Rarely' | 'Sometimes' | 'Often' | 'Always' | ''>('')
 
-const draftFields = [
-  bindRef('painStiffnessDay', painStiffnessDay),
-  bindRef('painStiffnessNight', painStiffnessNight),
-  bindRef('symptomsInterfereTasks', symptomsInterfereTasks),
-  bindRef('symptomsChange', symptomsChange),
-  bindRef('symptomsNeedHelp', symptomsNeedHelp),
-  bindRef('troubleSleepSymptoms', troubleSleepSymptoms),
-  bindRef('howMuchFatigue', howMuchFatigue),
-  bindRef('anxiousLowMood', anxiousLowMood),
-  bindRef('medicationManageSymptoms', medicationManageSymptoms)
-]
-
-const physiotherapyDraftStorageKey = computed(() => {
-  if (!props.patientId || !props.patientVid) return null
-  return `patient-record:draft:${props.patientId}:${props.patientVid}:physiotherapy`
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<Physiotherapy>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:physiotherapy`
+  }),
+  fields: [
+    { key: 'painStiffnessDay', ref: painStiffnessDay },
+    { key: 'painStiffnessNight', ref: painStiffnessNight },
+    { key: 'symptomsInterfereTasks', ref: symptomsInterfereTasks },
+    { key: 'symptomsChange', ref: symptomsChange },
+    { key: 'symptomsNeedHelp', ref: symptomsNeedHelp },
+    { key: 'troubleSleepSymptoms', ref: troubleSleepSymptoms },
+    { key: 'howMuchFatigue', ref: howMuchFatigue },
+    { key: 'anxiousLowMood', ref: anxiousLowMood },
+    { key: 'medicationManageSymptoms', ref: medicationManageSymptoms },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved physiotherapy assessment draft from this device.',
 })
 
-const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey, runChecks } = useEditableSection<Physiotherapy>({
-  draft: {
-    key: physiotherapyDraftStorageKey,
-    fields: draftFields,
-    autoRestore: false
-  }
-})
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
 
-const initialized = ref(false)
-const draftRestored = ref(false)
-
-watch(
-  () => draftStorageKey.value,
-  () => {
-    if (draftRestored.value) return
-    if (props.isAdd) return
-    // Try to restore draft when storage key becomes available
-    // This happens before initialization completes
-    draftRestored.value = restoreDraft() || draftRestored.value
-  },
-  { immediate: true }
-)
-
-function initialize(patientData: Patient | null) {
-  // Don't re-initialize if already initialized, in add mode, or currently editing
-  // This prevents overwriting form values with stale data after saving
-  if (initialized.value || props.isAdd || isEditing.value) return
-  
-  // Wait for patientData to actually be loaded (not null/undefined)
-  // This prevents initializing with null data on page refresh
-  if (!patientData) return
-
-  const p = patientData.physiotherapy
-  if (!p) {
-    // No saved physiotherapy data - try to restore draft if available
-    initialized.value = true
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-
-  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
-  painStiffnessDay.value = p.painStiffnessDay
-  painStiffnessNight.value = p.painStiffnessNight
-  symptomsInterfereTasks.value = p.symptomsInterfereTasks
-  symptomsChange.value = p.symptomsChange
-  symptomsNeedHelp.value = p.symptomsNeedHelp
-  troubleSleepSymptoms.value = p.troubleSleepSymptoms
-  howMuchFatigue.value = p.howMuchFatigue
-  anxiousLowMood.value = p.anxiousLowMood
-  medicationManageSymptoms.value = p.medicationManageSymptoms
-
-  initialized.value = true
-  // Don't restore draft when we have saved data - it would overwrite it
-  draftRestored.value = true
-}
-
-function resetData() {
-  initialized.value = false
-  if (!props.patientData?.physiotherapy) {
-    painStiffnessDay.value = null
-    painStiffnessNight.value = null
-    symptomsInterfereTasks.value = ''
-    symptomsChange.value = ''
-    symptomsNeedHelp.value = ''
-    troubleSleepSymptoms.value = ''
-    howMuchFatigue.value = null
-    anxiousLowMood.value = null
-    medicationManageSymptoms.value = ''
-    initialized.value = true
-    // Try to restore draft if available
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-  initialize(props.patientData)
-}
-
-// Initialize once
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal) => initialize(newVal),
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.physiotherapy || null)
+  },
   { immediate: true }
 )
 
@@ -469,7 +401,8 @@ async function submitData() {
 function discardEdit() {
   discardChanges({
     onDiscard: () => {
-      resetData()
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.physiotherapy || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

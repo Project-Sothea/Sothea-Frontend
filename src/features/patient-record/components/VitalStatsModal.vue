@@ -298,7 +298,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type VitalStatistics from '@patient-record/types/VitalStatistics'
 import type Patient from '@patient-record/types/Patient'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
@@ -324,112 +324,42 @@ const showIcope = computed<boolean>(() =>
 
 const icopeHighBp = ref<boolean | null> (null)
 
-const draftFields = [
-  bindRef('temperature', temperature),
-  bindRef('spO2', spO2),
-  bindRef('systolicBP1', systolicBP1),
-  bindRef('systolicBP2', systolicBP2),
-  bindRef('diastolicBP1', diastolicBP1),
-  bindRef('diastolicBP2', diastolicBP2),
-  bindRef('hr1', hr1),
-  bindRef('hr2', hr2),
-  bindRef('randomBloodGlucoseMmolL', randomBloodGlucoseMmolL),
-  bindRef('icopeHighBp', icopeHighBp)
-]
-
-const vitalStatsDraftStorageKey = computed(() => {
-  if (!props.patientId || !props.patientVid) return null
-  return `patient-record:draft:${props.patientId}:${props.patientVid}:vitalStatistics`
-})
-
-const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey, runChecks } = useEditableSection<VitalStatistics>({
-  draft: {
-    key: vitalStatsDraftStorageKey,
-    fields: draftFields,
-    autoRestore: false
-  }
-})
-
 const toast = useToast()
 
-const initialized = ref(false)
-const draftRestored = ref(false)
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<VitalStatistics>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:vitalStatistics`
+  }),
+  fields: [
+    { key: 'temperature', ref: temperature },
+    { key: 'spO2', ref: spO2 },
+    { key: 'systolicBP1', ref: systolicBP1 },
+    { key: 'systolicBP2', ref: systolicBP2 },
+    { key: 'diastolicBP1', ref: diastolicBP1 },
+    { key: 'diastolicBP2', ref: diastolicBP2 },
+    { key: 'hr1', ref: hr1 },
+    { key: 'hr2', ref: hr2 },
+    { key: 'randomBloodGlucoseMmolL', ref: randomBloodGlucoseMmolL },
+    { key: 'icopeHighBp', ref: icopeHighBp },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved vital statistics draft from this device.',
+})
 
-watch(
-  () => draftStorageKey.value,
-  () => {
-    if (draftRestored.value) return
-    if (props.isAdd) return
-    // Try to restore draft when storage key becomes available
-    // This happens before initialization completes
-    draftRestored.value = restoreDraft() || draftRestored.value
-  },
-  { immediate: true }
-)
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
 
-function initialize(patientData: Patient | null) {
-  // Don't re-initialize if already initialized, in add mode, or currently editing
-  // This prevents overwriting form values with stale data after saving
-  if (initialized.value || props.isAdd || isEditing.value) return
-  
-  // Wait for patientData to actually be loaded (not null/undefined)
-  // This prevents initializing with null data on page refresh
-  if (!patientData) return
-
-  const vitalStatistics = patientData.vitalstatistics
-  if (!vitalStatistics) {
-    // No saved vital statistics data - try to restore draft if available
-    initialized.value = true
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-
-  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
-  temperature.value = vitalStatistics.temperature
-  spO2.value = vitalStatistics.spO2
-  systolicBP1.value = vitalStatistics.systolicBP1
-  systolicBP2.value = vitalStatistics.systolicBP2
-  diastolicBP1.value = vitalStatistics.diastolicBP1
-  diastolicBP2.value = vitalStatistics.diastolicBP2
-  hr1.value = vitalStatistics.hr1
-  hr2.value = vitalStatistics.hr2
-  randomBloodGlucoseMmolL.value = vitalStatistics.randomBloodGlucoseMmolL
-  icopeHighBp.value = vitalStatistics.icopeHighBp
-
-  initialized.value = true
-  // Don't restore draft when we have saved data - it would overwrite it
-  draftRestored.value = true
-}
-
-function resetData() {
-  initialized.value = false
-  if (!props.patientData?.vitalstatistics) {
-    temperature.value = null
-    spO2.value = null
-    systolicBP1.value = null
-    systolicBP2.value = null
-    diastolicBP1.value = null
-    diastolicBP2.value = null
-    hr1.value = null
-    hr2.value = null
-    randomBloodGlucoseMmolL.value = null
-    icopeHighBp.value = null
-    initialized.value = true
-    // Try to restore draft if available
-    if (!draftRestored.value) {
-      draftRestored.value = restoreDraft() || draftRestored.value
-    }
-    return
-  }
-  initialize(props.patientData)
-}
-
-// Initialize once
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal) => initialize(newVal),
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.vitalstatistics || null)
+  },
   { immediate: true }
 )
 const avgSystolicBP = computed(() => {
@@ -518,7 +448,8 @@ async function submitData() {
 function discardEdit() {
   discardChanges({
     onDiscard: () => {
-      resetData()
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.vitalstatistics || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')
