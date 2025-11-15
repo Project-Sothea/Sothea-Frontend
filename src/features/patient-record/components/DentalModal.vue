@@ -373,7 +373,7 @@
               type="radio"
               name="tooth_11"
               class="w-4 h-4"
-              v-model="toothRefs.tooth11"
+              v-model="toothRefs.tooth11.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -383,7 +383,7 @@
               type="radio"
               name="tooth_11"
               class="w-4 h-4"
-              v-model="toothRefs.tooth11"
+              v-model="toothRefs.tooth11.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -396,7 +396,7 @@
               type="radio"
               name="tooth_12"
               class="w-4 h-4"
-              v-model="toothRefs.tooth12"
+              v-model="toothRefs.tooth12.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -406,7 +406,7 @@
               type="radio"
               name="tooth_12"
               class="w-4 h-4"
-              v-model="toothRefs.tooth12"
+              v-model="toothRefs.tooth12.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -419,7 +419,7 @@
               type="radio"
               name="tooth_13"
               class="w-4 h-4"
-              v-model="toothRefs.tooth13"
+              v-model="toothRefs.tooth13.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -429,7 +429,7 @@
               type="radio"
               name="tooth_13"
               class="w-4 h-4"
-              v-model="toothRefs.tooth13"
+              v-model="toothRefs.tooth13.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -441,7 +441,7 @@
               type="radio"
               name="tooth_14"
               class="w-4 h-4"
-              v-model="toothRefs.tooth14"
+              v-model="toothRefs.tooth14.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -451,7 +451,7 @@
               type="radio"
               name="tooth_14"
               class="w-4 h-4"
-              v-model="toothRefs.tooth14"
+              v-model="toothRefs.tooth14.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -463,7 +463,7 @@
               type="radio"
               name="tooth_15"
               class="w-4 h-4"
-              v-model="toothRefs.tooth15"
+              v-model="toothRefs.tooth15.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -473,7 +473,7 @@
               type="radio"
               name="tooth_15"
               class="w-4 h-4"
-              v-model="toothRefs.tooth15"
+              v-model="toothRefs.tooth15.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -486,7 +486,7 @@
               type="radio"
               name="tooth_16"
               class="w-4 h-4"
-              v-model="toothRefs.tooth16"
+              v-model="toothRefs.tooth16.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -496,7 +496,7 @@
               type="radio"
               name="tooth_16"
               class="w-4 h-4"
-              v-model="toothRefs.tooth16"
+              v-model="toothRefs.tooth16.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -509,7 +509,7 @@
               type="radio"
               name="tooth_17"
               class="w-4 h-4"
-              v-model="toothRefs.tooth17"
+              v-model="toothRefs.tooth17.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -519,7 +519,7 @@
               type="radio"
               name="tooth_17"
               class="w-4 h-4"
-              v-model="toothRefs.tooth17"
+              v-model="toothRefs.tooth17.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -531,7 +531,7 @@
               type="radio"
               name="tooth_18"
               class="w-4 h-4"
-              v-model="toothRefs.tooth18"
+              v-model="toothRefs.tooth18.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -541,7 +541,7 @@
               type="radio"
               name="tooth_18"
               class="w-4 h-4"
-              v-model="toothRefs.tooth18"
+              v-model="toothRefs.tooth18.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -574,7 +574,7 @@
               type="radio"
               name="tooth_41"
               class="w-4 h-4"
-              v-model="toothRefs.tooth41"
+              v-model="toothRefs.tooth41.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -584,7 +584,7 @@
               type="radio"
               name="tooth_41"
               class="w-4 h-4"
-              v-model="toothRefs.tooth41"
+              v-model="toothRefs.tooth41.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -597,7 +597,7 @@
               type="radio"
               name="tooth_42"
               class="w-4 h-4"
-              v-model="toothRefs.tooth42"
+              v-model="toothRefs.tooth42.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -607,7 +607,7 @@
               type="radio"
               name="tooth_42"
               class="w-4 h-4"
-              v-model="toothRefs.tooth42"
+              v-model="toothRefs.tooth42.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -620,7 +620,7 @@
               type="radio"
               name="tooth_43"
               class="w-4 h-4"
-              v-model="toothRefs.tooth43"
+              v-model="toothRefs.tooth43.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -630,7 +630,7 @@
               type="radio"
               name="tooth_43"
               class="w-4 h-4"
-              v-model="toothRefs.tooth43"
+              v-model="toothRefs.tooth43.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -642,7 +642,7 @@
               type="radio"
               name="tooth_44"
               class="w-4 h-4"
-              v-model="toothRefs.tooth44"
+              v-model="toothRefs.tooth44.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -652,7 +652,7 @@
               type="radio"
               name="tooth_44"
               class="w-4 h-4"
-              v-model="toothRefs.tooth44"
+              v-model="toothRefs.tooth44.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -664,7 +664,7 @@
               type="radio"
               name="tooth_45"
               class="w-4 h-4"
-              v-model="toothRefs.tooth45"
+              v-model="toothRefs.tooth45.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -674,7 +674,7 @@
               type="radio"
               name="tooth_45"
               class="w-4 h-4"
-              v-model="toothRefs.tooth45"
+              v-model="toothRefs.tooth45.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -687,7 +687,7 @@
               type="radio"
               name="tooth_46"
               class="w-4 h-4"
-              v-model="toothRefs.tooth46"
+              v-model="toothRefs.tooth46.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -697,7 +697,7 @@
               type="radio"
               name="tooth_46"
               class="w-4 h-4"
-              v-model="toothRefs.tooth46"
+              v-model="toothRefs.tooth46.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -710,7 +710,7 @@
               type="radio"
               name="tooth_47"
               class="w-4 h-4"
-              v-model="toothRefs.tooth47"
+              v-model="toothRefs.tooth47.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -720,7 +720,7 @@
               type="radio"
               name="tooth_47"
               class="w-4 h-4"
-              v-model="toothRefs.tooth47"
+              v-model="toothRefs.tooth47.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -732,7 +732,7 @@
               type="radio"
               name="tooth_48"
               class="w-4 h-4"
-              v-model="toothRefs.tooth48"
+              v-model="toothRefs.tooth48.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -742,7 +742,7 @@
               type="radio"
               name="tooth_48"
               class="w-4 h-4"
-              v-model="toothRefs.tooth48"
+              v-model="toothRefs.tooth48.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -775,7 +775,7 @@
               type="radio"
               name="tooth_21"
               class="w-4 h-4"
-              v-model="toothRefs.tooth21"
+              v-model="toothRefs.tooth21.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -785,7 +785,7 @@
               type="radio"
               name="tooth_21"
               class="w-4 h-4"
-              v-model="toothRefs.tooth21"
+              v-model="toothRefs.tooth21.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -798,7 +798,7 @@
               type="radio"
               name="tooth_22"
               class="w-4 h-4"
-              v-model="toothRefs.tooth22"
+              v-model="toothRefs.tooth22.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -808,7 +808,7 @@
               type="radio"
               name="tooth_22"
               class="w-4 h-4"
-              v-model="toothRefs.tooth22"
+              v-model="toothRefs.tooth22.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -821,7 +821,7 @@
               type="radio"
               name="tooth_23"
               class="w-4 h-4"
-              v-model="toothRefs.tooth23"
+              v-model="toothRefs.tooth23.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -831,7 +831,7 @@
               type="radio"
               name="tooth_23"
               class="w-4 h-4"
-              v-model="toothRefs.tooth23"
+              v-model="toothRefs.tooth23.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -843,7 +843,7 @@
               type="radio"
               name="tooth_24"
               class="w-4 h-4"
-              v-model="toothRefs.tooth24"
+              v-model="toothRefs.tooth24.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -853,7 +853,7 @@
               type="radio"
               name="tooth_24"
               class="w-4 h-4"
-              v-model="toothRefs.tooth24"
+              v-model="toothRefs.tooth24.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -865,7 +865,7 @@
               type="radio"
               name="tooth_25"
               class="w-4 h-4"
-              v-model="toothRefs.tooth25"
+              v-model="toothRefs.tooth25.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -875,7 +875,7 @@
               type="radio"
               name="tooth_25"
               class="w-4 h-4"
-              v-model="toothRefs.tooth25"
+              v-model="toothRefs.tooth25.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -888,7 +888,7 @@
               type="radio"
               name="tooth_26"
               class="w-4 h-4"
-              v-model="toothRefs.tooth26"
+              v-model="toothRefs.tooth26.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -898,7 +898,7 @@
               type="radio"
               name="tooth_26"
               class="w-4 h-4"
-              v-model="toothRefs.tooth26"
+              v-model="toothRefs.tooth26.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -911,7 +911,7 @@
               type="radio"
               name="tooth_27"
               class="w-4 h-4"
-              v-model="toothRefs.tooth27"
+              v-model="toothRefs.tooth27.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -921,7 +921,7 @@
               type="radio"
               name="tooth_27"
               class="w-4 h-4"
-              v-model="toothRefs.tooth27"
+              v-model="toothRefs.tooth27.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -933,7 +933,7 @@
               type="radio"
               name="tooth_28"
               class="w-4 h-4"
-              v-model="toothRefs.tooth28"
+              v-model="toothRefs.tooth28.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -943,7 +943,7 @@
               type="radio"
               name="tooth_28"
               class="w-4 h-4"
-              v-model="toothRefs.tooth28"
+              v-model="toothRefs.tooth28.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -976,7 +976,7 @@
               type="radio"
               name="tooth_31"
               class="w-4 h-4"
-              v-model="toothRefs.tooth31"
+              v-model="toothRefs.tooth31.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -986,7 +986,7 @@
               type="radio"
               name="tooth_31"
               class="w-4 h-4"
-              v-model="toothRefs.tooth31"
+              v-model="toothRefs.tooth31.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -999,7 +999,7 @@
               type="radio"
               name="tooth_32"
               class="w-4 h-4"
-              v-model="toothRefs.tooth32"
+              v-model="toothRefs.tooth32.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -1009,7 +1009,7 @@
               type="radio"
               name="tooth_32"
               class="w-4 h-4"
-              v-model="toothRefs.tooth32"
+              v-model="toothRefs.tooth32.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -1022,7 +1022,7 @@
               type="radio"
               name="tooth_33"
               class="w-4 h-4"
-              v-model="toothRefs.tooth33"
+              v-model="toothRefs.tooth33.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -1032,7 +1032,7 @@
               type="radio"
               name="tooth_33"
               class="w-4 h-4"
-              v-model="toothRefs.tooth33"
+              v-model="toothRefs.tooth33.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -1044,7 +1044,7 @@
               type="radio"
               name="tooth_34"
               class="w-4 h-4"
-              v-model="toothRefs.tooth34"
+              v-model="toothRefs.tooth34.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -1054,7 +1054,7 @@
               type="radio"
               name="tooth_34"
               class="w-4 h-4"
-              v-model="toothRefs.tooth34"
+              v-model="toothRefs.tooth34.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -1066,7 +1066,7 @@
               type="radio"
               name="tooth_35"
               class="w-4 h-4"
-              v-model="toothRefs.tooth35"
+              v-model="toothRefs.tooth35.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -1076,7 +1076,7 @@
               type="radio"
               name="tooth_35"
               class="w-4 h-4"
-              v-model="toothRefs.tooth35"
+              v-model="toothRefs.tooth35.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -1089,7 +1089,7 @@
               type="radio"
               name="tooth_36"
               class="w-4 h-4"
-              v-model="toothRefs.tooth36"
+              v-model="toothRefs.tooth36.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -1099,7 +1099,7 @@
               type="radio"
               name="tooth_36"
               class="w-4 h-4"
-              v-model="toothRefs.tooth36"
+              v-model="toothRefs.tooth36.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -1112,7 +1112,7 @@
               type="radio"
               name="tooth_37"
               class="w-4 h-4"
-              v-model="toothRefs.tooth37"
+              v-model="toothRefs.tooth37.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -1122,7 +1122,7 @@
               type="radio"
               name="tooth_37"
               class="w-4 h-4"
-              v-model="toothRefs.tooth37"
+              v-model="toothRefs.tooth37.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -1134,7 +1134,7 @@
               type="radio"
               name="tooth_38"
               class="w-4 h-4"
-              v-model="toothRefs.tooth38"
+              v-model="toothRefs.tooth38.value"
               :value="true"
               :disabled="!isEditing"
             />
@@ -1144,7 +1144,7 @@
               type="radio"
               name="tooth_38"
               class="w-4 h-4"
-              v-model="toothRefs.tooth38"
+              v-model="toothRefs.tooth38.value"
               :value="false"
               :disabled="!isEditing"
             />
@@ -1164,13 +1164,19 @@
       </div>
 
       <!-- Save Edits Button -->
-      <div class="flex flex-row-reverse w-full mt-5">
+      <div class="flex flex-row-reverse w-full mt-5 gap-3" v-if="isEditing && !isAdd">
         <button
-          v-if="isEditing && !isAdd"
           @click="submitData"
           class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
         >
           Save Edits
+        </button>
+        <button
+          type="button"
+          @click="discardEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none"
+        >
+          Discard Changes
         </button>
       </div>
     </div>
@@ -1183,8 +1189,8 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@features/patient-record/types/Patient'
 import { updateSection } from '@features/patient-record/api/visit'
 import type Dental from '@features/patient-record/types/Dental'
-import { ref, watch, computed } from 'vue'
-import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
+import { ref, watch, computed, type Ref } from 'vue'
+import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId?: string
@@ -1215,46 +1221,140 @@ const icopePainInMouth = ref<boolean | null>(null)
 const dentalNotes = ref<string | null>('')
 const referralNeeded = ref<boolean | null>(null)
 const referralLoc = ref<string | null>('')
-// Editing state handled by composable
-const { isEditing, toggleEdit, save } = useEditableSection<Dental>()
-
 const teeth = Array.from({ length: 48 }, () => ref<boolean | null>(null))
 const toothRefs: Record<string, (typeof teeth)[0]> = {}
+
+const draftFields: Array<ReturnType<typeof bindRef>> = [
+  bindRef('cleanTeethFreq', cleanTeethFreq),
+  bindRef('sugarConsumeFreq', sugarConsumeFreq),
+  bindRef('bacterialExposure', bacterialExposure),
+  bindRef('numLossFromToothDecay', numLossFromToothDecay),
+  bindRef('oralSymptoms', oralSymptoms),
+  bindRef('drinkOtherWater', drinkOtherWater),
+  bindRef('riskForDentalCarries', riskForDentalCarries),
+  bindRef('icopeDifficultyChewing', icopeDifficultyChewing),
+  bindRef('icopePainInMouth', icopePainInMouth),
+  bindRef('dentalNotes', dentalNotes),
+  bindRef('referralNeeded', referralNeeded),
+  bindRef('referralLoc', referralLoc),
+]
+
 for (let quadrant = 1; quadrant <= 4; quadrant++) {
   for (let position = 1; position <= 8; position++) {
     const toothKey = `tooth${quadrant}${position}`
-    toothRefs[toothKey] = teeth[(quadrant - 1) * 8 + (position - 1)]
+    const toothRef = teeth[(quadrant - 1) * 8 + (position - 1)]
+    toothRefs[toothKey] = toothRef
+    draftFields.push(bindRef(toothKey, toothRef))
   }
 }
 
+const dentalDraftStorageKey = computed(() => {
+  if (!props.patientId || !props.patientVid) return null
+  return `patient-record:draft:${props.patientId}:${props.patientVid}:dental`
+})
+
+const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey } = useEditableSection<Dental>({
+  draft: {
+    key: dentalDraftStorageKey,
+    fields: draftFields,
+    autoRestore: false
+  }
+})
+
+const initialized = ref(false)
+const draftRestored = ref(false)
+
+watch(
+  () => draftStorageKey.value,
+  () => {
+    if (draftRestored.value) return
+    if (props.isAdd) return
+    // Try to restore draft when storage key becomes available
+    // This happens before initialization completes
+    draftRestored.value = restoreDraft() || draftRestored.value
+  },
+  { immediate: true }
+)
+
+function initialize(patientData: Patient | undefined) {
+  // Don't re-initialize if already initialized, in add mode, or currently editing
+  // This prevents overwriting form values with stale data after saving
+
+  if (initialized.value || props.isAdd || isEditing.value) return
+  
+  // Wait for patientData to actually be loaded (not null/undefined)
+  // This prevents initializing with null data on page refresh
+  if (!patientData) return
+
+  const dental = patientData.dental
+  if (!dental) {
+    // No saved dental data - try to restore draft if available
+    initialized.value = true
+    if (!draftRestored.value) {
+      draftRestored.value = restoreDraft() || draftRestored.value
+    }
+    return
+  }
+
+  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
+  cleanTeethFreq.value = dental.cleanTeethFreq
+  sugarConsumeFreq.value = dental.sugarConsumeFreq
+  bacterialExposure.value = dental.bacterialExposure
+  numLossFromToothDecay.value = dental.numLossFromToothDecay
+  oralSymptoms.value = dental.oralSymptoms
+  drinkOtherWater.value = dental.drinkOtherWater
+
+  riskForDentalCarries.value = dental.riskForDentalCarries
+
+  icopeDifficultyChewing.value = dental.icopeDifficultyChewing
+  icopePainInMouth.value = dental.icopePainInMouth
+
+  dentalNotes.value = dental.dentalNotes
+  referralNeeded.value = dental.referralNeeded
+  referralLoc.value = dental.referralLoc
+  Object.keys(toothRefs).forEach((key) => {
+    toothRefs[key].value = dental[key as keyof Dental] as boolean | null
+  })
+  initialized.value = true
+  // Don't restore draft when we have saved data - it would overwrite it
+  draftRestored.value = true
+}
+
+function resetData() {
+  initialized.value = false
+  if (!props.patientData?.dental) {
+    cleanTeethFreq.value = null
+    sugarConsumeFreq.value = null
+    bacterialExposure.value = null
+    numLossFromToothDecay.value = 0
+    oralSymptoms.value = null
+    drinkOtherWater.value = null
+
+    riskForDentalCarries.value = null
+
+    icopeDifficultyChewing.value = null
+    icopePainInMouth.value = null
+
+    dentalNotes.value = null
+    referralNeeded.value = null
+    referralLoc.value = null
+    Object.keys(toothRefs).forEach((key) => {
+      toothRefs[key].value = null
+    })
+    initialized.value = true
+    // Try to restore draft if available
+    if (!draftRestored.value) {
+      draftRestored.value = restoreDraft() || draftRestored.value
+    }
+    return 
+  }
+  initialize(props.patientData)
+}
+
 // Initialize once
-let initialized = false
 watch(
   () => props.patientData,
-  (newVal) => {
-    if (initialized || props.isAdd || !newVal?.dental) return
-    const dental = newVal.dental
-
-    cleanTeethFreq.value = dental.cleanTeethFreq
-    sugarConsumeFreq.value = dental.sugarConsumeFreq
-    bacterialExposure.value = dental.bacterialExposure
-    numLossFromToothDecay.value = dental.numLossFromToothDecay
-    oralSymptoms.value = dental.oralSymptoms
-    drinkOtherWater.value = dental.drinkOtherWater
-
-    riskForDentalCarries.value = dental.riskForDentalCarries
-
-    icopeDifficultyChewing.value = dental.icopeDifficultyChewing
-    icopePainInMouth.value = dental.icopePainInMouth
-
-    dentalNotes.value = dental.dentalNotes
-    referralNeeded.value = dental.referralNeeded
-    referralLoc.value = dental.referralLoc
-    Object.keys(toothRefs).forEach((key) => {
-      toothRefs[key].value = dental[key as keyof Dental] as boolean | null
-    })
-    initialized = true
-  },
+  (newVal) => initialize(newVal),
   { immediate: true }
 )
 
@@ -1339,7 +1439,23 @@ async function submitData() {
   await save({
     buildPayload,
     update: () => updateSection(props.patientId!, props.patientVid!, 'dental', buildPayload()!),
-    onSuccess: () => toast.success('Dental saved successfully!')
+    onSuccess: () => {
+      toast.success('Dental saved successfully!')
+      // After saving, the form already has the correct values in memory
+      // We don't need to reload from parent - the form state is the source of truth
+      // The initialized flag prevents re-initialization from stale patientData
+    }
+  })
+}
+
+function discardEdit() {
+  discardChanges({
+    onDiscard: () => {
+      resetData()
+    },
+    onSuccess: () => {
+      toast.info('Changes discarded.')
+    }
   })
 }
 </script>

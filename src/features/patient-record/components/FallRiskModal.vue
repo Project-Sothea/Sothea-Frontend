@@ -322,13 +322,19 @@
       </div>
 
       <!-- Save Edits Button -->
-      <div class="flex flex-row-reverse w-full mt-5">
+      <div class="flex flex-row-reverse w-full mt-5 gap-3" v-if="isEditing && !isAdd">
         <button
-          v-if="isEditing && !isAdd"
           @click="submitData"
           class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
         >
           Save Edits
+        </button>
+        <button
+          type="button"
+          @click="discardEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none"
+        >
+          Discard Changes
         </button>
       </div>
     </div>
@@ -342,7 +348,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type FallRisk from '@patient-record/types/FallRisk'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
+import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -367,40 +373,107 @@ const showIcope = computed<boolean>(() =>
 const icopeCompleteChairStands = ref<boolean | null>(null)
 const icopeChairStandsTime = ref<boolean | null> (null)
 
-const { isEditing, toggleEdit, save, runChecks } = useEditableSection<FallRisk>()
+const draftFields = [
+  bindRef('sideToSideBalance', sideToSideBalance),
+  bindRef('semiTandemBalance', semiTandemBalance),
+  bindRef('tandemBalance', tandemBalance),
+  bindRef('gaitSpeedTest', gaitSpeedTest),
+  bindRef('chairStandTest', chairStandTest),
+  bindRef('icopeCompleteChairStands', icopeCompleteChairStands),
+  bindRef('icopeChairStandsTime', icopeChairStandsTime)
+]
+
+const fallRiskDraftStorageKey = computed(() => {
+  if (!props.patientId || !props.patientVid) return null
+  return `patient-record:draft:${props.patientId}:${props.patientVid}:fallRisk`
+})
+
+const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey, runChecks } = useEditableSection<FallRisk>({
+  draft: {
+    key: fallRiskDraftStorageKey,
+    fields: draftFields,
+    autoRestore: false
+  }
+})
 
 const fallRiskScore = computed(() => {
  return (sideToSideBalance.value ?? 0) + (semiTandemBalance.value ?? 0) + (tandemBalance.value ?? 0)
  + (gaitSpeedTest.value ?? 0) + (chairStandTest.value ?? 0)
 })
 
-// Watch for patientData changes
+const initialized = ref(false)
+const draftRestored = ref(false)
+
+watch(
+  () => draftStorageKey.value,
+  () => {
+    if (draftRestored.value) return
+    if (props.isAdd) return
+    // Try to restore draft when storage key becomes available
+    // This happens before initialization completes
+    draftRestored.value = restoreDraft() || draftRestored.value
+  },
+  { immediate: true }
+)
+
+function initialize(patientData: Patient | null) {
+  // Don't re-initialize if already initialized, in add mode, or currently editing
+  // This prevents overwriting form values with stale data after saving
+  if (initialized.value || props.isAdd || isEditing.value) return
+  
+  // Wait for patientData to actually be loaded (not null/undefined)
+  // This prevents initializing with null data on page refresh
+  if (!patientData) return
+
+  const fallRisk = patientData.fallrisk
+  if (!fallRisk) {
+    // No saved fall risk data - try to restore draft if available
+    initialized.value = true
+    if (!draftRestored.value) {
+      draftRestored.value = restoreDraft() || draftRestored.value
+    }
+    return
+  }
+
+  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
+  sideToSideBalance.value = fallRisk.sideToSideBalance
+  semiTandemBalance.value = fallRisk.semiTandemBalance
+  tandemBalance.value = fallRisk.tandemBalance
+  gaitSpeedTest.value = fallRisk.gaitSpeedTest
+  chairStandTest.value = fallRisk.chairStandTest
+
+  icopeCompleteChairStands.value = fallRisk.icopeCompleteChairStands
+  icopeChairStandsTime.value = fallRisk.icopeChairStandsTime
+
+  initialized.value = true
+  // Don't restore draft when we have saved data - it would overwrite it
+  draftRestored.value = true
+}
+
+function resetData() {
+  initialized.value = false
+  if (!props.patientData?.fallrisk) {
+    sideToSideBalance.value = null
+    semiTandemBalance.value = null
+    tandemBalance.value = null
+    gaitSpeedTest.value = null
+    chairStandTest.value = null
+    icopeCompleteChairStands.value = null
+    icopeChairStandsTime.value = null
+    initialized.value = true
+    // Try to restore draft if available
+    if (!draftRestored.value) {
+      draftRestored.value = restoreDraft() || draftRestored.value
+    }
+    return
+  }
+  initialize(props.patientData)
+}
+
+// Initialize once
 watch(
   () => props.patientData,
-  (newVal: Patient | null) => {
-    if (!props.isAdd && newVal) {
-      const fallRisk = newVal.fallrisk
-      if (!fallRisk) {
-        sideToSideBalance.value = null
-        semiTandemBalance.value = null
-        tandemBalance.value = null
-        gaitSpeedTest.value = null
-        chairStandTest.value = null
-        icopeCompleteChairStands.value = null
-        icopeChairStandsTime.value = null
-      } else {
-        sideToSideBalance.value = fallRisk.sideToSideBalance
-        semiTandemBalance.value = fallRisk.semiTandemBalance
-        tandemBalance.value = fallRisk.tandemBalance
-        gaitSpeedTest.value = fallRisk.gaitSpeedTest
-        chairStandTest.value = fallRisk.chairStandTest
-
-        icopeCompleteChairStands.value = fallRisk.icopeCompleteChairStands
-        icopeChairStandsTime.value = fallRisk.icopeChairStandsTime
-        
-      }
-    }
-  },
+  (newVal) => initialize(newVal),
   { immediate: true }
 )
 
@@ -437,7 +510,23 @@ async function submitData() {
   await save({
     buildPayload,
     update: () => updateSection(props.patientId, props.patientVid!, 'fallRisk', buildPayload()!),
-    onSuccess: () => toast.success('Fall Risk saved successfully!')
+    onSuccess: () => {
+      toast.success('Fall Risk saved successfully!')
+      // After saving, the form already has the correct values in memory
+      // We don't need to reload from parent - the form state is the source of truth
+      // The initialized flag prevents re-initialization from stale patientData
+    }
+  })
+}
+
+function discardEdit() {
+  discardChanges({
+    onDiscard: () => {
+      resetData()
+    },
+    onSuccess: () => {
+      toast.info('Changes discarded.')
+    }
   })
 }
 </script>

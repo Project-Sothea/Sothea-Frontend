@@ -271,13 +271,19 @@
         </div>
 
         <!-- Save Edits Button -->
-        <div class="flex flex-row-reverse w-full mt-5">
+        <div class="flex flex-row-reverse w-full mt-5 gap-3" v-if="isEditing && !isAdd">
           <button
-            v-if="isEditing && !isAdd"
             @click="submitData"
             class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
           >
             Save Edits
+          </button>
+          <button
+            type="button"
+            @click="discardEdit"
+            class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none"
+          >
+            Discard Changes
           </button>
         </div>
       </div>
@@ -292,7 +298,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type VitalStatistics from '@patient-record/types/VitalStatistics'
 import type Patient from '@patient-record/types/Patient'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
+import { useEditableSection, bindRef } from '@features/patient-record/composables/useEditableSection'
 
 const props = defineProps<{
   patientId: string
@@ -318,40 +324,112 @@ const showIcope = computed<boolean>(() =>
 
 const icopeHighBp = ref<boolean | null> (null)
 
-const { isEditing, toggleEdit, save, runChecks } = useEditableSection<VitalStatistics>()
+const draftFields = [
+  bindRef('temperature', temperature),
+  bindRef('spO2', spO2),
+  bindRef('systolicBP1', systolicBP1),
+  bindRef('systolicBP2', systolicBP2),
+  bindRef('diastolicBP1', diastolicBP1),
+  bindRef('diastolicBP2', diastolicBP2),
+  bindRef('hr1', hr1),
+  bindRef('hr2', hr2),
+  bindRef('randomBloodGlucoseMmolL', randomBloodGlucoseMmolL),
+  bindRef('icopeHighBp', icopeHighBp)
+]
+
+const vitalStatsDraftStorageKey = computed(() => {
+  if (!props.patientId || !props.patientVid) return null
+  return `patient-record:draft:${props.patientId}:${props.patientVid}:vitalStatistics`
+})
+
+const { isEditing, toggleEdit, save, discardChanges, restoreDraft, draftStorageKey, runChecks } = useEditableSection<VitalStatistics>({
+  draft: {
+    key: vitalStatsDraftStorageKey,
+    fields: draftFields,
+    autoRestore: false
+  }
+})
 
 const toast = useToast()
 
+const initialized = ref(false)
+const draftRestored = ref(false)
+
+watch(
+  () => draftStorageKey.value,
+  () => {
+    if (draftRestored.value) return
+    if (props.isAdd) return
+    // Try to restore draft when storage key becomes available
+    // This happens before initialization completes
+    draftRestored.value = restoreDraft() || draftRestored.value
+  },
+  { immediate: true }
+)
+
+function initialize(patientData: Patient | null) {
+  // Don't re-initialize if already initialized, in add mode, or currently editing
+  // This prevents overwriting form values with stale data after saving
+  if (initialized.value || props.isAdd || isEditing.value) return
+  
+  // Wait for patientData to actually be loaded (not null/undefined)
+  // This prevents initializing with null data on page refresh
+  if (!patientData) return
+
+  const vitalStatistics = patientData.vitalstatistics
+  if (!vitalStatistics) {
+    // No saved vital statistics data - try to restore draft if available
+    initialized.value = true
+    if (!draftRestored.value) {
+      draftRestored.value = restoreDraft() || draftRestored.value
+    }
+    return
+  }
+
+  // If we have saved data, load it and don't restore draft (draft would overwrite saved data)
+  temperature.value = vitalStatistics.temperature
+  spO2.value = vitalStatistics.spO2
+  systolicBP1.value = vitalStatistics.systolicBP1
+  systolicBP2.value = vitalStatistics.systolicBP2
+  diastolicBP1.value = vitalStatistics.diastolicBP1
+  diastolicBP2.value = vitalStatistics.diastolicBP2
+  hr1.value = vitalStatistics.hr1
+  hr2.value = vitalStatistics.hr2
+  randomBloodGlucoseMmolL.value = vitalStatistics.randomBloodGlucoseMmolL
+  icopeHighBp.value = vitalStatistics.icopeHighBp
+
+  initialized.value = true
+  // Don't restore draft when we have saved data - it would overwrite it
+  draftRestored.value = true
+}
+
+function resetData() {
+  initialized.value = false
+  if (!props.patientData?.vitalstatistics) {
+    temperature.value = null
+    spO2.value = null
+    systolicBP1.value = null
+    systolicBP2.value = null
+    diastolicBP1.value = null
+    diastolicBP2.value = null
+    hr1.value = null
+    hr2.value = null
+    randomBloodGlucoseMmolL.value = null
+    icopeHighBp.value = null
+    initialized.value = true
+    // Try to restore draft if available
+    if (!draftRestored.value) {
+      draftRestored.value = restoreDraft() || draftRestored.value
+    }
+    return
+  }
+  initialize(props.patientData)
+}
+
+// Initialize once
 watch(
   () => props.patientData,
-  (newVal: Patient | null) => {
-    if (!props.isAdd && newVal) {
-      const vitalStatistics = newVal.vitalstatistics
-      if (!vitalStatistics) {
-        temperature.value = null
-        spO2.value = null
-        systolicBP1.value = null
-        systolicBP2.value = null
-        diastolicBP1.value = null
-        diastolicBP2.value = null
-        hr1.value = null
-        hr2.value = null
-        randomBloodGlucoseMmolL.value = null
-        icopeHighBp.value = null
-      } else {
-        temperature.value = vitalStatistics.temperature
-        spO2.value = vitalStatistics.spO2
-        systolicBP1.value = vitalStatistics.systolicBP1
-        systolicBP2.value = vitalStatistics.systolicBP2
-        diastolicBP1.value = vitalStatistics.diastolicBP1
-        diastolicBP2.value = vitalStatistics.diastolicBP2
-        hr1.value = vitalStatistics.hr1
-        hr2.value = vitalStatistics.hr2
-        randomBloodGlucoseMmolL.value = vitalStatistics.randomBloodGlucoseMmolL
-        icopeHighBp.value = vitalStatistics.icopeHighBp
-      }
-    }
-  },
+  (newVal) => initialize(newVal),
   { immediate: true }
 )
 const avgSystolicBP = computed(() => {
@@ -428,7 +506,23 @@ async function submitData() {
     buildPayload,
     update: () =>
       updateSection(props.patientId, props.patientVid!, 'vitalStatistics', buildPayload()!),
-    onSuccess: () => toast.success('Vital Statistics saved successfully!')
+    onSuccess: () => {
+      toast.success('Vital Statistics saved successfully!')
+      // After saving, the form already has the correct values in memory
+      // We don't need to reload from parent - the form state is the source of truth
+      // The initialized flag prevents re-initialization from stale patientData
+    }
+  })
+}
+
+function discardEdit() {
+  discardChanges({
+    onDiscard: () => {
+      resetData()
+    },
+    onSuccess: () => {
+      toast.info('Changes discarded.')
+    }
   })
 }
 function preventNegative(event: KeyboardEvent) {
