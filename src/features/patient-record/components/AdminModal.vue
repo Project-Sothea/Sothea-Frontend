@@ -155,6 +155,19 @@ const formDraft = useAutoDraft<AdminPayload>({
 // Extract functions from formDraft
 const { isEditing, toggleEdit, save, discardChanges } = formDraft
 
+// Reset form when entering create mode
+watch(
+  () => props.isAdd,
+  (isAdd) => {
+    if (isAdd) {
+      // Clear form when entering create mode
+      reset()
+      if (!regDate.value) regDate.value = formatDateISO(new Date())
+    }
+  },
+  { immediate: true }
+)
+
 // Initialize when patientData changes
 watch(
   () => props.patientData,

@@ -319,6 +319,17 @@ watch(
   }
 )
 
+// Clear patient data when entering create mode
+watch(isCreateMode, (isCreate) => {
+  if (isCreate) {
+    patient.value = null
+    name.value = ''
+    age.value = null
+    regDate.value = ''
+    queueNo.value = ''
+  }
+})
+
 onBeforeUnmount(() => {
   clearPersistedState()
 })
