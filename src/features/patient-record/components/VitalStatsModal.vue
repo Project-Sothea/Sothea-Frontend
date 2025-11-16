@@ -390,7 +390,6 @@ function buildPayload(): VitalStatistics | null {
       [spO2.value !== null, 'Please enter SpO2'],
       [hr1.value !== null, 'Please enter HR1'],
       [hr2.value !== null, 'Please enter HR2'],
-      [randomBloodGlucoseMmolL.value !== null, 'Please enter Random Blood Glucose (mmol/L)'],
       [avgHR.value !== null, 'Average HR cannot be empty'],
       [!showIcope.value || icopeHighBp.value !== null, 'Please answer ICOPE question']
     ])

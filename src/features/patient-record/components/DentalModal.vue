@@ -4,31 +4,26 @@
       <h1>Dental</h1>
       <br />
 
-      <!-- cleanTeethFreq -->
+      <!-- Fluoride exposure -->
       <div class="flex flex-row w-full mt-5">
         <div>
-          <label for="cleanTeethFreq" class="mb-1 block text-sm font-medium text-dark">
-            Oral hygiene:
+          <label for="fluorideExposure" class="mb-1 block text-sm font-medium text-dark">
+            Fluoride Exposure:
             How many days per week do you brush your teeth with fluoride toothpaste twice a day?
             <span class="req">*</span>
           </label>
           <div class="relative z-20 w-64 md:w-80 text-left"> <!-- optional: ensure wrapper isn't centering -->
             <select
-              v-model="cleanTeethFreq"
+              v-model="fluorideExposure"
               :disabled="!isEditing"
               class="w-full appearance-none rounded-md border border-stroke bg-transparent
                     py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6
                     outline-none transition focus:border-primary active:border-primary
                     disabled:cursor-default disabled:bg-gray-200"
             >
-              <option :value="0">0</option>
-              <option :value="1">1</option>
-              <option :value="2">2</option>
-              <option :value="3">3</option>
-              <option :value="4">4</option>
-              <option :value="5">5</option>
-              <option :value="6">6</option>
-              <option :value="7">7</option>
+              <option :value="'6, 7'">6, 7</option>
+              <option :value="'5, 4, 3'">5, 4, 3</option>
+              <option :value="'2, 1, 0'">2, 1, 0</option>
             </select>
             <span class="absolute top-1/2 right-4 z-10 -translate-y-1/2">
               <img src="@/assets/chevrondown.svg" height="20" width="20" />
@@ -37,26 +32,26 @@
         </div>
       </div>
 
-      <!-- sugarConsumeFreq -->
+      <!-- Diet -->
       <div class="flex flex-row w-full mt-5">
         <div>
-          <label for="sugarConsumeFreq" class="mb-1 block text-sm font-medium text-dark">
+          <label for="diet" class="mb-1 block text-sm font-medium text-dark">
             Diet: On average, how many times daily do you consume starch or sugar (food or drinks) between meals?
             <span class="req">*</span>
           </label>
           <div class="relative z-20 w-64 md:w-80 text-left"> <!-- optional: ensure wrapper isn't centering -->
             <select
-              v-model="sugarConsumeFreq"
+              v-model="diet"
               :disabled="!isEditing"
               class="w-full appearance-none rounded-md border border-stroke bg-transparent
                     py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6
                     outline-none transition focus:border-primary active:border-primary
                     disabled:cursor-default disabled:bg-gray-200"
             >
-              <option :value="'<1'">&lt;1</option>
+              <option :value="'≤1'">≤1</option>
               <option :value="'2-3'">2-3</option>
-              <option :value="'4-5'">4-5</option>
-              <option :value="'≥6'">≥6</option>
+              <option :value="'>=4'">≥4</option>
+
             </select>
             <span class="absolute top-1/2 right-4 z-10 -translate-y-1/2">
               <img src="@/assets/chevrondown.svg" height="20" width="20" />
@@ -65,54 +60,50 @@
         </div>
       </div>
 
-      <!-- bacterialExposure -->
+      <!-- Bacterial exposure -->
       <div class="flex flex-col mt-4">
         <div class="font-medium text-sm">
-          Bacterial exposure: Has anyone in the immediate family (including a caregiver)
-          had tooth decay or lost a tooth from tooth decay in the past year?<span class="req">*</span>
+          Bacterial exposure: Has anyone in the family (including a caregiver)
+          had tooth decay or lost a tooth from tooth decay?<span class="req">*</span>
         </div>
 
-        <!-- Yes / No -->
-        <div class="mt-3 flex items-start gap-8">
-          <label class="flex flex-col items-center text-sm">
-            <span>Yes</span>
+        <!-- Three risk categories matching Dental type -->
+        <div class="mt-3 flex flex-col gap-2 text-sm">
+          <label class="inline-flex items-center gap-2">
             <input
-              class="mt-1 h-5 w-5"
+              class="h-4 w-4"
               type="radio"
               name="bacterialExposure"
               v-model="bacterialExposure"
-              :value="true"
+              :value="'None in last 2 years'"
               :disabled="!isEditing"
             />
+            <span>None in last 2 years</span>
           </label>
 
-          <label class="flex flex-col items-center text-sm">
-            <span>No</span>
+          <label class="inline-flex items-center gap-2">
             <input
-              class="mt-1 h-5 w-5"
+              class="h-4 w-4"
               type="radio"
               name="bacterialExposure"
               v-model="bacterialExposure"
-              :value="false"
+              :value="'Yes in last 7 - 23 months'"
               :disabled="!isEditing"
             />
+            <span>Yes in last 7–23 months</span>
           </label>
-        </div>
 
-        <!-- Subquestion appears only when Yes -->
-        <div v-if="bacterialExposure === true" class="mt-3 flex items-center gap-3">
-          <label for="bact-exp-count" class="text-sm">If yes, how many people?</label>
-          <input
-            id="bact-exp-count"
-            type="number"
-            min="1"
-            step="1"
-            v-model.number="numLossFromToothDecay"
-            :disabled="!isEditing"
-            class="w-24 bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm outline-none transition
-                  focus:border-primary disabled:cursor-default disabled:bg-gray-200"
-            placeholder="e.g. 2"
-          />
+          <label class="inline-flex items-center gap-2">
+            <input
+              class="h-4 w-4"
+              type="radio"
+              name="bacterialExposure"
+              v-model="bacterialExposure"
+              :value="'Yes in last 6 months'"
+              :disabled="!isEditing"
+            />
+            <span>Yes in last 6 months</span>
+          </label>
         </div>
       </div>
 
@@ -293,865 +284,6 @@
         </div>
       </div>
 
-      <div class="flex flex-col mt-5">
-        <!-- Referral Header -->
-        <div class="flex flex-row">
-          <div class="w-1/3"></div>
-          <div class="font-medium text-sm pr-5">Yes</div>
-          <div class="font-medium text-sm">No</div>
-          <div class="font-medium text-sm w-1/3 pl-11">Location</div>
-        </div>
-      </div>
-      <!-- Referral Needed? -->
-      <div class="flex flex-col mt-2">
-        <div class="flex flex-row">
-          <div class="font-normal items-center inline-flex text-sm w-1/3">
-            Referral Needed? <span class="req">*</span>
-          </div>
-
-          <div class="flex">
-            <div class="flex items-center pr-7">
-              <label class="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="ref-needed"
-                  class="w-4 h-4"
-                  v-model="referralNeeded"
-                  :value="true"
-                  :disabled="!isEditing"
-                />
-              </label>
-            </div>
-            <div class="flex items-center">
-              <label class="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="ref-needed"
-                  class="w-4 h-4"
-                  v-model="referralNeeded"
-                  :value="false"
-                  :disabled="!isEditing"
-                />
-              </label>
-            </div>
-          </div>
-
-          <div class="flex w-1/3 pl-11 grow">
-            <textarea
-              v-model="referralLoc"
-              rows="1"
-              placeholder="Enter Location"
-              class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
-              :disabled="!isEditing"
-            ></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tooth Chart Right Upper Header -->
-      <div class="flex flex-row justify-between mt-5">
-        <div class="font-normal items-center inline-flex text-sm w-1/5">Right Upper Cavities?</div>
-        <div class="font-medium text-sm">11</div>
-        <div class="font-medium text-sm">12</div>
-        <div class="font-medium text-sm">13</div>
-        <div class="font-medium text-sm">14</div>
-        <div class="font-medium text-sm">15</div>
-        <div class="font-medium text-sm">16</div>
-        <div class="font-medium text-sm">17</div>
-        <div class="font-medium text-sm">18</div>
-      </div>
-
-      <div class="flex flex-row mt-2 justify-between">
-        <div class="flex flex-col w-1/5">
-          <p class="text-sm font-medium mb-2">Yes</p>
-          <p class="text-sm font-medium">No</p>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_11"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth11.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_11"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth11.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_12"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth12.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_12"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth12.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_13"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth13.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_13"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth13.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_14"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth14.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_14"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth14.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_15"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth15.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_15"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth15.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_16"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth16.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_16"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth16.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_17"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth17.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_17"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth17.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_18"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth18.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_18"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth18.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Tooth Chart Right Lower Header -->
-      <div class="flex flex-row mt-2 justify-between">
-        <div class="font-normal items-center inline-flex text-sm w-1/5">Right Lower Cavities?</div>
-        <div class="font-medium text-sm">41</div>
-        <div class="font-medium text-sm">42</div>
-        <div class="font-medium text-sm">43</div>
-        <div class="font-medium text-sm">44</div>
-        <div class="font-medium text-sm">45</div>
-        <div class="font-medium text-sm">46</div>
-        <div class="font-medium text-sm">47</div>
-        <div class="font-medium text-sm">48</div>
-      </div>
-
-      <div class="flex flex-row mt-2 justify-between">
-        <div class="flex flex-col w-1/5">
-          <p class="text-sm font-medium mb-2">Yes</p>
-          <p class="text-sm font-medium">No</p>
-        </div>
-
-        <div>
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_41"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth41.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_41"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth41.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div>
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_42"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth42.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_42"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth42.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_43"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth43.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_43"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth43.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_44"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth44.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_44"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth44.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_45"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth45.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_45"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth45.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_46"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth46.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_46"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth46.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_47"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth47.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_47"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth47.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_48"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth48.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_48"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth48.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Tooth Chart Left Upper Header -->
-      <div class="flex flex-row mt-2 justify-between">
-        <div class="font-normal items-center inline-flex text-sm w-1/5">Left Upper Cavities?</div>
-        <div class="font-medium text-sm">21</div>
-        <div class="font-medium text-sm">22</div>
-        <div class="font-medium text-sm">23</div>
-        <div class="font-medium text-sm">24</div>
-        <div class="font-medium text-sm">25</div>
-        <div class="font-medium text-sm">26</div>
-        <div class="font-medium text-sm">27</div>
-        <div class="font-medium text-sm">28</div>
-      </div>
-
-      <div class="flex flex-row mt-2 justify-between">
-        <div class="flex flex-col w-1/5">
-          <p class="text-sm font-medium mb-2">Yes</p>
-          <p class="text-sm font-medium">No</p>
-        </div>
-
-        <div>
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_21"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth21.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_21"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth21.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div>
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_22"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth22.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_22"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth22.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_23"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth23.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_23"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth23.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_24"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth24.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_24"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth24.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_25"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth25.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_25"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth25.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_26"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth26.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_26"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth26.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_27"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth27.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_27"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth27.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_28"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth28.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_28"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth28.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Tooth Chart Left Lower Header -->
-      <div class="flex flex-row mt-2 justify-between">
-        <div class="font-normal items-center inline-flex text-sm w-1/5">Left Lower Cavities?</div>
-        <div class="font-medium text-sm">31</div>
-        <div class="font-medium text-sm">32</div>
-        <div class="font-medium text-sm">33</div>
-        <div class="font-medium text-sm">34</div>
-        <div class="font-medium text-sm">35</div>
-        <div class="font-medium text-sm">36</div>
-        <div class="font-medium text-sm">37</div>
-        <div class="font-medium text-sm">38</div>
-      </div>
-
-      <div class="flex flex-row mt-2 justify-between">
-        <div class="flex flex-col w-1/5">
-          <p class="text-sm font-medium mb-2">Yes</p>
-          <p class="text-sm font-medium">No</p>
-        </div>
-
-        <div>
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_31"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth31.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_31"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth31.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div>
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_32"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth32.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_32"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth32.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_33"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth33.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_33"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth33.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_34"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth34.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_34"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth34.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_35"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth35.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_35"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth35.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_36"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth36.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_36"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth36.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_37"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth37.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_37"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth37.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-        <div class="flex-col">
-          <div class="mb-2">
-            <input
-              type="radio"
-              name="tooth_38"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth38.value"
-              :value="true"
-              :disabled="!isEditing"
-            />
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="tooth_38"
-              class="w-4 h-4"
-              v-model="toothRefs.tooth38.value"
-              :value="false"
-              :disabled="!isEditing"
-            />
-          </div>
-        </div>
-      </div>
-
       <!-- Edit Button -->
       <div class="flex flex-row-reverse w-full mt-5">
         <button
@@ -1202,10 +334,9 @@ const props = defineProps<{
 
 const toast = useToast()
 
-const cleanTeethFreq = ref<0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | null>(null)
-const sugarConsumeFreq = ref<'<1' | '2-3' | '4-5' | '≥6' | null> (null)
-const bacterialExposure = ref<boolean | null>(null)
-const numLossFromToothDecay = ref<number>(0)
+const fluorideExposure = ref<'6, 7' | '5, 4, 3' | '2, 1, 0' | null>(null)
+const diet = ref<'≤1' | '2-3' | '≥4' | null> (null)
+const bacterialExposure = ref<'None in last 2 years' | 'Yes in last 7 - 23 months' | 'Yes in last 6 months' | null>(null)
 const oralSymptoms = ref<boolean | null>(null)
 const drinkOtherWater = ref<boolean | null>(null)
 
@@ -1219,36 +350,21 @@ const icopeDifficultyChewing = ref<boolean | null>(null)
 const icopePainInMouth = ref<boolean | null>(null)
 
 const dentalNotes = ref<string | null>('')
-const referralNeeded = ref<boolean | null>(null)
-const referralLoc = ref<string | null>('')
-const teeth = Array.from({ length: 48 }, () => ref<boolean | null>(null))
-const toothRefs: Record<string, (typeof teeth)[0]> = {}
 
-// Build fields array including dynamic tooth fields
+// Build fields array
 const draftFields = [
-  { key: 'cleanTeethFreq', ref: cleanTeethFreq },
-  { key: 'sugarConsumeFreq', ref: sugarConsumeFreq },
+  { key: 'fluorideExposure', ref: fluorideExposure },
+  { key: 'diet', ref: diet },
   { key: 'bacterialExposure', ref: bacterialExposure },
-  { key: 'numLossFromToothDecay', ref: numLossFromToothDecay },
   { key: 'oralSymptoms', ref: oralSymptoms },
   { key: 'drinkOtherWater', ref: drinkOtherWater },
   { key: 'riskForDentalCarries', ref: riskForDentalCarries },
   { key: 'icopeDifficultyChewing', ref: icopeDifficultyChewing },
   { key: 'icopePainInMouth', ref: icopePainInMouth },
   { key: 'dentalNotes', ref: dentalNotes },
-  { key: 'referralNeeded', ref: referralNeeded },
-  { key: 'referralLoc', ref: referralLoc },
 ]
 
-// Add tooth fields dynamically
-for (let quadrant = 1; quadrant <= 4; quadrant++) {
-  for (let position = 1; position <= 8; position++) {
-    const toothKey = `tooth${quadrant}${position}`
-    const toothRef = teeth[(quadrant - 1) * 8 + (position - 1)]
-    toothRefs[toothKey] = toothRef
-    draftFields.push({ key: toothKey, ref: toothRef })
-  }
-}
+
 
 // Automatic draft management - handles everything
 const formDraft = useAutoDraft<Dental>({
@@ -1277,21 +393,17 @@ watch(
 )
 
 const requiredFlags = computed(() => [
-  cleanTeethFreq.value,
-  sugarConsumeFreq.value,
+  fluorideExposure.value,
+  diet.value,
   bacterialExposure.value,
-  numLossFromToothDecay.value,
   oralSymptoms.value,
   drinkOtherWater.value,
   riskForDentalCarries.value,
-  referralNeeded.value,
 ])
 
 function buildPayload(): Dental | null {
   if (
     requiredFlags.value.some((v) => v === null) ||
-    cleanTeethFreq.value === null ||
-    sugarConsumeFreq.value === null ||
     showIcope.value && (icopeDifficultyChewing.value === null || icopePainInMouth.value === null)
   ) {
     toast.error('Please fill in all required fields.')
@@ -1299,10 +411,9 @@ function buildPayload(): Dental | null {
   }
   return {
 
-    cleanTeethFreq: cleanTeethFreq.value,
-    sugarConsumeFreq: sugarConsumeFreq.value,
+    fluorideExposure: fluorideExposure.value!,
+    diet: diet.value!,
     bacterialExposure: bacterialExposure.value!,
-    numLossFromToothDecay: numLossFromToothDecay.value,
     oralSymptoms: oralSymptoms.value!,
     drinkOtherWater: drinkOtherWater.value!,
 
@@ -1312,40 +423,6 @@ function buildPayload(): Dental | null {
     icopePainInMouth: icopePainInMouth.value!,
 
     dentalNotes: dentalNotes.value,
-    referralNeeded: referralNeeded.value!,
-    referralLoc: referralLoc.value,
-    tooth11: toothRefs.tooth11.value,
-    tooth12: toothRefs.tooth12.value,
-    tooth13: toothRefs.tooth13.value,
-    tooth14: toothRefs.tooth14.value,
-    tooth15: toothRefs.tooth15.value,
-    tooth16: toothRefs.tooth16.value,
-    tooth17: toothRefs.tooth17.value,
-    tooth18: toothRefs.tooth18.value,
-    tooth21: toothRefs.tooth21.value,
-    tooth22: toothRefs.tooth22.value,
-    tooth23: toothRefs.tooth23.value,
-    tooth24: toothRefs.tooth24.value,
-    tooth25: toothRefs.tooth25.value,
-    tooth26: toothRefs.tooth26.value,
-    tooth27: toothRefs.tooth27.value,
-    tooth28: toothRefs.tooth28.value,
-    tooth31: toothRefs.tooth31.value,
-    tooth32: toothRefs.tooth32.value,
-    tooth33: toothRefs.tooth33.value,
-    tooth34: toothRefs.tooth34.value,
-    tooth35: toothRefs.tooth35.value,
-    tooth36: toothRefs.tooth36.value,
-    tooth37: toothRefs.tooth37.value,
-    tooth38: toothRefs.tooth38.value,
-    tooth41: toothRefs.tooth41.value,
-    tooth42: toothRefs.tooth42.value,
-    tooth43: toothRefs.tooth43.value,
-    tooth44: toothRefs.tooth44.value,
-    tooth45: toothRefs.tooth45.value,
-    tooth46: toothRefs.tooth46.value,
-    tooth47: toothRefs.tooth47.value,
-    tooth48: toothRefs.tooth48.value
   }
 }
 

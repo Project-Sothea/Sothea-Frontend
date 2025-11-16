@@ -45,7 +45,7 @@
           </div>
 
           <!-- Row 2 -->
-          <div class="flex flex-row mb-2">
+          <div v-if="showPaeds" class="flex flex-row mb-2">
             <!-- Paeds: Height % -->
             <div class="w-1/2">
               <div class="flex flex-row content-center">
@@ -294,6 +294,9 @@ const icopeNoDesireToEat = ref<boolean | null>(null)
 
 const showIcope = computed<boolean>(() => 
   props.age != null ? props.age >= 60 : true
+)
+const showPaeds = computed<boolean>(() => 
+  props.age != null ? props.age <= 16 : true
 )
 
 const showHeightModal = ref(false)

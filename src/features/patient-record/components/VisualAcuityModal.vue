@@ -154,7 +154,7 @@
         <!-- Additional Intervention -->
         <div class="mt-4">
           <label for="" class="mb-2 block text-sm font-medium text-dark"
-            >Additional Intervention:
+            >Remarks:
           </label>
           <textarea
             v-model="additionalIntervention"

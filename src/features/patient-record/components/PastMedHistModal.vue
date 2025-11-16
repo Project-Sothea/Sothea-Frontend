@@ -23,7 +23,7 @@
       <!-- Cough -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Cough <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Cough <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -55,7 +55,7 @@
       <!-- Fever -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Fever <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Fever <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -87,7 +87,7 @@
       <!-- Blocked Nose -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Blocked Nose <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Blocked Nose <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -119,7 +119,7 @@
       <!-- Sore Throat -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Sore Throat <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Sore Throat <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -151,7 +151,7 @@
       <!-- Night Sweats -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Night Sweats <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Night Sweats <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -183,7 +183,7 @@
       <!-- Unintentional Weight Los -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Unintentional Weight Loss <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Unintentional Weight Loss <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -221,7 +221,7 @@
       <!-- Tuberculosis -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Tuberculosis <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Tuberculosis <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -285,7 +285,7 @@
       <!-- Diabetes -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Diabetes <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Diabetes <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -317,7 +317,7 @@
       <!-- Hypertension -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Hypertension <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Hypertension <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -349,7 +349,7 @@
       <!-- Hyperlipidemia -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Hyperlipidemia <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Hyperlipidemia <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -382,7 +382,7 @@
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
           <div class="font-normal text-sm w-1/3">
-            Chronic Joint Pains <span class="req">*</span>
+            Chronic Joint Pains <span v-if="!showPaeds" class="req">*</span>
           </div>
 
           <div class="flex items-center w-1/6">
@@ -416,7 +416,7 @@
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
           <div class="font-normal text-sm w-1/3">
-            Chronic Muscle Aches <span class="req">*</span>
+            Chronic Muscle Aches <span v-if="!showPaeds" class="req">*</span>
           </div>
 
           <div class="flex items-center w-1/6">
@@ -450,7 +450,7 @@
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
           <div class="font-normal text-sm w-1/3">
-            Sexually Transmitted Disease <span class="req">*</span>
+            Sexually Transmitted Disease <span v-if="!showPaeds" class="req">*</span>
           </div>
 
           <div class="flex items-center w-1/6">
@@ -553,6 +553,7 @@ import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 const props = defineProps<{
   patientId: string
   patientData: Patient
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -577,6 +578,10 @@ const chronicMuscleAches = ref<boolean | null>(null)
 const sexuallyTransmittedDisease = ref<boolean | null>(null)
 const specifiedSTDs = ref<string | null>('')
 const others = ref<string | null>('')
+
+const showPaeds = computed<boolean>(() => 
+  props.age != null ? props.age <= 16 : true
+)
 
 // Automatic draft management - handles everything
 const formDraft = useAutoDraft<PastMedicalHistory>({
@@ -622,7 +627,10 @@ watch(
 )
 
 function buildPayload(): PastMedicalHistory | null {
+  // For paediatric patients (showPaeds), all fields are optional.
+  // Only enforce required checks for non-paeds.
   if (
+    !showPaeds.value &&
     !runChecks([
       [cough.value !== null, 'Select Cough'],
       [fever.value !== null, 'Select Fever'],
