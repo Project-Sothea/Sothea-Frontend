@@ -27,8 +27,13 @@ export async function deleteDrug(drugId: string | number) {
   return data
 }
 
+export async function listAllPresentations() {
+  const { data } = await http.get<DrugPresentationView[]>(`/pharmacy/drugs/presentations`)
+  return data
+}
+
 export async function listPresentationsForDrug(drugId: string | number) {
-  const { data } = await http.get<DrugPresentationView[]>(`/pharmacy/drugs/${drugId}/presentations`)
+  const { data } = await http.get<DrugPresentationView[]>(`/pharmacy/drugs/presentations?drugId=${drugId}`)
   return data
 }
 

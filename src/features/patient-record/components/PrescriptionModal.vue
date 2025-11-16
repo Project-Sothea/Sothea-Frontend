@@ -192,7 +192,7 @@ import {
 } from '@/features/pharmacy/api/prescription'
 import type { DrugPresentationView } from '@/features/pharmacy/types/Drug'
 import PrescriptionLineRow from './PrescriptionLineRow.vue'
-import { listDrugs, listPresentationsForDrug } from '@/features/pharmacy/api/drug'
+import { listAllPresentations, listDrugs, listPresentationsForDrug } from '@/features/pharmacy/api/drug'
 import type Patient from '../types/Patient'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
@@ -321,12 +321,7 @@ async function ensureHeader() {
 }
 
 async function loadPresentations() {
-  const drugs = await listDrugs()
-  presentations.value = (
-    await Promise.all(
-      drugs.map(d => listPresentationsForDrug(d.id))
-    )
-  ).flat();
+  presentations.value = await listAllPresentations()
 }
 
 async function refreshRx() {

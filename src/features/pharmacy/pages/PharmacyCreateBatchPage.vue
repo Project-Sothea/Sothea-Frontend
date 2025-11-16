@@ -232,7 +232,7 @@ import NavBar from '@shared/ui/navigation/NavBar.vue'
 import type { Drug, DrugPresentationView } from '../types/Drug'
 import type { BatchPostData, DrugBatchLocation } from '../types/Batch'
 import CreatePresentationForm from '../components/CreatePresentationForm.vue'
-import { listDrugs, listPresentationsForDrug } from '../api/drug'
+import { listAllPresentations } from '../api/drug'
 import { createBatch } from '../api/batch'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -280,13 +280,7 @@ const openCreatePresentationForm = ref(false)
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function fetchPresentations() {
- drugs.value = await listDrugs()
-
-  presentations.value = (
-    await Promise.all(
-      drugs.value.map(d => listPresentationsForDrug(d.id))
-    )
-  ).flat();
+  presentations.value = await listAllPresentations()
 }
 
 
