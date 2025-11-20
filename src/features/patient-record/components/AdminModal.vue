@@ -31,13 +31,19 @@
         </button>
       </div>
       <!-- Save Edits Button -->
-      <div class="flex flex-row-reverse w-full mt-5">
+      <div class="flex flex-row-reverse w-full mt-5 gap-3" v-if="isEditing && !isAdd">
         <button
-          v-if="isEditing && !isAdd"
           @click="saveChanges"
           class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
         >
           Save Edits
+        </button>
+        <button
+          type="button"
+          @click="discardEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none"
+        >
+          Discard Changes
         </button>
       </div>
     </div>
@@ -45,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { formatDateISO } from '@shared/utils/date'
 
 import { useToast } from 'vue-toast-notification'
@@ -56,6 +62,8 @@ import { handleApiError } from '@shared/api/handleApiError'
 import { useAdminForm } from '@patient-record/composables/useAdminForm'
 import AdminFormFields from './AdminFormFields.vue'
 import { getPatientPhotoBlob } from '@patient-record/api/photo'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
+import type { AdminPayload } from '@features/patient-record/api/visit'
 
 const props = defineProps<{
   patientId?: string
@@ -88,24 +96,87 @@ const emit = defineEmits<{
 }>()
 
 const toast = useToast()
-const isEditing = ref(false)
 const maxDate = ref(formatDateISO(new Date()))
 const formRef = useAdminForm({
   initial: !props.isAdd && props.patientData?.admin ? props.patientData.admin : undefined,
   onError: (m) => toast.error(m)
 })
 
-const { name, regDate, queueNo, photoFile, selectedPhoto, ageComputed, buildPayload, validate } =
-  formRef
+const {
+  name,
+  khmerName,
+  dob,
+  gender,
+  contactNo,
+  regDate,
+  queueNo,
+  village,
+  familyGroup,
+  pregnant,
+  lastMenstrualPeriod,
+  drugAllergies,
+  sentToId,
+  photoFile,
+  selectedPhoto,
+  ageComputed,
+  buildPayload,
+  validate,
+  reset
+} = formRef
 
 if (props.isAdd && !regDate.value) regDate.value = formatDateISO(new Date())
 
-// Keep form in sync if parent passes a different patient (admin fields only)
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<AdminPayload>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:admin`
+  }),
+  fields: [
+    { key: 'name', ref: name },
+    { key: 'khmerName', ref: khmerName },
+    { key: 'dob', ref: dob },
+    { key: 'gender', ref: gender },
+    { key: 'contactNo', ref: contactNo },
+    { key: 'regDate', ref: regDate },
+    { key: 'queueNo', ref: queueNo },
+    { key: 'village', ref: village },
+    { key: 'familyGroup', ref: familyGroup },
+    { key: 'pregnant', ref: pregnant },
+    { key: 'lastMenstrualPeriod', ref: lastMenstrualPeriod },
+    { key: 'drugAllergies', ref: drugAllergies },
+    { key: 'sentToId', ref: sentToId },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved admin details draft from this device.',
+})
+
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges } = formDraft
+
+// Reset form when entering create mode
 watch(
-  () => props.patientData?.admin,
-  (next) => {
-    if (!props.isAdd) formRef.reset(next || undefined)
-  }
+  () => props.isAdd,
+  (isAdd) => {
+    if (isAdd) {
+      // Clear form when entering create mode
+      reset()
+      if (!regDate.value) regDate.value = formatDateISO(new Date())
+    }
+  },
+  { immediate: true }
+)
+
+// Initialize when patientData changes
+watch(
+  () => props.patientData,
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.admin || null)
+  },
+  { immediate: true }
 )
 
 // Load existing photo when patient id/vid becomes available or changes
@@ -119,16 +190,13 @@ watch(
   { immediate: true }
 )
 
-const isSubmitting = ref(false)
-
 async function submitData() {
-  if (isSubmitting.value) return
-  if (!validate()) return
-  isSubmitting.value = true
-  try {
-    if (props.isAdd && !isEditing.value) {
-      const payload = buildPayload()
-      if (!payload) return
+  if (props.isAdd) {
+    // For new patients, use the existing logic
+    if (!validate()) return
+    const payload = buildPayload()
+    if (!payload) return
+    try {
       const response = await createPatient(payload, photoFile.value)
       toast.success('New Patient created successfully!')
       emit('patientCreated', {
@@ -139,26 +207,30 @@ async function submitData() {
         regDate: regDate.value,
         queueNo: queueNo.value
       })
-    } else if (!props.isAdd && isEditing.value && props.patientId && props.patientVid) {
-      const payload = buildPayload()
-      if (!payload) return
-      await updateAdmin(props.patientId, props.patientVid, payload, photoFile.value)
-      toast.success('Admin Details updated successfully!')
-      emit('patientUpdated', {
-        id: props.patientId,
-        name: name.value,
-        age: ageComputed.value as number,
-        vid: props.patientVid,
-        regDate: regDate.value,
-        queueNo: queueNo.value
-      })
+    } catch (error) {
+      console.error(error)
+      toast.error(handleApiError(error))
     }
-  } catch (error) {
-    console.error(error)
-    toast.error(handleApiError(error))
-    return
-  } finally {
-    isSubmitting.value = false
+  } else if (!props.isAdd && props.patientId && props.patientVid) {
+    // For existing patients, use useEditableSection's save
+    await save({
+      buildPayload: () => {
+        if (!validate()) return null
+        return buildPayload()
+      },
+      update: () => updateAdmin(props.patientId!, props.patientVid!, buildPayload()!, photoFile.value),
+      onSuccess: () => {
+        toast.success('Admin Details updated successfully!')
+        emit('patientUpdated', {
+          id: props.patientId,
+          name: name.value,
+          age: ageComputed.value as number,
+          vid: props.patientVid,
+          regDate: regDate.value,
+          queueNo: queueNo.value
+        })
+      }
+    })
   }
 }
 
@@ -218,15 +290,22 @@ async function loadExistingPhoto(patientId: string, vid: string) {
   }
 }
 
-function toggleEdit() {
-  isEditing.value = !isEditing.value
-}
-
 async function saveChanges() {
   if (!isEditing.value) return
   await submitData()
-  // Only toggle off editing if submission succeeded (no error toast in last attempt)
-  if (!isSubmitting.value) toggleEdit()
+}
+
+function discardEdit() {
+  discardChanges({
+    onDiscard: () => {
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.admin || null, true)
+      reset(props.patientData?.admin || undefined)
+    },
+    onSuccess: () => {
+      toast.info('Changes discarded.')
+    }
+  })
 }
 </script>
 

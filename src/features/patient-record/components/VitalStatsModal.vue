@@ -271,13 +271,19 @@
         </div>
 
         <!-- Save Edits Button -->
-        <div class="flex flex-row-reverse w-full mt-5">
+        <div class="flex flex-row-reverse w-full mt-5 gap-3" v-if="isEditing && !isAdd">
           <button
-            v-if="isEditing && !isAdd"
             @click="submitData"
             class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
           >
             Save Edits
+          </button>
+          <button
+            type="button"
+            @click="discardEdit"
+            class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none"
+          >
+            Discard Changes
           </button>
         </div>
       </div>
@@ -292,7 +298,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type VitalStatistics from '@patient-record/types/VitalStatistics'
 import type Patient from '@patient-record/types/Patient'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
@@ -318,39 +324,41 @@ const showIcope = computed<boolean>(() =>
 
 const icopeHighBp = ref<boolean | null> (null)
 
-const { isEditing, toggleEdit, save, runChecks } = useEditableSection<VitalStatistics>()
-
 const toast = useToast()
 
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<VitalStatistics>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:vitalStatistics`
+  }),
+  fields: [
+    { key: 'temperature', ref: temperature },
+    { key: 'spO2', ref: spO2 },
+    { key: 'systolicBP1', ref: systolicBP1 },
+    { key: 'systolicBP2', ref: systolicBP2 },
+    { key: 'diastolicBP1', ref: diastolicBP1 },
+    { key: 'diastolicBP2', ref: diastolicBP2 },
+    { key: 'hr1', ref: hr1 },
+    { key: 'hr2', ref: hr2 },
+    { key: 'randomBloodGlucoseMmolL', ref: randomBloodGlucoseMmolL },
+    { key: 'icopeHighBp', ref: icopeHighBp },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved vital statistics draft from this device.',
+})
+
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
+
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal: Patient | null) => {
-    if (!props.isAdd && newVal) {
-      const vitalStatistics = newVal.vitalstatistics
-      if (!vitalStatistics) {
-        temperature.value = null
-        spO2.value = null
-        systolicBP1.value = null
-        systolicBP2.value = null
-        diastolicBP1.value = null
-        diastolicBP2.value = null
-        hr1.value = null
-        hr2.value = null
-        randomBloodGlucoseMmolL.value = null
-        icopeHighBp.value = null
-      } else {
-        temperature.value = vitalStatistics.temperature
-        spO2.value = vitalStatistics.spO2
-        systolicBP1.value = vitalStatistics.systolicBP1
-        systolicBP2.value = vitalStatistics.systolicBP2
-        diastolicBP1.value = vitalStatistics.diastolicBP1
-        diastolicBP2.value = vitalStatistics.diastolicBP2
-        hr1.value = vitalStatistics.hr1
-        hr2.value = vitalStatistics.hr2
-        randomBloodGlucoseMmolL.value = vitalStatistics.randomBloodGlucoseMmolL
-        icopeHighBp.value = vitalStatistics.icopeHighBp
-      }
-    }
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.vitalstatistics || null)
   },
   { immediate: true }
 )
@@ -382,7 +390,6 @@ function buildPayload(): VitalStatistics | null {
       [spO2.value !== null, 'Please enter SpO2'],
       [hr1.value !== null, 'Please enter HR1'],
       [hr2.value !== null, 'Please enter HR2'],
-      [randomBloodGlucoseMmolL.value !== null, 'Please enter Random Blood Glucose (mmol/L)'],
       [avgHR.value !== null, 'Average HR cannot be empty'],
       [!showIcope.value || icopeHighBp.value !== null, 'Please answer ICOPE question']
     ])
@@ -428,7 +435,24 @@ async function submitData() {
     buildPayload,
     update: () =>
       updateSection(props.patientId, props.patientVid!, 'vitalStatistics', buildPayload()!),
-    onSuccess: () => toast.success('Vital Statistics saved successfully!')
+    onSuccess: () => {
+      toast.success('Vital Statistics saved successfully!')
+      // After saving, the form already has the correct values in memory
+      // We don't need to reload from parent - the form state is the source of truth
+      // The initialized flag prevents re-initialization from stale patientData
+    }
+  })
+}
+
+function discardEdit() {
+  discardChanges({
+    onDiscard: () => {
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.vitalstatistics || null, true)
+    },
+    onSuccess: () => {
+      toast.info('Changes discarded.')
+    }
   })
 }
 function preventNegative(event: KeyboardEvent) {

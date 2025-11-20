@@ -107,8 +107,8 @@
                   <!-- Strength numerator -->
                   <div class="col-span-7 sm:col-span-4">
                     <label class="block mb-1 text-gray-700">Strength (num) <span class="text-red-600">*</span></label>
-                    <input v-model.number="pres.strengthNum" type="number" min="1" step="1" :class="inputClass(errors.strengthNum)" />
-                    <p class="text-xs text-gray-500 mt-1">Integer (smallest unit)</p>
+                    <input v-model.number="pres.strengthNum" type="number" min="0.1" step="0.1" :class="inputClass(errors.strengthNum)" />
+                    <p class="text-xs text-gray-500 mt-1">Max 1 decimal place (e.g., 5 or 2.5)</p>
                     <p v-if="errors.strengthNum" class="err">{{ errors.strengthNum }}</p>
                   </div>
 
@@ -125,8 +125,8 @@
                   <template v-if="isLiquidForm">
                     <div class="col-span-7 sm:col-span-4">
                       <label class="block mb-1 text-gray-700">Strength (den) <span class="text-red-600">*</span></label>
-                      <input v-model.number="pres.strengthDen" type="number" min="1" step="1" :class="inputClass(errors.strengthDen)" />
-                      <p class="text-xs text-gray-500 mt-1">Integer (e.g., 5 mL)</p>
+                      <input v-model.number="pres.strengthDen" type="number" min="0.1" step="0.1" :class="inputClass(errors.strengthDen)" />
+                      <p class="text-xs text-gray-500 mt-1">Max 1 decimal place (e.g., 5 or 2.5 mL)</p>
                       <p v-if="errors.strengthDen" class="err">{{ errors.strengthDen }}</p>
                     </div>
 
@@ -159,8 +159,8 @@
                   <template v-if="isLiquidForm && pres.dispenseUnit==='bottle'">
                     <div class="col-span-7 sm:col-span-4">
                       <label class="block mb-1 text-gray-700">Bottle content amount <span class="text-red-600">*</span></label>
-                      <input v-model.number="pres.pieceContentAmount" type="number" min="1" step="1" :class="inputClass(errors.pieceContentAmount)" />
-                      <p class="text-xs text-gray-500 mt-1">Integer (e.g., 5 or 100)</p>
+                      <input v-model.number="pres.pieceContentAmount" type="number" min="0.1" step="0.1" :class="inputClass(errors.pieceContentAmount)" />
+                      <p class="text-xs text-gray-500 mt-1">Max 1 decimal place (e.g., 5 or 100.5)</p>
                       <p v-if="errors.pieceContentAmount" class="err">{{ errors.pieceContentAmount }}</p>
                     </div>
                     <div class="col-span-5 sm:col-span-2">
@@ -402,6 +402,17 @@ watch([() => pres.value.strengthUnitNum, () => pres.value.strengthUnitDen], () =
 
 const isInt = (v: unknown) => typeof v === 'number' && Number.isInteger(v)
 
+// Helper to check if a number has at most 1 decimal place
+function hasMaxOneDecimal(value: number | undefined | null): boolean {
+  if (value == null) return true
+  // Convert to string to check decimal places
+  const str = value.toString()
+  const decimalIndex = str.indexOf('.')
+  if (decimalIndex === -1) return true // No decimal point, so 0 decimal places
+  const decimalPart = str.substring(decimalIndex + 1)
+  return decimalPart.length <= 1
+}
+
 function validatePres(): boolean {
   const e: Record<string,string> = {}
   const p = pres.value
@@ -413,7 +424,11 @@ function validatePres(): boolean {
   if (!df) { errors.value = e; return false }
 
   // Numerator (always)
-  if (p.strengthNum == null || !isInt(p.strengthNum) || p.strengthNum <= 0) e.strengthNum = 'Enter a positive integer.'
+  if (p.strengthNum == null || p.strengthNum <= 0) {
+    e.strengthNum = 'Enter a positive number.'
+  } else if (!hasMaxOneDecimal(p.strengthNum)) {
+    e.strengthNum = 'Must have at most 1 decimal place.'
+  }
   if (!p.strengthUnitNum) e.strengthUnitNum = 'Select a unit.'
   else {
     const isMassIU = ['mcg','mg','g','IU'].includes(p.strengthUnitNum)
@@ -426,7 +441,11 @@ function validatePres(): boolean {
 
   if (isLiquidForm.value) {
     // Denominator required
-    if (p.strengthDen == null || !isInt(p.strengthDen) || p.strengthDen <= 0) e.strengthDen = 'Enter a positive integer.'
+    if (p.strengthDen == null || p.strengthDen <= 0) {
+      e.strengthDen = 'Enter a positive number.'
+    } else if (!hasMaxOneDecimal(p.strengthDen)) {
+      e.strengthDen = 'Must have at most 1 decimal place.'
+    }
     if (!p.strengthUnitDen) e.strengthUnitDen = 'Select a unit.'
     else {
       const kind = UNIT_KIND[p.strengthUnitDen]
@@ -439,8 +458,10 @@ function validatePres(): boolean {
 
     // Bottle specifics
     if (p.dispenseUnit === 'bottle') {
-      if (p.pieceContentAmount == null || !isInt(p.pieceContentAmount) || p.pieceContentAmount <= 0) {
-        e.pieceContentAmount = 'Enter a positive integer.'
+      if (p.pieceContentAmount == null || p.pieceContentAmount <= 0) {
+        e.pieceContentAmount = 'Enter a positive number.'
+      } else if (!hasMaxOneDecimal(p.pieceContentAmount)) {
+        e.pieceContentAmount = 'Must have at most 1 decimal place.'
       }
       if (!p.pieceContentUnit) e.pieceContentUnit = 'Select a unit.'
       else {

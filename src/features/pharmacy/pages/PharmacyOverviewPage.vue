@@ -128,8 +128,8 @@
 import { ref, computed, onMounted } from 'vue'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
 import BatchLocationsModal from '../components/BatchLocationsModal.vue'
-import { listBatchesByPresentation } from '../api/batch'
-import { listDrugs, listPresentationsForDrug } from '../api/drug'
+import { listAllBatches, listBatchesByPresentation } from '../api/batch'
+import { listAllPresentations, listDrugs, listPresentationsForDrug } from '../api/drug'
 import type { BatchDetail, DrugBatchLocation } from '../types/Batch'
 import type { Drug, DrugPresentationView } from '../types/Drug'
 
@@ -145,48 +145,33 @@ const drugs = ref<Drug[]>([])
 const presentationsByDrug = ref<Record<number, DrugPresentationView[]>>({})
 const presentationsById = ref<Map<number, DrugPresentationView>>(new Map())
 
-// We’ll hold batches “flattened” with presentationId; we’ll derive drugId via presentationsById
-type BatchRow = BatchDetail & { presentationId: number }
-const batches = ref<BatchRow[]>([])
+const batches = ref<BatchDetail[]>([])
 
 const searchTerm = ref('')
 
 // modal state
 const showLocations = ref(false)
-const selectedBatch = ref<BatchRow | null>(null)
+const selectedBatch = ref<BatchDetail | null>(null)
 
 // ---------------- fetchers ----------------
 async function loadAll() {
   // 1) Drugs
   drugs.value = await listDrugs()
 
-  // 2) Presentations per drug (in parallel)
-  const pairs = await Promise.all(
-    drugs.value.map(async d => {
-      const res = await listPresentationsForDrug(d.id)
-      return [d.id, res] as const
-    })
-  )
+  const allPresentations = await listAllPresentations()
 
   const pbd: Record<number, DrugPresentationView[]> = {}
   const presMap = new Map<number, DrugPresentationView>()
-  for (const [drugId, presList] of pairs) {
-    pbd[drugId] = presList
-    for (const p of presList) presMap.set(p.id, p)
+  for (const drugPres of allPresentations) {
+    if (!pbd[drugPres.drugId]) pbd[drugPres.drugId] = []
+    pbd[drugPres.drugId].push(drugPres)
+    presMap.set(drugPres.id, drugPres)
   }
   presentationsByDrug.value = pbd
   presentationsById.value = presMap
-
-  // 3) Batches per presentation (in parallel)
   const allPresentationIds = [...presMap.keys()]
-  const batchGroups = await Promise.all(
-    allPresentationIds.map(async pid => {
-      const list = await listBatchesByPresentation(pid)
-      // attach presentationId so we can backtrack to drug later
-      return list.map(b => ({ ...b, presentationId: pid } as BatchRow))
-    })
-  )
-  batches.value = batchGroups.flat()
+
+  batches.value = await listAllBatches()
 }
 
 // ---------------- helpers ----------------
@@ -196,19 +181,19 @@ const drugById = computed(() => {
   return m
 })
 
-function drugIdForBatch(b: BatchRow): number | null {
+function drugIdForBatch(b: BatchDetail): number | null {
   const pres = presentationsById.value.get(b.presentationId)
   return pres?.drugId ?? null
 }
 
-function drugForBatch(b: BatchRow): Drug | null {
+function drugForBatch(b: BatchDetail): Drug | null {
   const id = drugIdForBatch(b)
   if (id == null) return null
   // NOTE: your Drug type uses genericName (not name)
   return drugById.value.get(id) ?? null
 }
 
-function batchTotalQty(b: BatchRow): number {
+function batchTotalQty(b: BatchDetail): number {
   // If your BatchDetail has a server-computed total, prefer it:
   if (typeof b.quantity === 'number') return b.quantity
   // else, sum locations if present (often you won’t have them on overview)
@@ -300,7 +285,7 @@ const filteredPresentationRows = computed(() => {
 
 
 // ---------------- modal ----------------
-const openLocations = (b: BatchRow) => {
+const openLocations = (b: BatchDetail) => {
   selectedBatch.value = b
   showLocations.value = true
   // If your modal fetches locations by batchId internally, nothing else to do here.

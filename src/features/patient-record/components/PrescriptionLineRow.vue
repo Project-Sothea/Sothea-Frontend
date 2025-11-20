@@ -185,11 +185,21 @@
               class="w-24 border p-2 rounded text-right disabled:bg-gray-50"
               placeholder="e.g. 7" :disabled="readOnly || saving"
             />
-            <span class="ml-2 text-sm text-gray-500 whitespace-nowrap">
-              {{ pluralize(1, form.scheduleKind ?? 'day') }}
-            </span>
           </div>
         </div>
+
+        <!-- Duration unit -->
+        <div v-if="!isBottleMode">
+          <label :for="`sched-kind-${uid}`" class="block text-xs text-gray-600 mb-1">Duration unit</label>
+          <select
+            :id="`sched-kind-${uid}`" v-model="form.durationUnit"
+            class="w-28 border p-2 rounded disabled:bg-gray-50"
+            :disabled="readOnly || saving"
+          >
+            <option v-for="k in DURATION_UNITS" :key="k" :value="k">{{ k }}</option>
+          </select>
+        </div>
+
       </div>
 
       <div
@@ -322,20 +332,28 @@ import PresentationSelector from './PresentationSelector.vue'
 import type { PrescriptionLine, PrescriptionLinePostData } from '@/features/pharmacy/types/Prescription'
 import type { DrugPresentationView } from '@/features/pharmacy/types/Drug'
 import { createLine, updateLine, deleteLine as apiDeleteLine, listLineAllocations } from '@/features/pharmacy/api/prescription'
-import { fmtDate, type UnitCode , UNIT_LABELS, SCHEDULE_KINDS} from '@/features/pharmacy/types/Util'
+import { fmtDate, type UnitCode , UNIT_LABELS, SCHEDULE_KINDS, type ScheduleKind} from '@/features/pharmacy/types/Util'
 import PrescriptionBatchAllocator from './PrescriptionBatchAllocator.vue'
 import ConfirmationDialogue from './ConfirmationDialogue.vue'
 
 // ─── Props & Emits ───────────────────────────────────────────────────────
 const props = defineProps<{
   rxId: number
-  line: Partial<PrescriptionLine>
+  line: Partial<PrescriptionLine> // current line state (with unsaved edits, if any)
   readOnly?: boolean
   allPresentations?: DrugPresentationView[]
   excludePresentationIds?: number[]
+  hasUnsavedEdits?: boolean
+  originalLine?: Partial<PrescriptionLine> // Original server data (without unsaved edits)
 }>()
 
-const emit = defineEmits<{ (e: 'refresh'): void; (e: 'discard-draft'): void }>()
+const emit = defineEmits<{ 
+  (e: 'refresh'): void
+  (e: 'discard-draft'): void
+  (e: 'update-line-edit', lineId: number, data: Partial<PrescriptionLine>): void
+  (e: 'clear-line-edit', lineId: number): void
+  (e: 'update-draft-line', uid: string, data: Partial<PrescriptionLine>): void
+}>()
 
 const toast = useToast()
 const uid = Math.random().toString(36).slice(2)
@@ -350,6 +368,7 @@ const form = reactive<Partial<PrescriptionLine>>({
   everyN: 1,
   frequencyPerSchedule: 1,
   duration: 7,
+  durationUnit: 'day',
   remarks: '',
 })
 
@@ -373,14 +392,14 @@ const presentationLabel = computed(() => {
 // Fields you care about for dirty checking
 const SNAPSHOT_KEYS = [
   'presentationId','doseAmount','doseUnit',
-  'scheduleKind','everyN','frequencyPerSchedule','duration','remarks',
+  'scheduleKind','everyN','frequencyPerSchedule','duration','durationUnit','remarks',
 ] as const
 type K = (typeof SNAPSHOT_KEYS)[number]
 
 // Normalize so comparisons are stable
 const norm = (k: K, v: unknown) => {
   if (k === 'remarks') return String(v ?? '').trim()
-  if (['doseAmount','everyN','frequencyPerSchedule','duration'].includes(k)) {
+  if (['doseAmount','everyN','frequencyPerSchedule','duration','durationUnit'].includes(k)) {
     return v == null ? null : Number(v)
   }
   return v ?? null
@@ -401,19 +420,35 @@ function resetBaseline() { baseKey.value = currKey.value }
 const seeding = ref(false)
 
 // Seed form from incoming line
-function seedFromLine() {
+async function seedFromLine() {
+  seeding.value = true
   const L = props.line
   if (L && L.id) {
-    form.presentationId = L.presentationId
+    // For saved lines, use the line data (which may include unsaved edits from parent)
+    // Set doseUnit BEFORE presentationId to prevent watch from interfering
     form.doseAmount = L.doseAmount
     form.doseUnit = L.doseUnit
+    form.presentationId = L.presentationId
     form.scheduleKind = L.scheduleKind
     form.everyN = L.everyN
     form.frequencyPerSchedule = L.frequencyPerSchedule
     form.duration = L.duration
+    form.durationUnit = L.durationUnit
     form.remarks = L.remarks
+  } else if ((L as any).__draft && (L as any)._uid) {
+    // For draft lines, use existing data if available (preserves user input)
+    const draftLine = L as any
+    form.doseAmount = draftLine.doseAmount
+    form.doseUnit = draftLine.doseUnit
+    form.presentationId = draftLine.presentationId
+    form.scheduleKind = draftLine.scheduleKind ?? 'day'
+    form.everyN = draftLine.everyN ?? 1
+    form.frequencyPerSchedule = draftLine.frequencyPerSchedule ?? 1
+    form.duration = draftLine.duration ?? 7
+    form.durationUnit = draftLine.durationUnit ?? 'day'
+    form.remarks = draftLine.remarks ?? ''
   } else {
-    // draft defaults
+    // New draft defaults
     form.presentationId = undefined
     form.doseAmount = undefined
     form.doseUnit = undefined
@@ -421,15 +456,52 @@ function seedFromLine() {
     form.everyN = 1
     form.frequencyPerSchedule = 1
     form.duration = 7
+    form.durationUnit = 'day'
     form.remarks = ''
   }
+  // Wait for next tick to ensure all computed properties and watches have settled
+  await nextTick()
   seeding.value = false
-  resetBaseline()
+  
+  // Set baseline to original server data (if available), otherwise use current form state
+  // This ensures dirty state works correctly when draft is restored
+  if (L && L.id && props.originalLine) {
+    // Use original server data as baseline for dirty checking
+    const orig = props.originalLine
+    const origForm = {
+      presentationId: orig.presentationId,
+      doseAmount: orig.doseAmount,
+      doseUnit: orig.doseUnit,
+      scheduleKind: orig.scheduleKind,
+      everyN: orig.everyN,
+      frequencyPerSchedule: orig.frequencyPerSchedule,
+      duration: orig.duration,
+      durationUnit: orig.durationUnit,
+      remarks: orig.remarks,
+    }
+    baseKey.value = JSON.stringify(SNAPSHOT_KEYS.map(k => [k, norm(k, (origForm as any)[k])]))
+  }
 }
 
+// Watch for line changes and reseed form automatically
+// This handles: initial load, draft restoration, save/discard, server refresh
+// Don't reseed when actively editing - form state is the source of truth during editing
 watch(() => props.line, () => {
+  if (seeding.value) return // Prevent infinite loops during seeding
+  if (editing.value && isSaved.value) return // Don't reseed while actively editing saved lines
+  
   seedFromLine()
-  editing.value = !isSaved.value   // whenever a new line comes in, default to view for saved lines
+  // For saved lines: if there are unsaved edits, put in edit mode; otherwise view mode
+  // For draft lines: always in edit mode
+  editing.value = !isSaved.value || (isSaved.value && props.hasUnsavedEdits === true)
+}, { immediate: true, deep: true })
+
+// Watch for changes to hasUnsavedEdits prop (e.g., when draft is restored)
+watch(() => props.hasUnsavedEdits, (hasEdits) => {
+  if (isSaved.value && hasEdits && !editing.value) {
+    // If this saved line has unsaved edits, put it in edit mode
+    editing.value = true
+  }
 }, { immediate: true })
 
 function resetNonPresentationFields() {
@@ -464,6 +536,7 @@ const allowedDoseUnits = computed<UnitCode[]>(() => allowedDoseUnitsFor(selected
 
 watch(selectedPresentation, (p) => {
   if (!p) return
+  if (seeding.value) return // Don't auto-set doseUnit during seeding - let seedFromLine handle it
   if (!form.doseUnit || !allowedDoseUnits.value.includes(form.doseUnit)) {
     if (allowedDoseUnits.value.includes('tab' as UnitCode) && p.dosageFormCode === 'TAB'){
       form.doseUnit = 'tab'
@@ -499,19 +572,84 @@ watch([() => form.doseAmount, () => form.doseUnit], () => {
 })
 
 watch(
-  [() => form.scheduleKind, () => form.everyN, () => form.frequencyPerSchedule, () => form.duration],
+  [() => form.scheduleKind, () => form.everyN, () => form.frequencyPerSchedule,
+  () => form.duration, () => form.durationUnit],
   () => { errors.schedule = undefined }
 )
 
 watch(() => form.remarks, () => { errors.remarks = undefined })
+
+// Emit form changes for saved lines in edit mode (debounced)
+let updateTimer: ReturnType<typeof setTimeout> | undefined = undefined
+watch(() => form, () => {
+  if (seeding.value) return // Don't emit during seeding
+  const lineId = props.line.id
+  const draftUid = (props.line as any)._uid
+  
+  if (isSaved.value && editing.value && lineId) {
+    // Clear any pending update
+    if (updateTimer) {
+      clearTimeout(updateTimer)
+    }
+    // Debounce updates to avoid too many emissions
+    updateTimer = setTimeout(() => {
+      const editData: Partial<PrescriptionLine> = {
+        presentationId: form.presentationId,
+        doseAmount: form.doseAmount,
+        doseUnit: form.doseUnit,
+        scheduleKind: form.scheduleKind,
+        everyN: form.everyN,
+        frequencyPerSchedule: form.frequencyPerSchedule,
+        duration: form.duration,
+        durationUnit: form.durationUnit,
+        remarks: form.remarks,
+      }
+      emit('update-line-edit', lineId, editData)
+    }, 300)
+  } else if (!isSaved.value && draftUid) {
+    // For draft lines, emit updates immediately (debounced) to update the parent's draftLines array
+    if (updateTimer) {
+      clearTimeout(updateTimer)
+    }
+    updateTimer = setTimeout(() => {
+      const draftData: Partial<PrescriptionLine> = {
+        presentationId: form.presentationId,
+        doseAmount: form.doseAmount,
+        doseUnit: form.doseUnit,
+        scheduleKind: form.scheduleKind,
+        everyN: form.everyN,
+        frequencyPerSchedule: form.frequencyPerSchedule,
+        duration: form.duration,
+        durationUnit: form.durationUnit,
+        remarks: form.remarks,
+      }
+      emit('update-draft-line', draftUid, draftData)
+    }, 300)
+  }
+}, { deep: true })
+
+// Helper to check if a number has at most 2 decimal places
+function hasMaxTwoDecimals(value: number | undefined): boolean {
+  if (value == null) return true
+  // Convert to string to check decimal places
+  const str = value.toString()
+  const decimalIndex = str.indexOf('.')
+  if (decimalIndex === -1) return true // No decimal point, so 0 decimal places
+  const decimalPart = str.substring(decimalIndex + 1)
+  return decimalPart.length <= 2
+}
 
 function validate(): boolean {
   Object.assign(errors, { presentationId: undefined, dose: undefined, schedule: undefined })
   let ok = true
   if (!form.presentationId || form.presentationId <= 0) { errors.presentationId = 'Select a presentation.'; ok = false }
   if (!form.doseAmount || form.doseAmount <= 0) { errors.dose = 'Dose must be > 0.'; ok = false }
+  if (form.doseAmount && !hasMaxTwoDecimals(form.doseAmount)) {
+    errors.dose = (errors.dose ? errors.dose + ' ' : '') + 'Dose must have at most 2 decimal places.'
+    ok = false
+  }
   if (!form.doseUnit) { errors.dose = (errors.dose ? errors.dose + ' ' : '') + 'Select a dose unit.'; ok = false }
-  if (!isBottleMode.value && (!form.scheduleKind || !form.everyN || !form.frequencyPerSchedule || !form.duration)) { errors.schedule = 'Complete the schedule.'; ok = false }
+  if (!isBottleMode.value && (!form.scheduleKind || !form.everyN || !form.frequencyPerSchedule || !form.duration || !form.durationUnit)) { errors.schedule = 'Complete the schedule.'; ok = false }
   if (isBottleMode.value && !form.remarks) { errors.remarks = 'Please enter dosage instruction above'; ok = false}
   return ok
 }
@@ -520,29 +658,62 @@ function validate(): boolean {
 
 function startEditing() {
   editing.value = true
+  expanded.value = false
+  // Immediately emit current form state when starting to edit
+  if (isSaved.value && props.line.id) {
+    const editData: Partial<PrescriptionLine> = {
+      presentationId: form.presentationId,
+      doseAmount: form.doseAmount,
+      doseUnit: form.doseUnit,
+      scheduleKind: form.scheduleKind,
+      everyN: form.everyN,
+      frequencyPerSchedule: form.frequencyPerSchedule,
+      duration: form.duration,
+      durationUnit: form.durationUnit,
+      remarks: form.remarks,
+    }
+    emit('update-line-edit', props.line.id, editData)
+  }
 }
 
 function discardEditing() {
-  seedFromLine()
-  Object.assign(errors, { presentationId: undefined, dose: undefined, schedule: undefined })
+  // Set editing to false first so watch can reseed
   editing.value = false
+  // Clear unsaved edits - watch on props.line will handle reseeding automatically
+  if (isSaved.value && props.line.id) {
+    emit('clear-line-edit', props.line.id)
+  }
+  // Reset form and errors
+  Object.assign(errors, { presentationId: undefined, dose: undefined, schedule: undefined })
 }
 
 const saving = ref(false)
 
 async function onClickSave() { 
-  if (isSaved.value  && form.presentationId !== props.line.presentationId) {
+  // Check if presentation changed (compare against original server value, not props.line which may have unsaved edits)
+  const originalPresentationId = props.originalLine?.presentationId ?? props.line.presentationId
+  const presentationChanged = isSaved.value && form.presentationId !== originalPresentationId
+  
+  // Check if line has allocations
+  const hasAllocations = props.line.allocations && props.line.allocations.length > 0
+  
+  // Show warning if presentation changed AND line has allocations
+  if (presentationChanged && hasAllocations) {
     showPresChangeWarn.value = true
     return
   }
+  
+  // Also validate that presentation is set
+  if (!form.presentationId || form.presentationId <= 0) {
+    errors.presentationId = 'Select a presentation.'
+    return
+  }
+  
   await saveAndExitEditingMode()
 }
 
 async function saveAndExitEditingMode() {
-  const success = await saveLine()
-  if (isSaved.value && success) {
-    editing.value = false
-  }
+  await saveLine()
 }
 
 async function confirmSaveAfterChange() {
@@ -564,16 +735,24 @@ async function saveLine() {
       everyN: isBottleMode.value ? 1 : form.everyN!,
       frequencyPerSchedule: isBottleMode.value ? 1 : form.frequencyPerSchedule!,
       duration: isBottleMode.value ? 1 : form.duration!,
+      durationUnit: isBottleMode.value ? 'day' : form.durationUnit!
     }
     if (isSaved.value && props.line.id) {
       await updateLine(props.line.id, payload)
       toast.success(`Line #${props.line.id} saved`)
+      // Clear unsaved edits after successful save
+      emit('clear-line-edit', props.line.id)
+      // Set editing to false before refresh so watch can reseed
+      editing.value = false
+      // Close batch allocator after edit
+      expanded.value = false
     } else {
       await createLine(props.rxId, payload)
       toast.success('Line created')
       emit('discard-draft')
     }
     emit('refresh')
+    // Watch on props.line will handle reseeding automatically after refresh
     resetBaseline()
     reloadAllocations()
     return true
@@ -640,6 +819,8 @@ async function toggleAlloc() {
 
 // ─── Convert Dosing Instructions into Human Readable ────────────────────────
 
+const DURATION_UNITS: ScheduleKind[] = ['day', 'week']
+
 // Pluralize a word (very simple; adjust if you localize)
 function pluralize(n: number, word: string) {
   return n === 1 ? word : `${word}s`
@@ -660,6 +841,7 @@ const scheduleReadable = computed(() => {
   const every = Number(form.everyN ?? 0)
   const freq = Number(form.frequencyPerSchedule ?? 0)
   const dur  = Number(form.duration ?? 0)
+  const durUnit = form.durationUnit ??  'day'
 
   if (!form.doseAmount || !form.doseUnit) {
     return 'Set Dosage'
@@ -674,7 +856,7 @@ const scheduleReadable = computed(() => {
   const dosePart = `${form.doseAmount} ${unitLabel(form.doseUnit)}`
 
   // Example: "the dose, 3× per day, for 7 days."
-  return `${dosePart}, ${freq}× ${periodPhrase}, for ${dur} ${pluralize(dur, k)}.`
+  return `${dosePart}, ${freq}× ${periodPhrase}, for ${dur} ${pluralize(dur, durUnit)}.`
 })
 
 const scheduleIncomplete = computed(() => {
@@ -683,7 +865,8 @@ const scheduleIncomplete = computed(() => {
   const every = Number(form.everyN ?? 0)
   const freq  = Number(form.frequencyPerSchedule ?? 0)
   const dur   = Number(form.duration ?? 0)
-  const schedOk = !!(k && every > 0 && freq > 0 && dur > 0)
+  const durUnit = form.durationUnit
+  const schedOk = !!(k && every > 0 && freq > 0 && dur > 0 && durUnit)
   return !(doseOk && schedOk)
 })
 

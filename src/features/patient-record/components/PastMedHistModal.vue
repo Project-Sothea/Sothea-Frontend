@@ -23,7 +23,7 @@
       <!-- Cough -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Cough <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Cough <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -55,7 +55,7 @@
       <!-- Fever -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Fever <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Fever <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -87,7 +87,7 @@
       <!-- Blocked Nose -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Blocked Nose <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Blocked Nose <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -119,7 +119,7 @@
       <!-- Sore Throat -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Sore Throat <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Sore Throat <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -151,7 +151,7 @@
       <!-- Night Sweats -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Night Sweats <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Night Sweats <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -183,7 +183,7 @@
       <!-- Unintentional Weight Los -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Unintentional Weight Loss <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Unintentional Weight Loss <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -221,7 +221,7 @@
       <!-- Tuberculosis -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Tuberculosis <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Tuberculosis <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -285,7 +285,7 @@
       <!-- Diabetes -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Diabetes <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Diabetes <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -317,7 +317,7 @@
       <!-- Hypertension -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Hypertension <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Hypertension <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -349,7 +349,7 @@
       <!-- Hyperlipidemia -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Hyperlipidemia <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Hyperlipidemia <span v-if="!showPaeds" class="req">*</span></div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -382,7 +382,7 @@
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
           <div class="font-normal text-sm w-1/3">
-            Chronic Joint Pains <span class="req">*</span>
+            Chronic Joint Pains <span v-if="!showPaeds" class="req">*</span>
           </div>
 
           <div class="flex items-center w-1/6">
@@ -416,7 +416,7 @@
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
           <div class="font-normal text-sm w-1/3">
-            Chronic Muscle Aches <span class="req">*</span>
+            Chronic Muscle Aches <span v-if="!showPaeds" class="req">*</span>
           </div>
 
           <div class="flex items-center w-1/6">
@@ -450,7 +450,7 @@
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
           <div class="font-normal text-sm w-1/3">
-            Sexually Transmitted Disease <span class="req">*</span>
+            Sexually Transmitted Disease <span v-if="!showPaeds" class="req">*</span>
           </div>
 
           <div class="flex items-center w-1/6">
@@ -522,13 +522,19 @@
       </div>
 
       <!-- Save Edits Button -->
-      <div class="flex flex-row-reverse w-full mt-5">
+      <div class="flex flex-row-reverse w-full mt-5 gap-3" v-if="isEditing && !isAdd">
         <button
-          v-if="isEditing && !isAdd"
           @click="submitData"
           class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
         >
           Save Edits
+        </button>
+        <button
+          type="button"
+          @click="discardEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none"
+        >
+          Discard Changes
         </button>
       </div>
     </div>
@@ -536,17 +542,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type PastMedicalHistory from '@patient-record/types/PastMedicalHistory'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
   patientData: Patient
+  age: number | null
   isAdd?: boolean
   patientVid?: string
 }>()
@@ -571,42 +578,59 @@ const chronicMuscleAches = ref<boolean | null>(null)
 const sexuallyTransmittedDisease = ref<boolean | null>(null)
 const specifiedSTDs = ref<string | null>('')
 const others = ref<string | null>('')
-const { isEditing, save, toggleEdit, runChecks } = useEditableSection<PastMedicalHistory>()
 
-let initialized = false
+const showPaeds = computed<boolean>(() => 
+  props.age != null ? props.age <= 16 : true
+)
+
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<PastMedicalHistory>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:pastMedicalHistory`
+  }),
+  fields: [
+    { key: 'cough', ref: cough },
+    { key: 'fever', ref: fever },
+    { key: 'blockedNose', ref: blockedNose },
+    { key: 'soreThroat', ref: soreThroat },
+    { key: 'nightSweats', ref: nightSweats },
+    { key: 'unintentionalWeightLoss', ref: unintentionalWeightLoss },
+    { key: 'tuberculosis', ref: tuberculosis },
+    { key: 'tuberculosisHasBeenTreated', ref: tuberculosisHasBeenTreated },
+    { key: 'diabetes', ref: diabetes },
+    { key: 'hypertension', ref: hypertension },
+    { key: 'hyperlipidemia', ref: hyperlipidemia },
+    { key: 'chronicJointPains', ref: chronicJointPains },
+    { key: 'chronicMuscleAches', ref: chronicMuscleAches },
+    { key: 'sexuallyTransmittedDisease', ref: sexuallyTransmittedDisease },
+    { key: 'specifiedSTDs', ref: specifiedSTDs },
+    { key: 'others', ref: others },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved past medical history draft from this device.',
+})
+
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
+
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal: Patient | undefined) => {
-    if (initialized || props.isAdd || !newVal) return
-    const pastMedHist = newVal.pastmedicalhistory
-    if (pastMedHist) {
-
-      cough.value = pastMedHist.cough
-      fever.value = pastMedHist.fever
-      blockedNose.value = pastMedHist.blockedNose
-      soreThroat.value = pastMedHist.soreThroat
-      nightSweats.value = pastMedHist.nightSweats
-      unintentionalWeightLoss.value = pastMedHist.unintentionalWeightLoss
-
-      tuberculosis.value = pastMedHist.tuberculosis
-      tuberculosisHasBeenTreated.value = pastMedHist.tuberculosisHasBeenTreated
-
-      diabetes.value = pastMedHist.diabetes
-      hypertension.value = pastMedHist.hypertension
-      hyperlipidemia.value = pastMedHist.hyperlipidemia
-      chronicJointPains.value = pastMedHist.chronicJointPains
-      chronicMuscleAches.value = pastMedHist.chronicMuscleAches
-      sexuallyTransmittedDisease.value = pastMedHist.sexuallyTransmittedDisease
-      specifiedSTDs.value = pastMedHist.specifiedSTDs
-      others.value = pastMedHist.others
-    }
-    initialized = true
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.pastmedicalhistory || null)
   },
   { immediate: true }
 )
 
 function buildPayload(): PastMedicalHistory | null {
+  // For paediatric patients (showPaeds), all fields are optional.
+  // Only enforce required checks for non-paeds.
   if (
+    !showPaeds.value &&
     !runChecks([
       [cough.value !== null, 'Select Cough'],
       [fever.value !== null, 'Select Fever'],
@@ -657,7 +681,24 @@ async function submitData() {
     buildPayload,
     update: () =>
       updateSection(props.patientId, props.patientVid!, 'pastMedicalHistory', buildPayload()!),
-    onSuccess: () => toast.success('Past medical history saved successfully!')
+    onSuccess: () => {
+      toast.success('Past medical history saved successfully!')
+      // After saving, the form already has the correct values in memory
+      // We don't need to reload from parent - the form state is the source of truth
+      // The initialized flag prevents re-initialization from stale patientData
+    }
+  })
+}
+
+function discardEdit() {
+  discardChanges({
+    onDiscard: () => {
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.pastmedicalhistory || null, true)
+    },
+    onSuccess: () => {
+      toast.info('Changes discarded.')
+    }
   })
 }
 </script>

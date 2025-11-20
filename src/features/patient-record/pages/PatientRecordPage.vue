@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
 import SideBar from '@patient-record/components/SideBar.vue'
@@ -148,6 +148,13 @@ const showRecords = ref(false)
 const tryDeleteVisit = ref(false)
 const tryReload = ref(false)
 
+const activeSectionStorageKey = computed(() => {
+  const patientId = id.value ?? createdPatientId.value
+  const visitId = vid.value ?? createdVisitVid.value
+  if (!patientId || !visitId) return null
+  return `patient-record:active-section:${patientId}:${visitId}`
+})
+
 const componentMap: Record<string, any> = {
   admin: AdminModal,
   'past-med-hist': PastMedHistModal,
@@ -164,6 +171,60 @@ const componentMap: Record<string, any> = {
 }
 
 const activeComponent = computed(() => componentMap[activeSection.value] || AdminModal)
+
+function sectionDraftKey(section: string | null) {
+  if (!section) return null
+  const patientId = id.value ?? createdPatientId.value
+  const visitId = vid.value ?? createdVisitVid.value
+  if (!patientId || !visitId) return null
+  return `patient-record:draft:${patientId}:${visitId}:${section}`
+}
+
+function clearPersistedState() {
+  const storageKey = activeSectionStorageKey.value
+
+  if (typeof window === 'undefined') return
+
+  if (storageKey) {
+    localStorage.removeItem(storageKey)
+  }
+
+}
+
+watch(
+  activeSectionStorageKey,
+  (key) => {
+    if (!key || typeof window === 'undefined') return
+    try {
+      const stored = localStorage.getItem(key)
+      if (stored && stored in componentMap) {
+        activeSection.value = stored
+      }
+    } catch (err) {
+      console.warn('[PatientRecordPage] Failed to read active section from localStorage', err)
+    }
+  },
+  { immediate: true }
+)
+
+watch(activeSection, (section, prev) => {
+  const storageKey = activeSectionStorageKey.value
+  if (storageKey && typeof window !== 'undefined' && section in componentMap) {
+    try {
+      localStorage.setItem(storageKey, section)
+    } catch (err) {
+      console.warn('[PatientRecordPage] Failed to persist active section', err)
+    }
+  }
+})
+
+watch(
+  () => route.fullPath,
+  (newPath, oldPath) => {
+    if (newPath === oldPath) return
+    clearPersistedState()
+  }
+)
 
 function setActiveSection(section: string) {
   // In create mode restrict to admin until created
@@ -245,14 +306,33 @@ onMounted(() => {
 })
 
 watch(
-  () => route.params.vid,
-  (newVid) => {
-    if (!isCreateMode.value) {
-      vid.value = newVid as string
+  () => [route.params.id, route.params.vid],
+  ([newId, newVid], [oldId, oldVid]) => {
+    if (newId === oldId && newVid === oldVid) return
+
+    id.value = (newId as string) ?? null
+    vid.value = (newVid as string) ?? null
+
+    if (!isCreateMode.value && id.value && vid.value) {
       loadPatientData()
     }
   }
 )
+
+// Clear patient data when entering create mode
+watch(isCreateMode, (isCreate) => {
+  if (isCreate) {
+    patient.value = null
+    name.value = ''
+    age.value = null
+    regDate.value = ''
+    queueNo.value = ''
+  }
+})
+
+onBeforeUnmount(() => {
+  clearPersistedState()
+})
 </script>
 
 <style scoped></style>

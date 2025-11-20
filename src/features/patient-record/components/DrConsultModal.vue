@@ -7,7 +7,7 @@
       <div class="flex flex-col">
         <!-- Header -->
         <div class="flex flex-row">
-          <div class="font-medium text-md w-1/3">Condition</div>
+          <div class="font-medium text-md w-1/3">Condition<span class="req">*</span></div>
           <div class="font-medium text-md w-1/6">Yes</div>
           <div class="font-medium text-md w-1/6">No</div>
         </div>
@@ -16,7 +16,7 @@
       <!-- Well -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">WELL <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">WELL</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -48,7 +48,7 @@
       <!-- MSK -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">MSK <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">MSK</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -80,7 +80,7 @@
       <!-- CVS -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">CVS <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">CVS</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -112,7 +112,7 @@
       <!-- Respi -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Respi <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Respi</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -144,7 +144,7 @@
       <!-- GU -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">GU <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">GU</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -176,7 +176,7 @@
       <!-- GIT -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">GIT <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">GIT</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -208,7 +208,7 @@
       <!-- EYE -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">EYE <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">EYE</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -240,7 +240,7 @@
       <!-- DERM -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">DERM <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">DERM</div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -271,7 +271,7 @@
       <!-- Others -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row items-center">
-          <div class="font-normal text-sm w-1/3">Others: <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">Others:</div>
 
           <div class="flex w-1/3">
             <input
@@ -407,13 +407,19 @@
       </div>
 
       <!-- Save Edits Button -->
-      <div class="flex flex-row-reverse w-full mt-5">
+      <div class="flex flex-row-reverse w-full mt-5 gap-3" v-if="isEditing && !isAdd">
         <button
-          v-if="isEditing && !isAdd"
           @click="submitData"
           class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
         >
           Save Edits
+        </button>
+        <button
+          type="button"
+          @click="discardEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none"
+        >
+          Discard Changes
         </button>
       </div>
     </div>
@@ -421,13 +427,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type DoctorsConsultation from '@patient-record/types/DoctorsConsultation'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
@@ -437,8 +443,6 @@ const props = defineProps<{
 }>()
 
 const toast = useToast()
-const { isEditing, toggleEdit, save, runChecks } = useEditableSection<DoctorsConsultation>()
-const initialized = ref(false)
 
 const well = ref<boolean | null>(null)
 const msk = ref<boolean | null>(null)
@@ -448,7 +452,7 @@ const gu = ref<boolean | null>(null)
 const git = ref<boolean | null>(null)
 const eye = ref<boolean | null>(null)
 const derm = ref<boolean | null>(null)
-const others = ref<string>('')
+const others = ref<string | null>('')
 const consultationNotes = ref<string | null>('')
 const diagnosis = ref<string | null>('')
 const treatment = ref<string | null>('')
@@ -456,29 +460,44 @@ const referralNeeded = ref<boolean | null>(null)
 const referralLoc = ref<string | null>('')
 const remarks = ref<string | null>('')
 
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<DoctorsConsultation>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:doctorsConsultation`
+  }),
+  fields: [
+    { key: 'well', ref: well },
+    { key: 'msk', ref: msk },
+    { key: 'cvs', ref: cvs },
+    { key: 'respi', ref: respi },
+    { key: 'gu', ref: gu },
+    { key: 'git', ref: git },
+    { key: 'eye', ref: eye },
+    { key: 'derm', ref: derm },
+    { key: 'others', ref: others },
+    { key: 'consultationNotes', ref: consultationNotes },
+    { key: 'diagnosis', ref: diagnosis },
+    { key: 'treatment', ref: treatment },
+    { key: 'referralNeeded', ref: referralNeeded },
+    { key: 'referralLoc', ref: referralLoc },
+    { key: 'remarks', ref: remarks },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved doctor consultation draft from this device.',
+})
+
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
+
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (val: Patient | null) => {
-    if (props.isAdd || !val || initialized.value || isEditing.value) return
-    const d = val.doctorsconsultation
-    if (d) {
-      well.value = d.well
-      msk.value = d.msk
-      cvs.value = d.cvs
-      respi.value = d.respi
-      gu.value = d.gu
-      git.value = d.git
-      eye.value = d.eye
-      derm.value = d.derm
-      others.value = d.others
-      consultationNotes.value = d.consultationNotes
-      diagnosis.value = d.diagnosis
-      treatment.value = d.treatment
-      referralNeeded.value = d.referralNeeded
-      referralLoc.value = d.referralLoc
-      remarks.value = d.remarks
-    }
-    initialized.value = true
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.doctorsconsultation || null)
   },
   { immediate: true }
 )
@@ -486,15 +505,15 @@ watch(
 function buildPayload(): DoctorsConsultation | null {
   if (
     !runChecks([
-      [well.value !== null, 'Indicate if patient is well'],
-      [msk.value !== null, 'Indicate MSK'],
-      [cvs.value !== null, 'Indicate CVS'],
-      [respi.value !== null, 'Indicate Respi'],
-      [gu.value !== null, 'Indicate GU'],
-      [git.value !== null, 'Indicate GIT'],
-      [eye.value !== null, 'Indicate Eye'],
-      [derm.value !== null, 'Indicate Derm'],
-      [others.value.trim() !== '', 'Specify Others'],
+      [well.value !== null ||
+      msk.value !== null ||
+      cvs.value !== null ||
+      respi.value !== null ||
+      gu.value !== null ||
+      git.value !== null ||
+      eye.value !== null ||
+      derm.value !== null ||
+      (others.value !== null && others.value.trim() !== ''), 'Please indicate at least one condition status'],
       [referralNeeded.value !== null, 'Indicate referral need']
     ])
   )
@@ -508,7 +527,7 @@ function buildPayload(): DoctorsConsultation | null {
     git: git.value!,
     eye: eye.value!,
     derm: derm.value!,
-    others: others.value.trim(),
+    others: others.value ? others.value.trim() : others.value,
     consultationNotes: consultationNotes.value || '',
     diagnosis: diagnosis.value || '',
     treatment: treatment.value || '',
@@ -524,7 +543,24 @@ async function submitData() {
     buildPayload,
     update: () =>
       updateSection(props.patientId, props.patientVid!, 'doctorsConsultation', buildPayload()!),
-    onSuccess: () => toast.success('Doctors Consultation saved successfully!')
+    onSuccess: () => {
+      toast.success('Doctors Consultation saved successfully!')
+      // After saving, the form already has the correct values in memory
+      // We don't need to reload from parent - the form state is the source of truth
+      // The initialized flag prevents re-initialization from stale patientData
+    }
+  })
+}
+
+function discardEdit() {
+  discardChanges({
+    onDiscard: () => {
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.doctorsconsultation || null, true)
+    },
+    onSuccess: () => {
+      toast.info('Changes discarded.')
+    }
   })
 }
 </script>

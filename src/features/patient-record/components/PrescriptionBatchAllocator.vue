@@ -183,6 +183,7 @@ import { markLinePacked, setLineAllocations, unmarkLinePacked } from '@/features
 import { fmtDate } from '@/features/pharmacy/types/Util'
 import type { DrugBatchLocation } from '@/features/pharmacy/types/Batch'
 import { listBatchesByPresentation, listBatchLocations } from '@/features/pharmacy/api/batch'
+import { getPresentation } from '@/features/pharmacy/api/drug'
 
 // ─── Props & Emits ───────────────────────────────────────────────────────
 
@@ -279,21 +280,23 @@ function leftFor(batchLocationId: number) {
 
 /** Load allocatable batch locations for this line */
 async function loadOptions() {
-  const batches = await listBatchesByPresentation(props.presId)
-  const arrays = await Promise.all(
-  batches.map(async (b) => {
-    const locs = await listBatchLocations(b.id);
-    return locs.map((bl) => ({
+  const presStock = await getPresentation(props.presId)
+
+  const flat: Option[] = []
+  presStock.batches.forEach(b => {
+    b.batchLocations.forEach(bl => {
+      flat.push({
         ...bl,
         batchLocationId: bl.id,
         batchNumber: b.batchNumber,
         expiryDate: b.expiryDate,
         available: bl.quantity
-      }));
+      })
+    })
   })
-);
-options.value = arrays.flat();
-hydrateSelections() 
+
+  options.value = flat
+  hydrateSelections()
 }
 
 function hydrateSelections(from?: LineAllocation[]) {

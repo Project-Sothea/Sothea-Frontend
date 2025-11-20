@@ -12,4 +12,8 @@ export default interface PatientVisitMeta {
   drugAllergies: string | undefined
   sentToId: boolean
   referralNeeded: boolean
+
+  hasPrescriptionWithDrug: boolean
+  allPrescriptionDrugsPacked: boolean
+  prescriptionDispensed: boolean
 }

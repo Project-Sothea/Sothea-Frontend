@@ -60,7 +60,6 @@ async function submitData() {
   if (!admin) return
   isSubmitting.value = true
   try {
-    console.log(photoFile.value)
     const response = await addVisit(props.patientId, admin, photoFile.value)
     toast.success('New Patient Visit created successfully!')
     emit('patientVisitCreated', {

@@ -1,5 +1,10 @@
 import { http } from "@/shared/api/http"
-import type { BatchDetail, BatchPostData, DrugBatch, DrugBatchLocation } from "../types/Batch"
+import type { BatchDetail, BatchPostData, DrugBatch, DrugBatchLocation, PresentationStock } from "../types/Batch"
+
+export async function listAllBatches() {
+  const { data } = await http.get<BatchDetail[]>(`/pharmacy/presentations/batches`)
+  return data
+}
 
 export async function listBatchesByPresentation(presentationId: number) {
   const { data } = await http.get<BatchDetail[]>(`/pharmacy/presentations/${presentationId}/batches`)

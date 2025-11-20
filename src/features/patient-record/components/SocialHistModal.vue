@@ -170,13 +170,19 @@
       </div>
 
       <!-- Save Edits Button -->
-      <div class="flex flex-row-reverse w-full mt-5">
+      <div class="flex flex-row-reverse w-full mt-5 gap-3" v-if="isEditing && !isAdd">
         <button
-          v-if="isEditing && !isAdd"
           @click="submitData"
           class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
         >
           Save Edits
+        </button>
+        <button
+          type="button"
+          @click="discardEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none"
+        >
+          Discard Changes
         </button>
       </div>
     </div>
@@ -184,13 +190,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type SocialHistory from '@patient-record/types/SocialHistory'
 import { updateSection } from '@features/patient-record/api/visit'
-import { useEditableSection } from '@features/patient-record/composables/useEditableSection'
+import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 
 const props = defineProps<{
   patientId: string
@@ -205,25 +211,38 @@ const currentSmokingHistory = ref<boolean | null>(null)
 const cigarettesPerDay = ref<number | null>(null)
 const alcoholHistory = ref<boolean | null>(null)
 const howRegular = ref<string | null>('')
-const { isEditing, toggleEdit, save, runChecks } = useEditableSection<SocialHistory>()
 
 const toast = useToast()
 
-let initialized = false
+// Automatic draft management - handles everything
+const formDraft = useAutoDraft<SocialHistory>({
+  storageKey: computed(() => {
+    if (!props.patientId || !props.patientVid || props.isAdd) return null
+    return `patient-record:draft:${props.patientId}:${props.patientVid}:socialHistory`
+  }),
+  fields: [
+    { key: 'pastSmokingHistory', ref: pastSmokingHistory },
+    { key: 'numberOfYears', ref: numberOfYears },
+    { key: 'currentSmokingHistory', ref: currentSmokingHistory },
+    { key: 'cigarettesPerDay', ref: cigarettesPerDay },
+    { key: 'alcoholHistory', ref: alcoholHistory },
+    { key: 'howRegular', ref: howRegular },
+  ],
+  persistWhen: (isEditing) => isEditing.value && !props.isAdd,
+  expirationMs: 30 * 60 * 1000, // 30 minutes
+  restoreMessage: 'Restored unsaved social history draft from this device.',
+})
+
+// Extract functions from formDraft
+const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
+
+// Initialize when patientData changes
 watch(
   () => props.patientData,
-  (newVal: Patient | null) => {
-    if (initialized || props.isAdd || !newVal) return
-    const socialHistory = newVal.socialhistory
-    if (socialHistory) {
-      pastSmokingHistory.value = socialHistory.pastSmokingHistory
-      numberOfYears.value = socialHistory.numberOfYears
-      currentSmokingHistory.value = socialHistory.currentSmokingHistory
-      cigarettesPerDay.value = socialHistory.cigarettesPerDay
-      alcoholHistory.value = socialHistory.alcoholHistory
-      howRegular.value = socialHistory.howRegular
-    }
-    initialized = true
+  (patientData) => {
+    if (props.isAdd || isEditing.value) return
+    if (!patientData) return
+    formDraft.initialize(patientData.socialhistory || null)
   },
   { immediate: true }
 )
@@ -264,7 +283,24 @@ async function submitData() {
     buildPayload,
     update: () =>
       updateSection(props.patientId, props.patientVid!, 'socialHistory', buildPayload()!),
-    onSuccess: () => toast.success('Social history saved successfully!')
+    onSuccess: () => {
+      toast.success('Social history saved successfully!')
+      // After saving, the form already has the correct values in memory
+      // We don't need to reload from parent - the form state is the source of truth
+      // The initialized flag prevents re-initialization from stale patientData
+    }
+  })
+}
+
+function discardEdit() {
+  discardChanges({
+    onDiscard: () => {
+      // Reset to server data or defaults (force re-initialization)
+      formDraft.initialize(props.patientData?.socialhistory || null, true)
+    },
+    onSuccess: () => {
+      toast.info('Changes discarded.')
+    }
   })
 }
 </script>

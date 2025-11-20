@@ -53,6 +53,12 @@
               Allergies
             </th>
             <th
+              class="px-5 py-5 text-sm font-medium text-left text-gray-800 uppercase bg-indigo-200 border-b border-gray-200"
+              style="background: rgba(63, 81, 181, 0.3)"
+            >
+              Prescription
+            </th>
+            <th
               class="px-7 py-5 text-sm font-medium text-left text-gray-800 uppercase bg-indigo-200 border-b border-gray-200 hover:cursor-pointer select-none"
               style="background: rgba(63, 81, 181, 0.3)"
               @click="$emit('sort-referral')"
@@ -84,6 +90,10 @@
             :gender="patientVisit.gender"
             :allergies="patientVisit.drugAllergies"
             :referralNeeded="patientVisit.referralNeeded"
+            :sentToId="patientVisit.sentToId"
+            :hasPrescriptionWithDrug="patientVisit.hasPrescriptionWithDrug"
+            :allPrescriptionDrugsPacked="patientVisit.allPrescriptionDrugsPacked"
+            :prescriptionDispensed="patientVisit.prescriptionDispensed"
             class="hover:cursor-pointer"
             :class="{ 'even-row': index % 2 === 0, 'odd-row': index % 2 !== 0 }"
           />
