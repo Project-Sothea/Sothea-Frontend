@@ -197,7 +197,7 @@
           <!-- Random Blood Glucose (mmol/L) -->
           <div class="w-1/4">
             <label for="" class="mb-1 block text-sm font-medium text-dark">
-              Random Blood Glucose (mmol/L) <span class="req">*</span>
+              Random Blood Glucose (mmol/L)
             </label>
             <input
               v-model="randomBloodGlucoseMmolL"
@@ -421,8 +421,8 @@ function buildPayload(): VitalStatistics | null {
     hr1: hr1.value!,
     hr2: hr2.value!,
     averageHR: avgHR.value!,
-    randomBloodGlucoseMmolL: randomBloodGlucoseMmolL.value!,
-    icopeHighBp: icopeHighBp.value!
+    randomBloodGlucoseMmolL: randomBloodGlucoseMmolL.value || null,
+    icopeHighBp: icopeHighBp.value || null
   }
 }
 
