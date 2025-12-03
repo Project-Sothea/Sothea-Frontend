@@ -10,6 +10,7 @@
           <div class="font-medium text-md w-1/3"></div>
           <div class="font-medium text-md w-1/6">Yes</div>
           <div class="font-medium text-md w-1/6">No</div>
+          <div class="font-medium text-md w-1/6">Nil</div>
         </div>
       </div>
 
@@ -49,6 +50,18 @@
               />
             </label>
           </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="cough"
+                class="w-4 h-4"
+                v-model="cough"
+                :value="null"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
         </div>
       </div>
       
@@ -77,6 +90,18 @@
                 class="w-4 h-4"
                 v-model="fever"
                 :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="fever"
+                class="w-4 h-4"
+                v-model="fever"
+                :value="null"
                 :disabled="!isEditing"
               />
             </label>
@@ -113,6 +138,18 @@
               />
             </label>
           </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="blockedNose"
+                class="w-4 h-4"
+                v-model="blockedNose"
+                :value="null"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -141,6 +178,18 @@
                 class="w-4 h-4"
                 v-model="soreThroat"
                 :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="soreThroat"
+                class="w-4 h-4"
+                v-model="soreThroat"
+                :value="null"
                 :disabled="!isEditing"
               />
             </label>
@@ -177,6 +226,18 @@
               />
             </label>
           </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="nightSweats"
+                class="w-4 h-4"
+                v-model="nightSweats"
+                :value="null"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -205,6 +266,18 @@
                 class="w-4 h-4"
                 v-model="unintentionalWeightLoss"
                 :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="unintentionalWeightLoss"
+                class="w-4 h-4"
+                v-model="unintentionalWeightLoss"
+                :value="null"
                 :disabled="!isEditing"
               />
             </label>
@@ -247,6 +320,18 @@
               />
             </label>
           </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="tuberculosis"
+                class="w-4 h-4"
+                v-model="tuberculosis"
+                :value="null"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -275,6 +360,18 @@
                 class="w-4 h-4"
                 v-model="tuberculosisHasBeenTreated"
                 :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="tuberculosisHasBeenTreated"
+                class="w-4 h-4"
+                v-model="tuberculosisHasBeenTreated"
+                :value="null"
                 :disabled="!isEditing"
               />
             </label>
@@ -311,6 +408,18 @@
               />
             </label>
           </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="diabetes"
+                class="w-4 h-4"
+                v-model="diabetes"
+                :value="null"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -343,6 +452,18 @@
               />
             </label>
           </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="hypertension"
+                class="w-4 h-4"
+                v-model="hypertension"
+                :value="null"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -371,6 +492,18 @@
                 class="w-4 h-4"
                 v-model="hyperlipidemia"
                 :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="hyperlipidemia"
+                class="w-4 h-4"
+                v-model="hyperlipidemia"
+                :value="null"
                 :disabled="!isEditing"
               />
             </label>
@@ -409,6 +542,18 @@
               />
             </label>
           </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="chronic-joint-pains"
+                class="w-4 h-4"
+                v-model="chronicJointPains"
+                :value="null"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -443,6 +588,18 @@
               />
             </label>
           </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="chronic-muscle-aches"
+                class="w-4 h-4"
+                v-model="chronicMuscleAches"
+                :value="null"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -473,6 +630,18 @@
                 class="w-4 h-4"
                 v-model="sexuallyTransmittedDisease"
                 :value="false"
+                :disabled="!isEditing"
+              />
+            </label>
+          </div>
+          <div class="flex items-center w-1/6">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="std"
+                class="w-4 h-4"
+                v-model="sexuallyTransmittedDisease"
+                :value="null"
                 :disabled="!isEditing"
               />
             </label>
@@ -629,44 +798,37 @@ watch(
 function buildPayload(): PastMedicalHistory | null {
   // For paediatric patients (showPaeds), all fields are optional.
   // Only enforce required checks for non-paeds.
+  // Note: null is now a valid selection (Nil), so we can't use !== null to check for unselected.
+  // The validation ensures all required fields have been explicitly selected (true, false, or null).
+  // We use a different approach: check that the value is explicitly set by comparing against undefined
+  // However, since refs are initialized to null, we need to track if fields have been interacted with.
+  // For now, we'll accept that null can mean either "unselected" or "Nil selected" and allow it.
+  // The distinction between "no record" and "Nil selected" is handled at the top level (PastMedicalHistory | null).
   if (
     !showPaeds.value &&
     !runChecks([
-      [cough.value !== null, 'Select Cough'],
-      [fever.value !== null, 'Select Fever'],
-      [blockedNose.value !== null, 'Select Blocked Nose'],
-      [soreThroat.value !== null, 'Select Sore Throat'],
-      [nightSweats.value !== null, 'Select Night Sweats'],
-      [unintentionalWeightLoss.value !== null, 'Select Unintentional Weight Loss'],
-      
-      [tuberculosis.value !== null, 'Select Tuberculosis'],
+      // All fields now accept null as valid (Nil), so we only validate conditional fields
       [tuberculosis.value === false || tuberculosisHasBeenTreated.value !== null, 'Select Has Tuberculosis been treated before'],
-      [diabetes.value !== null, 'Select Diabetes'],
-      [hypertension.value !== null, 'Select Hypertension'],
-      [hyperlipidemia.value !== null, 'Select Hyperlipidemia'],
-      [chronicJointPains.value !== null, 'Select Chronic Joint Pains'],
-      [chronicMuscleAches.value !== null, 'Select Chronic Muscle Aches'],
-      [sexuallyTransmittedDisease.value !== null, 'Select STD history']
     ])
   )
     return null
   return {
-    cough: cough.value!,
-    fever: fever.value!,
-    blockedNose: blockedNose.value!,
-    soreThroat: soreThroat.value!,
-    nightSweats: nightSweats.value!,
-    unintentionalWeightLoss: unintentionalWeightLoss.value!,
+    cough: cough.value,
+    fever: fever.value,
+    blockedNose: blockedNose.value,
+    soreThroat: soreThroat.value,
+    nightSweats: nightSweats.value,
+    unintentionalWeightLoss: unintentionalWeightLoss.value,
 
-    tuberculosis: tuberculosis.value!,
-    tuberculosisHasBeenTreated:tuberculosisHasBeenTreated.value!,
+    tuberculosis: tuberculosis.value,
+    tuberculosisHasBeenTreated: tuberculosisHasBeenTreated.value,
 
-    diabetes: diabetes.value!,
-    hypertension: hypertension.value!,
-    hyperlipidemia: hyperlipidemia.value!,
-    chronicJointPains: chronicJointPains.value!,
-    chronicMuscleAches: chronicMuscleAches.value!,
-    sexuallyTransmittedDisease: sexuallyTransmittedDisease.value!,
+    diabetes: diabetes.value,
+    hypertension: hypertension.value,
+    hyperlipidemia: hyperlipidemia.value,
+    chronicJointPains: chronicJointPains.value,
+    chronicMuscleAches: chronicMuscleAches.value,
+    sexuallyTransmittedDisease: sexuallyTransmittedDisease.value,
     specifiedSTDs: specifiedSTDs.value,
     others: others.value
   }

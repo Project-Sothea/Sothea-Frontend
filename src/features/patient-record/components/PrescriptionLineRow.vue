@@ -31,7 +31,15 @@
             <span class="inline-block h-2 w-2 rounded-full bg-gray-400"></span>
             Not packed
           </span>
-        </div>  
+        </div>
+
+        <!-- Total quantity available -->
+        <div v-if="form.presentationId && totalQtyAvailable !== null" class="mt-2">
+          <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            <span class="inline-block h-2 w-2 rounded-full bg-blue-600"></span>
+            Available: {{ totalQtyAvailable }} {{ selectedPresentation?.dispenseUnit ?? '' }}
+          </span>
+        </div>
 
         <p v-if="errors.presentationId" class="text-xs text-red-600 mt-1">{{ errors.presentationId }}</p>
       </div>
@@ -92,6 +100,14 @@
             class="inline-flex items-center text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200"
           >
             Last Updated By: {{ line.updaterName ?? '—' }}
+          </span>
+        </div>
+
+        <!-- Total quantity available (read-only view) -->
+        <div v-if="form.presentationId && totalQtyAvailable !== null" class="mt-2">
+          <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            <span class="inline-block h-2 w-2 rounded-full bg-blue-600"></span>
+            Available: {{ totalQtyAvailable }} {{ selectedPresentation?.dispenseUnit ?? '' }}
           </span>
         </div>
 
@@ -332,6 +348,7 @@ import PresentationSelector from './PresentationSelector.vue'
 import type { PrescriptionLine, PrescriptionLinePostData } from '@/features/pharmacy/types/Prescription'
 import type { DrugPresentationView } from '@/features/pharmacy/types/Drug'
 import { createLine, updateLine, deleteLine as apiDeleteLine, listLineAllocations } from '@/features/pharmacy/api/prescription'
+import { getPresentation } from '@/features/pharmacy/api/drug'
 import { fmtDate, type UnitCode , UNIT_LABELS, SCHEDULE_KINDS, type ScheduleKind} from '@/features/pharmacy/types/Util'
 import PrescriptionBatchAllocator from './PrescriptionBatchAllocator.vue'
 import ConfirmationDialogue from './ConfirmationDialogue.vue'
@@ -463,6 +480,11 @@ async function seedFromLine() {
   await nextTick()
   seeding.value = false
   
+  // Fetch stock quantity if presentation is already selected
+  if (form.presentationId) {
+    await fetchStockQuantity(form.presentationId)
+  }
+  
   // Set baseline to original server data (if available), otherwise use current form state
   // This ensures dirty state works correctly when draft is restored
   if (L && L.id && props.originalLine) {
@@ -514,7 +536,27 @@ watch(() => form.presentationId, (newId, oldId) => {
   if (oldId != null && newId !== oldId) {
     resetNonPresentationFields()
   }
+  // Fetch stock quantity when presentation is selected (only if changed)
+  if (newId && newId !== oldId) {
+    fetchStockQuantity(newId)
+  } else if (!newId) {
+    totalQtyAvailable.value = null
+  }
 })
+
+// Fetch stock quantity for selected presentation
+async function fetchStockQuantity(presentationId: number) {
+  loadingStock.value = true
+  try {
+    const stock = await getPresentation(presentationId)
+    totalQtyAvailable.value = stock.totalQty
+  } catch (error) {
+    console.error('Failed to fetch stock quantity:', error)
+    totalQtyAvailable.value = null
+  } finally {
+    loadingStock.value = false
+  }
+}
 
 // ─── Dose unit choices based on selected presentation ────────────────────
 
@@ -782,6 +824,8 @@ async function deleteLine() {
 
 const expanded = ref(false)
 const allocated = ref(0)
+const totalQtyAvailable = ref<number | null>(null)
+const loadingStock = ref(false)
 
 const allocClass = computed(() => {
   const need = (props.line as any).totalToDispense ?? 0
