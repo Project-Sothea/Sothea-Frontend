@@ -30,5 +30,5 @@ export default defineConfig({
       }
     }
   },
-  base: '/app/'
+  base: process.env.VITE_DEPLOY_TARGET === 'railway' ? '/' : '/app/',
 })
