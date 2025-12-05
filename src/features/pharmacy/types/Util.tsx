@@ -31,6 +31,7 @@ export type RouteCode =
   | 'OTIC'
   | 'OPH'
   | 'INH'
+  | 'NAS'
 
 export type UnitCode = 'mcg' | 'mg' | 'g' | 'mL' | 'L' | 'IU' | 'tab' | 'cap' | 'drop' | 'bottle' | 'sachet' | 'inhaler' | 'puff' | 'tube'
 
@@ -54,7 +55,8 @@ export const ROUTE_LABELS: Record<RouteCode, string> = {
   TOP: 'Topical',
   OTIC: 'Ear',
   OPH: 'Ophthalmic',
-  INH: 'Inhalation'
+  INH: 'Inhalation',
+  NAS: 'Nasal'
 }
 
 export const UNIT_LABELS: Record<UnitCode, string> = {
