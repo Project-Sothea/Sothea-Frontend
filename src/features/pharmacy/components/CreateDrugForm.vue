@@ -22,11 +22,6 @@
             </label>
 
             <label class="block mb-3">
-              <span class="text-gray-700">ATC code</span>
-              <input v-model.trim="drug.atcCode" :class="inputClass()" placeholder="e.g. N02BE01" />
-            </label>
-
-            <label class="block mb-3">
               <span class="text-gray-700">Notes</span>
               <textarea v-model.trim="drug.notes" class="mt-1 block w-full rounded border px-3 py-2" />
             </label>
@@ -59,7 +54,6 @@ const submitting = ref(false)
 const drug = ref<Omit<Drug, 'id'>>({
     genericName: '',
     brandName: '',
-    atcCode: '',
     isActive: true,
     notes: ''
 })
@@ -90,7 +84,6 @@ async function submit() {
     drug.value = {
         genericName: '',
         brandName: '',
-        atcCode: '',
         isActive: true,
         notes: ''
     }

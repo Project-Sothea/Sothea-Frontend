@@ -71,14 +71,14 @@
             maxlength="300"
             rows="3"
             placeholder="Add any instructions for the pharmacist (optional)…"
-            :disabled="isReadOnly || !headerNotesEditing || headerSaving"
+            :disabled="!headerNotesEditing || headerSaving"
             class="block w-full resize-y rounded-xl border border-gray-200 bg-white p-3 text-sm placeholder:text-gray-400
                    focus:outline-none focus:ring-4 focus:ring-[#3f51b5]/20 disabled:bg-gray-50 disabled:cursor-not-allowed"
           />
         </div>
 
         <!-- Edit Button -->
-        <div class="flex flex-row-reverse w-full px-5 pb-4" v-if="!isReadOnly">
+        <div class="flex flex-row-reverse w-full px-5 pb-4">
           <button
             v-if="!headerNotesEditing"
             @click="headerNotesEditing = true"
@@ -89,7 +89,7 @@
         </div>
 
         <!-- Save/Discard Buttons -->
-        <div class="flex flex-row-reverse w-full px-5 pb-4 gap-3" v-if="headerNotesEditing && !isReadOnly">
+        <div class="flex flex-row-reverse w-full px-5 pb-4 gap-3" v-if="headerNotesEditing">
           <button
             @click="saveHeader"
             :disabled="headerSaving || formDraft.isSubmitting.value"
