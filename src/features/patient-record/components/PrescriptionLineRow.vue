@@ -1,16 +1,16 @@
 <template>
   <div>
-    <!-- Top row: presentation + packed badge -->
+    <!-- Top row: drug + packed badge -->
     <div class="flex items-start gap-6" v-if="editing || !isSaved">
-      <!-- Presentation selector -->
+      <!-- Drug selector -->
       <div class="w-2/5">
-        <label :for="`presentation-${uid}`" class="block text-sm font-medium text-dark">
-          Presentation <span class="text-red-600" v-if="!readOnly">*</span>
+        <label :for="`drug-${uid}`" class="block text-sm font-medium text-dark">
+          Drug <span class="text-red-600" v-if="!readOnly">*</span>
         </label>
-        <PresentationSelector
-          v-model="form.presentationId"
-          :all-presentations="allPresentations"
-          :exclude-ids="excludePresentationIds"
+        <PrescriptionDrugSelector
+          v-model="form.drugId"
+          :all-drugs="allDrugs"
+          :exclude-ids="excludeDrugIds"
           :disabled="readOnly || saving"
         />
 
@@ -31,20 +31,25 @@
             <span class="inline-block h-2 w-2 rounded-full bg-gray-400"></span>
             Not packed
           </span>
-        </div>
 
-        <!-- Total quantity available -->
-        <div v-if="form.presentationId && totalQtyAvailable !== null" class="mt-2">
-          <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-            <span class="inline-block h-2 w-2 rounded-full bg-blue-600"></span>
-            Available: {{ totalQtyAvailable }} {{ selectedPresentation?.dispenseUnit ?? '' }}
+          <!-- Total quantity available -->
+          <span 
+            v-if="form.drugId && totalQtyAvailable !== null" 
+            :class="[
+              'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border',
+              totalQtyAvailable === 0 
+                ? 'bg-red-50 text-red-700 border-red-200' 
+                : 'bg-blue-50 text-blue-700 border-blue-200'
+            ]"
+          >
+            <span :class="['inline-block h-2 w-2 rounded-full', totalQtyAvailable === 0 ? 'bg-red-600' : 'bg-blue-600']"></span>
+            Available: {{ totalQtyAvailable }} {{ selectedDrug?.dispenseUnit ?? '' }}
           </span>
         </div>
 
-        <p v-if="errors.presentationId" class="text-xs text-red-600 mt-1">{{ errors.presentationId }}</p>
+        <p v-if="errors.drugId" class="text-xs text-red-600 mt-1">{{ errors.drugId }}</p>
       </div>
 
-      
     <!-- Remarks -->
     <div class="flex-1">
       <label :for="`remarks-${uid}`" class="block text-sm font-medium text-dark">
@@ -71,10 +76,10 @@
 
     </div>
     <div class="flex items-start gap-6" v-else>
-      <!-- Presentation readout -->
+      <!-- Drug readout -->
       <div class="w-2/5">
-        <div class="text-sm text-gray-600">Presentation</div>
-        <div class="mt-1 text-sm font-medium text-gray-900">{{ presentationLabel }}</div>
+        <div class="text-sm text-gray-600">Drug</div>
+        <div class="mt-1 text-sm font-medium text-gray-900">{{ drugLabel }}</div>
        
         <div class="mt-2 flex flex-wrap items-center gap-2">
           <span
@@ -94,20 +99,25 @@
             Not packed
           </span>
 
-          <!-- Removed the dot here -->
+          <!-- Total quantity available (read-only view) -->
+          <span
+            v-if="form.drugId && totalQtyAvailable !== null"
+            :class="[
+              'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border',
+              totalQtyAvailable === 0 
+                ? 'bg-red-50 text-red-700 border-red-200' 
+                : 'bg-blue-50 text-blue-700 border-blue-200'
+            ]"
+          >
+            <span :class="['inline-block h-2 w-2 rounded-full', totalQtyAvailable === 0 ? 'bg-red-600' : 'bg-blue-600']"></span>
+            Available: {{ totalQtyAvailable }} {{ selectedDrug?.dispenseUnit ?? '' }}
+          </span>
+
           <span
             v-if="isSaved"
             class="inline-flex items-center text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-700 border border-gray-200"
           >
             Last Updated By: {{ line.updaterName ?? '—' }}
-          </span>
-        </div>
-
-        <!-- Total quantity available (read-only view) -->
-        <div v-if="form.presentationId && totalQtyAvailable !== null" class="mt-2">
-          <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-            <span class="inline-block h-2 w-2 rounded-full bg-blue-600"></span>
-            Available: {{ totalQtyAvailable }} {{ selectedPresentation?.dispenseUnit ?? '' }}
           </span>
         </div>
 
@@ -157,37 +167,23 @@
           </div>
         </div>
 
-        <!-- Times per period -->
+        <!-- Frequency (code-based) -->
         <div v-if="!isBottleMode">
-          <label :for="`sched-freq-${uid}`" class="block text-xs text-gray-600 mb-1">Times per period</label>
-          <input
-            :id="`sched-freq-${uid}`" type="number" min="1"
-            v-model.number="form.frequencyPerSchedule"
-            class="w-20 border p-2 rounded text-right disabled:bg-gray-50"
-            placeholder="e.g. 3" :disabled="readOnly || saving"
-          />
-        </div>
-
-        <!-- Every N -->
-        <div v-if="!isBottleMode">
-          <label :for="`sched-everyN-${uid}`" class="block text-xs text-gray-600 mb-1">Every N</label>
-          <input
-            :id="`sched-everyN-${uid}`" type="number" min="1"
-            v-model.number="form.everyN"
-            class="w-20 border p-2 rounded text-right disabled:bg-gray-50"
-            placeholder="e.g. 1" :disabled="readOnly || saving"
-          />
-        </div>
-
-        <!-- Period unit -->
-        <div v-if="!isBottleMode">
-          <label :for="`sched-kind-${uid}`" class="block text-xs text-gray-600 mb-1">Period unit</label>
+          <label :for="`sched-frequency-${uid}`" class="block text-xs text-gray-600 mb-1">Frequency</label>
           <select
-            :id="`sched-kind-${uid}`" v-model="form.scheduleKind"
-            class="w-28 border p-2 rounded disabled:bg-gray-50"
+            :id="`sched-frequency-${uid}`"
+            v-model="form.frequencyCode"
+            class="w-40 border p-2 rounded disabled:bg-gray-50"
             :disabled="readOnly || saving"
           >
-            <option v-for="k in SCHEDULE_KINDS" :key="k" :value="k">{{ k }}</option>
+            <option disabled value="">Select frequency…</option>
+            <option
+              v-for="opt in FREQUENCY_OPTIONS"
+              :key="opt.code"
+              :value="opt.code"
+            >
+              {{ opt.code }}
+            </option>
           </select>
         </div>
 
@@ -214,6 +210,24 @@
           >
             <option v-for="k in DURATION_UNITS" :key="k" :value="k">{{ k }}</option>
           </select>
+        </div>
+
+        <!-- PRN Checkbox -->
+        <div class="ml-2 -translate-y-1">
+          <label
+            class="shrink-0 inline-flex flex-col items-center select-none leading-none"
+            :title="readOnly || saving ? 'Read-only' : 'As needed (PRN)'"
+          >
+            <input
+              type="checkbox"
+              v-model="form.prn"
+              :disabled="readOnly || saving"
+              class="h-5 w-5 rounded border-gray-300 accent-indigo-600 focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 translate-y-[3px]"
+            />
+            <span class="mt-1 text-[10px] uppercase tracking-wide text-gray-600 leading-none translate-y-[3px]">
+              PRN
+            </span>
+          </label>
         </div>
 
       </div>
@@ -315,10 +329,10 @@
 
       <!-- Allocation panel -->
       <transition name="fade">
-        <div v-if="expanded && line.id && line.presentationId" :id="`alloc-panel-${uid}`" class="mt-3 -mx-4 px-4 pb-4" role="region">
+        <div v-if="expanded && line.id && line.drugId" :id="`alloc-panel-${uid}`" class="mt-3 -mx-4 px-4 pb-4" role="region">
           <PrescriptionBatchAllocator
             :line-id="line.id"
-            :pres-id="line.presentationId"
+            :drug-id="line.drugId"
             :allocations="line.allocations ?? []"
             :requested-qty="line.totalToDispense ?? 0"
             :is-packed="line.isPacked"
@@ -331,12 +345,12 @@
   </div>
 
   <ConfirmationDialogue
-    :open="showPresChangeWarn"
-    title="Presentation changed"
-    message="You changed the presentation for this saved line. This may reset allocations and units. Continue to save?"
+    :open="showDrugChangeWarn"
+    title="Drug changed"
+    message="You changed the drug for this saved line. This may reset allocations and units. Continue to save?"
     :close-on-esc="true"
     :close-on-backdrop="true"
-    @cancel="showPresChangeWarn = false"
+    @cancel="showDrugChangeWarn = false"
     @confirm="confirmSaveAfterChange"
   />
 </template>
@@ -344,22 +358,22 @@
 <script setup lang="ts">
 import { reactive, ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useToast } from 'vue-toast-notification'
-import PresentationSelector from './PresentationSelector.vue'
 import type { PrescriptionLine, PrescriptionLinePostData } from '@/features/pharmacy/types/Prescription'
-import type { DrugPresentationView } from '@/features/pharmacy/types/Drug'
+import type { DrugView } from '@/features/pharmacy/types/Drug'
 import { createLine, updateLine, deleteLine as apiDeleteLine, listLineAllocations } from '@/features/pharmacy/api/prescription'
-import { getPresentation } from '@/features/pharmacy/api/drug'
-import { fmtDate, type UnitCode , UNIT_LABELS, SCHEDULE_KINDS, type ScheduleKind} from '@/features/pharmacy/types/Util'
+import { getDrugStock } from '@/features/pharmacy/api/drug'
+import { fmtDate, type UnitCode , UNIT_LABELS, UNIT_KIND, SCHEDULE_KINDS, type ScheduleKind, type FrequencyCode, FREQUENCY_OPTIONS, fmtDrugName, fmtStrength} from '@/features/pharmacy/types/Util'
 import PrescriptionBatchAllocator from './PrescriptionBatchAllocator.vue'
 import ConfirmationDialogue from './ConfirmationDialogue.vue'
+import PrescriptionDrugSelector from './PrescriptionDrugSelector.vue'
 
 // ─── Props & Emits ───────────────────────────────────────────────────────
 const props = defineProps<{
   rxId: number
   line: Partial<PrescriptionLine> // current line state (with unsaved edits, if any)
   readOnly?: boolean
-  allPresentations?: DrugPresentationView[]
-  excludePresentationIds?: number[]
+  allDrugs?: DrugView[]
+  excludeDrugIds?: number[]
   hasUnsavedEdits?: boolean
   originalLine?: Partial<PrescriptionLine> // Original server data (without unsaved edits)
 }>()
@@ -378,12 +392,11 @@ const uid = Math.random().toString(36).slice(2)
 // ─── Local editable form state ───────────────────────────────────────────
 
 const form = reactive<Partial<PrescriptionLine>>({
-  presentationId: undefined,
+  drugId: undefined,
   doseAmount: undefined,
   doseUnit: undefined,
-  scheduleKind: 'day',
-  everyN: 1,
-  frequencyPerSchedule: 1,
+  frequencyCode: 'OM' as FrequencyCode,
+  prn: false,
   duration: 7,
   durationUnit: 'day',
   remarks: '',
@@ -393,30 +406,31 @@ const form = reactive<Partial<PrescriptionLine>>({
 const isSaved = computed(() => (props.line.id != null)) // false => draft, true => actual
 const editing = ref(!isSaved.value) // drafts: editing=true, saved: false
 const readOnly = computed(() => !!props.readOnly)
-const showFields = computed(() => !!form.presentationId)
+const showFields = computed(() => !!form.drugId)
 
-const showPresChangeWarn = ref(false)
+const showDrugChangeWarn = ref(false)
 
-const presentationLabel = computed(() => {
-  const p = selectedPresentation.value
-  if (!p) return form.presentationId ? `#${form.presentationId}` : '—'
+const drugLabel = computed(() => {
+  const d = selectedDrug.value
+  if (!d) return form.drugId ? `#${form.drugId}` : '—'
   // same label style as your selector cache
-  return `${p.drugName} — ${p.displayStrength} (${p.displayRoute})`
+  return `${fmtDrugName(d)} — ${fmtStrength(d)} (${d.displayRoute})`
 })
 
 // ─── Dirty Checking ───────────────────────────────────────────────────────
 
 // Fields you care about for dirty checking
 const SNAPSHOT_KEYS = [
-  'presentationId','doseAmount','doseUnit',
-  'scheduleKind','everyN','frequencyPerSchedule','duration','durationUnit','remarks',
+  'drugId','doseAmount','doseUnit',
+  'frequencyCode','prn','duration','durationUnit','remarks',
 ] as const
 type K = (typeof SNAPSHOT_KEYS)[number]
 
 // Normalize so comparisons are stable
 const norm = (k: K, v: unknown) => {
   if (k === 'remarks') return String(v ?? '').trim()
-  if (['doseAmount','everyN','frequencyPerSchedule','duration','durationUnit'].includes(k)) {
+  if (k === 'prn') return Boolean(v ?? false)
+  if (['doseAmount','duration'].includes(k)) {
     return v == null ? null : Number(v)
   }
   return v ?? null
@@ -436,19 +450,27 @@ function resetBaseline() { baseKey.value = currKey.value }
 
 const seeding = ref(false)
 
+// ─── Frequency options (code-based) ─────────────────────────────────────────
+
+type FrequencyOption = (typeof FREQUENCY_OPTIONS)[number]
+
+// Get frequency option by code (for preview/display purposes)
+function getFrequencyOption(code?: FrequencyCode): FrequencyOption | undefined {
+  return FREQUENCY_OPTIONS.find(o => o.code === code)
+}
+
 // Seed form from incoming line
 async function seedFromLine() {
   seeding.value = true
   const L = props.line
   if (L && L.id) {
     // For saved lines, use the line data (which may include unsaved edits from parent)
-    // Set doseUnit BEFORE presentationId to prevent watch from interfering
+    // Set doseUnit BEFORE drugId to prevent watch from interfering
     form.doseAmount = L.doseAmount
     form.doseUnit = L.doseUnit
-    form.presentationId = L.presentationId
-    form.scheduleKind = L.scheduleKind
-    form.everyN = L.everyN
-    form.frequencyPerSchedule = L.frequencyPerSchedule
+    form.drugId = L.drugId
+    form.frequencyCode = L.frequencyCode
+    form.prn = L.prn ?? false
     form.duration = L.duration
     form.durationUnit = L.durationUnit
     form.remarks = L.remarks
@@ -457,21 +479,19 @@ async function seedFromLine() {
     const draftLine = L as any
     form.doseAmount = draftLine.doseAmount
     form.doseUnit = draftLine.doseUnit
-    form.presentationId = draftLine.presentationId
-    form.scheduleKind = draftLine.scheduleKind ?? 'day'
-    form.everyN = draftLine.everyN ?? 1
-    form.frequencyPerSchedule = draftLine.frequencyPerSchedule ?? 1
+    form.drugId = draftLine.drugId
+    form.frequencyCode = draftLine.frequencyCode ?? ('OM' as FrequencyCode)
+    form.prn = draftLine.prn ?? false
     form.duration = draftLine.duration ?? 7
     form.durationUnit = draftLine.durationUnit ?? 'day'
     form.remarks = draftLine.remarks ?? ''
   } else {
     // New draft defaults
-    form.presentationId = undefined
+    form.drugId = undefined
     form.doseAmount = undefined
     form.doseUnit = undefined
-    form.scheduleKind = 'day'
-    form.everyN = 1
-    form.frequencyPerSchedule = 1
+    form.frequencyCode = 'OM' as FrequencyCode
+    form.prn = false
     form.duration = 7
     form.durationUnit = 'day'
     form.remarks = ''
@@ -479,10 +499,10 @@ async function seedFromLine() {
   // Wait for next tick to ensure all computed properties and watches have settled
   await nextTick()
   seeding.value = false
-  
-  // Fetch stock quantity if presentation is already selected
-  if (form.presentationId) {
-    await fetchStockQuantity(form.presentationId)
+
+  // Fetch stock quantity if drug is already selected
+  if (form.drugId) {
+    await fetchStockQuantity(form.drugId)
   }
   
   // Set baseline to original server data (if available), otherwise use current form state
@@ -491,12 +511,11 @@ async function seedFromLine() {
     // Use original server data as baseline for dirty checking
     const orig = props.originalLine
     const origForm = {
-      presentationId: orig.presentationId,
+      drugId: orig.drugId,
       doseAmount: orig.doseAmount,
       doseUnit: orig.doseUnit,
-      scheduleKind: orig.scheduleKind,
-      everyN: orig.everyN,
-      frequencyPerSchedule: orig.frequencyPerSchedule,
+      frequencyCode: orig.frequencyCode,
+      prn: orig.prn ?? false,
       duration: orig.duration,
       durationUnit: orig.durationUnit,
       remarks: orig.remarks,
@@ -526,17 +545,17 @@ watch(() => props.hasUnsavedEdits, (hasEdits) => {
   }
 }, { immediate: true })
 
-function resetNonPresentationFields() {
+function resetNonDrugFields() {
   form.doseAmount = undefined
   form.doseUnit = undefined
 }
 
-watch(() => form.presentationId, (newId, oldId) => {
+watch(() => form.drugId, (newId, oldId) => {
   if (seeding.value) return
   if (oldId != null && newId !== oldId) {
-    resetNonPresentationFields()
+    resetNonDrugFields()
   }
-  // Fetch stock quantity when presentation is selected (only if changed)
+  // Fetch stock quantity when drug is selected (only if changed)
   if (newId && newId !== oldId) {
     fetchStockQuantity(newId)
   } else if (!newId) {
@@ -544,11 +563,11 @@ watch(() => form.presentationId, (newId, oldId) => {
   }
 })
 
-// Fetch stock quantity for selected presentation
-async function fetchStockQuantity(presentationId: number) {
+// Fetch stock quantity for selected drug
+async function fetchStockQuantity(drugId: number) {
   loadingStock.value = true
   try {
-    const stock = await getPresentation(presentationId)
+    const stock = await getDrugStock(drugId)
     totalQtyAvailable.value = stock.totalQty
   } catch (error) {
     console.error('Failed to fetch stock quantity:', error)
@@ -558,25 +577,81 @@ async function fetchStockQuantity(presentationId: number) {
   }
 }
 
-// ─── Dose unit choices based on selected presentation ────────────────────
+// ─── Dose unit choices based on selected drug ────────────────────
 
-const selectedPresentation = computed(() => props.allPresentations?.find(p => p.id === form.presentationId!) )
+const selectedDrug = computed(() => props.allDrugs?.find(d => d.id === form.drugId!) )
 const isBottleMode = computed(() => form.doseUnit === 'bottle')
 
-function allowedDoseUnitsFor(p?: DrugPresentationView): UnitCode[] {
-  if (!p) return []  // nothing until a presentation is chosen
+function allowedDoseUnitsFor(p?: DrugView): UnitCode[] {
+  if (!p) return []
+  
   const out: UnitCode[] = []
-  if (p.dispenseUnit) out.push(p.dispenseUnit as UnitCode)
-  if (p.strengthUnitDen) out.push(p.strengthUnitDen as UnitCode)
-  if (p.strengthUnitNum) out.push(p.strengthUnitNum as UnitCode)
+  const hasNumStrengthOnly = p.strengthNum != null && p.strengthNum > 0 && p.strengthUnitNum != null && !p.strengthUnitDen
+  const hasBothStrength = p.strengthNum != null && p.strengthNum > 0 && p.strengthUnitNum != null && p.strengthDen != null && p.strengthUnitDen != null
+  const hasNoStrength = !hasNumStrengthOnly && !hasBothStrength
+  
+  if (hasNumStrengthOnly) {
+    // Only strength numerator (solids)
+    // - dispenseUnit is allowed
+    // - strengthUnitNum is allowed
+    if (p.dispenseUnit) out.push(p.dispenseUnit as UnitCode)
+    if (p.strengthUnitNum) out.push(p.strengthUnitNum as UnitCode)
+  } 
+  else {
+    // Liquids
+    const dispenseUnit = p.dispenseUnit
+    const pieceUnit = p.pieceContentUnit
+    const numUnit = p.strengthUnitNum
+    const denUnit = p.strengthUnitDen
+    const isBottle = dispenseUnit === 'bottle'
+    const isTube = dispenseUnit === 'tube'
+    const isInhaler = dispenseUnit === 'inhaler'
+    const isPieceDispensed = isBottle || isTube || isInhaler
+    const hasPieceUnit = pieceUnit != null
+    
+    if (hasNoStrength) {
+      // No strength data
+      // dispenseUnit is always allowed
+      if (dispenseUnit) out.push(dispenseUnit as UnitCode)
+      
+      // If piece-dispensed unit (bottle/tube/inhaler) and pieceContentUnit is provided, that's also allowed
+      if (isPieceDispensed && hasPieceUnit) {
+        out.push(pieceUnit as UnitCode)
+      }
+    }
+    else if (hasBothStrength) {
+      // Both strength numerator and denominator
+      // dispenseUnit is always allowed
+      if (dispenseUnit) out.push(dispenseUnit as UnitCode)
+      
+      if (!isPieceDispensed || !hasPieceUnit) {
+        // Not piece-dispensed or no piece unit
+        // If dispenseUnit equals numUnit OR denUnit, then both numUnit and denUnit are allowed
+        if (numUnit && denUnit && (dispenseUnit === numUnit || dispenseUnit === denUnit)) {
+          out.push(numUnit as UnitCode)
+          out.push(denUnit as UnitCode)
+        }
+      } else {
+        // Piece-dispensed (bottle/tube/inhaler) with pieceContentUnit
+        // pieceContentUnit is always allowed
+        if (pieceUnit) out.push(pieceUnit as UnitCode)
+        
+        // If pieceContentUnit equals numUnit OR denUnit, then both numUnit and denUnit are allowed
+        if (numUnit && denUnit && (pieceUnit === numUnit || pieceUnit === denUnit)) {
+          out.push(numUnit as UnitCode)
+          out.push(denUnit as UnitCode)
+        }
+      }
+    }
+  }  
   // de-duplicate while preserving order
   return Array.from(new Set(out))
 }
 
-const allowedDoseUnits = computed<UnitCode[]>(() => allowedDoseUnitsFor(selectedPresentation.value))
+const allowedDoseUnits = computed<UnitCode[]>(() => allowedDoseUnitsFor(selectedDrug.value))
 
 
-watch(selectedPresentation, (p) => {
+watch(selectedDrug, (p) => {
   if (!p) return
   if (seeding.value) return // Don't auto-set doseUnit during seeding - let seedFromLine handle it
   if (!form.doseUnit || !allowedDoseUnits.value.includes(form.doseUnit)) {
@@ -601,9 +676,9 @@ watch(selectedPresentation, (p) => {
 
 // ─── Form Validation ─────────────────────────────────────────────────────────
 
-const errors = reactive<{ presentationId?: string; dose?: string; schedule?: string ; remarks?: string}>({})
-watch(() => form.presentationId, () => {
-  errors.presentationId = undefined
+const errors = reactive<{ drugId?: string; dose?: string; schedule?: string ; remarks?: string}>({})
+watch(() => form.drugId, () => {
+  errors.drugId = undefined
   errors.dose = undefined
   errors.schedule = undefined
   errors.remarks = undefined
@@ -614,8 +689,7 @@ watch([() => form.doseAmount, () => form.doseUnit], () => {
 })
 
 watch(
-  [() => form.scheduleKind, () => form.everyN, () => form.frequencyPerSchedule,
-  () => form.duration, () => form.durationUnit],
+  [() => form.frequencyCode, () => form.duration, () => form.durationUnit],
   () => { errors.schedule = undefined }
 )
 
@@ -636,12 +710,11 @@ watch(() => form, () => {
     // Debounce updates to avoid too many emissions
     updateTimer = setTimeout(() => {
       const editData: Partial<PrescriptionLine> = {
-        presentationId: form.presentationId,
+        drugId: form.drugId,
         doseAmount: form.doseAmount,
         doseUnit: form.doseUnit,
-        scheduleKind: form.scheduleKind,
-        everyN: form.everyN,
-        frequencyPerSchedule: form.frequencyPerSchedule,
+        frequencyCode: form.frequencyCode,
+        prn: form.prn ?? false,
         duration: form.duration,
         durationUnit: form.durationUnit,
         remarks: form.remarks,
@@ -655,12 +728,11 @@ watch(() => form, () => {
     }
     updateTimer = setTimeout(() => {
       const draftData: Partial<PrescriptionLine> = {
-        presentationId: form.presentationId,
+        drugId: form.drugId,
         doseAmount: form.doseAmount,
         doseUnit: form.doseUnit,
-        scheduleKind: form.scheduleKind,
-        everyN: form.everyN,
-        frequencyPerSchedule: form.frequencyPerSchedule,
+        frequencyCode: form.frequencyCode,
+        prn: form.prn ?? false,
         duration: form.duration,
         durationUnit: form.durationUnit,
         remarks: form.remarks,
@@ -682,16 +754,23 @@ function hasMaxTwoDecimals(value: number | undefined): boolean {
 }
 
 function validate(): boolean {
-  Object.assign(errors, { presentationId: undefined, dose: undefined, schedule: undefined })
+  Object.assign(errors, { drugId: undefined, dose: undefined, schedule: undefined })
   let ok = true
-  if (!form.presentationId || form.presentationId <= 0) { errors.presentationId = 'Select a presentation.'; ok = false }
+  if (!form.drugId || form.drugId <= 0) { errors.drugId = 'Select a drug.'; ok = false }
   if (!form.doseAmount || form.doseAmount <= 0) { errors.dose = 'Dose must be > 0.'; ok = false }
   if (form.doseAmount && !hasMaxTwoDecimals(form.doseAmount)) {
     errors.dose = (errors.dose ? errors.dose + ' ' : '') + 'Dose must have at most 2 decimal places.'
     ok = false
   }
   if (!form.doseUnit) { errors.dose = (errors.dose ? errors.dose + ' ' : '') + 'Select a dose unit.'; ok = false }
-  if (!isBottleMode.value && (!form.scheduleKind || !form.everyN || !form.frequencyPerSchedule || !form.duration || !form.durationUnit)) { errors.schedule = 'Complete the schedule.'; ok = false }
+  if (!isBottleMode.value) {
+    if (!form.frequencyCode) {
+      errors.schedule = 'Select a frequency.'; ok = false
+    }
+    if (!form.duration || !form.durationUnit) {
+      errors.schedule = (errors.schedule ? errors.schedule + ' ' : '') + 'Complete the duration.'; ok = false
+    }
+  }
   if (isBottleMode.value && !form.remarks) { errors.remarks = 'Please enter dosage instruction above'; ok = false}
   return ok
 }
@@ -704,12 +783,11 @@ function startEditing() {
   // Immediately emit current form state when starting to edit
   if (isSaved.value && props.line.id) {
     const editData: Partial<PrescriptionLine> = {
-      presentationId: form.presentationId,
+      drugId: form.drugId,
       doseAmount: form.doseAmount,
       doseUnit: form.doseUnit,
-      scheduleKind: form.scheduleKind,
-      everyN: form.everyN,
-      frequencyPerSchedule: form.frequencyPerSchedule,
+      frequencyCode: form.frequencyCode,
+      prn: form.prn ?? false,
       duration: form.duration,
       durationUnit: form.durationUnit,
       remarks: form.remarks,
@@ -726,28 +804,28 @@ function discardEditing() {
     emit('clear-line-edit', props.line.id)
   }
   // Reset form and errors
-  Object.assign(errors, { presentationId: undefined, dose: undefined, schedule: undefined })
+  Object.assign(errors, { drugId: undefined, dose: undefined, schedule: undefined })
 }
 
 const saving = ref(false)
 
 async function onClickSave() { 
-  // Check if presentation changed (compare against original server value, not props.line which may have unsaved edits)
-  const originalPresentationId = props.originalLine?.presentationId ?? props.line.presentationId
-  const presentationChanged = isSaved.value && form.presentationId !== originalPresentationId
+  // Check if drug changed (compare against original server value, not props.line which may have unsaved edits)
+  const originaldrugId = props.originalLine?.drugId ?? props.line.drugId
+  const drugChanged = isSaved.value && form.drugId !== originaldrugId
   
   // Check if line has allocations
   const hasAllocations = props.line.allocations && props.line.allocations.length > 0
   
-  // Show warning if presentation changed AND line has allocations
-  if (presentationChanged && hasAllocations) {
-    showPresChangeWarn.value = true
+  // Show warning if drug changed AND line has allocations
+  if (drugChanged && hasAllocations) {
+    showDrugChangeWarn.value = true
     return
   }
   
-  // Also validate that presentation is set
-  if (!form.presentationId || form.presentationId <= 0) {
-    errors.presentationId = 'Select a presentation.'
+  // Also validate that drug is set
+  if (!form.drugId || form.drugId <= 0) {
+    errors.drugId = 'Select a drug.'
     return
   }
   
@@ -759,7 +837,7 @@ async function saveAndExitEditingMode() {
 }
 
 async function confirmSaveAfterChange() {
-  showPresChangeWarn.value = false
+  showDrugChangeWarn.value = false
   await saveLine()
 }
 
@@ -769,13 +847,12 @@ async function saveLine() {
   saving.value = true
   try {
     const payload: PrescriptionLinePostData = {
-      presentationId: form.presentationId!,
+      drugId: form.drugId!,
       remarks: form.remarks,
       doseAmount: form.doseAmount!,
       doseUnit: form.doseUnit!,
-      scheduleKind: isBottleMode.value ? 'day' : form.scheduleKind!,
-      everyN: isBottleMode.value ? 1 : form.everyN!,
-      frequencyPerSchedule: isBottleMode.value ? 1 : form.frequencyPerSchedule!,
+      frequencyCode: isBottleMode.value ? 'OM' as FrequencyCode : form.frequencyCode!,
+      prn: form.prn ?? false,
       duration: isBottleMode.value ? 1 : form.duration!,
       durationUnit: isBottleMode.value ? 'day' : form.durationUnit!
     }
@@ -878,12 +955,11 @@ function unitLabel(u?: UnitCode) {
 // A clearer, doctor-readable description of the regimen.
 const scheduleReadable = computed(() => {
   if (isBottleMode.value && form.doseAmount && form.doseUnit) {
-    return `${form.doseAmount} ${unitLabel(form.doseUnit)}(s) total.`
+    const baseSchedule = `${form.doseAmount} ${unitLabel(form.doseUnit)}(s) total.`
+    return form.prn ? `${baseSchedule} (PRN)` : baseSchedule
   }
 
-  const k = form.scheduleKind ?? 'day'
-  const every = Number(form.everyN ?? 0)
-  const freq = Number(form.frequencyPerSchedule ?? 0)
+  const freqOpt = getFrequencyOption(form.frequencyCode)
   const dur  = Number(form.duration ?? 0)
   const durUnit = form.durationUnit ??  'day'
 
@@ -891,7 +967,11 @@ const scheduleReadable = computed(() => {
     return 'Set Dosage'
   }
 
-  if (!every || !freq || !dur) return 'Set frequency, interval, and duration.'
+  if (!freqOpt || !dur) return 'Set frequency and duration.'
+
+  const k = freqOpt.scheduleKind
+  const every = freqOpt.everyN
+  const freq = freqOpt.frequencyPerSchedule
 
   // period phrase: "per day" vs "every 6 hours"
   const periodPhrase = every === 1 ? `per ${k}` : `every ${every} ${pluralize(every, k)}`
@@ -900,17 +980,16 @@ const scheduleReadable = computed(() => {
   const dosePart = `${form.doseAmount} ${unitLabel(form.doseUnit)}`
 
   // Example: "the dose, 3× per day, for 7 days."
-  return `${dosePart}, ${freq}× ${periodPhrase}, for ${dur} ${pluralize(dur, durUnit)}.`
+  const baseSchedule = `${dosePart}, ${freq}× ${periodPhrase}, for ${dur} ${pluralize(dur, durUnit)}.`
+  return form.prn ? `${baseSchedule} (PRN)` : baseSchedule
 })
 
 const scheduleIncomplete = computed(() => {
   const doseOk = !!(form.doseAmount && form.doseUnit)
-  const k = form.scheduleKind
-  const every = Number(form.everyN ?? 0)
-  const freq  = Number(form.frequencyPerSchedule ?? 0)
+  const freqOk = !!form.frequencyCode
   const dur   = Number(form.duration ?? 0)
   const durUnit = form.durationUnit
-  const schedOk = !!(k && every > 0 && freq > 0 && dur > 0 && durUnit)
+  const schedOk = !!(freqOk && dur > 0 && durUnit)
   return !(doseOk && schedOk)
 })
 

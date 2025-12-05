@@ -127,14 +127,14 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
 import type { BatchDetail, DrugBatchLocation } from '../types/Batch'
-import { fmtDispenseUnit, fmtDrugName, fmtDrugNameWithBrand, fmtStrengthWithRoute, type ISODateString } from '../types/Util'
-import { fmtDate } from '../types/Util'
-import type { DrugView } from '../types/Drug'
 import { getDrugStock } from '../api/drug'
+import { fmtDispenseUnit, fmtStrengthWithRoute, type ISODateString, fmtDrugName } from '../types/Util'
+import type { DrugView } from '../types/Drug'
+import { fmtDate } from '../types/Util'
 
 /** Route param */
 const route = useRoute()
-const drugId = Number(route.params.drugId)
+const drugId = Number(route.params.drugId) // Route param name still uses drugId for backward compatibility
 
 /** State */
 const tab = ref<'batches' | 'locations'>('batches')
@@ -154,7 +154,7 @@ async function fetchData() {
 }
 
 /** Header label builders */
-const headerTitle = computed(() => fmtDrugNameWithBrand(drug.value))
+const headerTitle = computed(() => fmtDrugName(drug.value))
 
 const headerSubtitle = computed(() => fmtStrengthWithRoute(drug.value))
 

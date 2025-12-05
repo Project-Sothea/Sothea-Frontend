@@ -182,8 +182,7 @@ import type { LineAllocation } from '@/features/pharmacy/types/Prescription'
 import { markLinePacked, setLineAllocations, unmarkLinePacked } from '@/features/pharmacy/api/prescription'
 import { fmtDate } from '@/features/pharmacy/types/Util'
 import type { DrugBatchLocation } from '@/features/pharmacy/types/Batch'
-import { listBatchesByPresentation, listBatchLocations } from '@/features/pharmacy/api/batch'
-import { getPresentation } from '@/features/pharmacy/api/drug'
+import { getDrugStock } from '@/features/pharmacy/api/drug'
 
 // ─── Props & Emits ───────────────────────────────────────────────────────
 
@@ -191,7 +190,7 @@ const emit = defineEmits<{ (e: 'changed'): void }>()
 
 const props = defineProps<{
   lineId: number;
-  presId: number;
+  drugId: number;
   allocations: LineAllocation[]
   requestedQty: number
   isPacked?: boolean
@@ -280,10 +279,10 @@ function leftFor(batchLocationId: number) {
 
 /** Load allocatable batch locations for this line */
 async function loadOptions() {
-  const presStock = await getPresentation(props.presId)
+  const drugStock = await getDrugStock(props.drugId)
 
   const flat: Option[] = []
-  presStock.batches.forEach(b => {
+  drugStock.batches.forEach(b => {
     b.batchLocations.forEach(bl => {
       flat.push({
         ...bl,

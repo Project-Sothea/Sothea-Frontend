@@ -11,49 +11,49 @@
       </router-link>
     </div>
 
-    <!-- ─────────── PRESENTATION PICKER ─────────── -->
+    <!-- ─────────── DRUG PICKER ─────────── -->
     <div class="mb-6">
       <label class="block mb-2 text-gray-700">
-        Presentation <span class="text-red-600">*</span>
+        Drug <span class="text-red-600">*</span>
       </label>
 
-      <div class="relative" ref="presComboRef">
+      <div class="relative" ref="drugComboRef">
         <input
-          v-model.trim="presentationQuery"
-          @focus="showPresDropdown = true"
-          @input="onPresentationQueryInput"
-          placeholder="Search presentation (e.g., 'amoxicillin 500 cap oral')…"
-          :class="inputClass(errors.presentation)"
+          v-model.trim="drugQuery"
+          @focus="showDrugDropdown = true"
+          @input="onDrugQueryInput"
+          placeholder="Search drug (e.g., 'amoxicillin 500 cap oral')…"
+          :class="inputClass(errors.drug)"
           class="w-full"
           autocomplete="off"
         />
         <ul
-          v-show="showPresDropdown"
+          v-show="showDrugDropdown"
           class="absolute z-20 bg-white border border-gray-300 rounded shadow w-full mt-1 max-h-56 overflow-auto"
         >
           <li
-            v-for="p in filteredPresentations"
-            :key="p.id"
-            @click="selectPresentation(p)"
+            v-for="d in filteredDrugs"
+            :key="d.id"
+            @click="selectDrug(d)"
             class="px-3 py-2 cursor-pointer hover:bg-indigo-100"
           >
-            <!-- common display format you’ve been using -->
-            <span class="font-medium">{{ p.displayLabel }}</span>
+            <!-- common display format you've been using -->
+            <span class="font-medium">{{ fmtDrugNameWithBrand(d) }} — {{ fmtStrength(d) }} ({{ d.displayRoute }})</span>
           </li>
           <li
-            @click="openCreatePresentationForm = true"
+            @click="openCreateDrugForm = true"
             class="px-3 py-2 cursor-pointer hover:bg-green-100 text-green-700 font-semibold border-t"
           >
-            ➕ Create new presentation…
+            ➕ Create new drug…
           </li>
 
-          <CreatePresentationForm
-            :open="openCreatePresentationForm"
-            @created="onPresentationCreated"
-            @close="openCreatePresentationForm = false"
+          <CreateDrugForm
+            :open="openCreateDrugForm"
+            @created="onDrugCreated"
+            @close="openCreateDrugForm = false"
           />
         </ul>
-        <p v-if="errors.presentation" class="err">{{ errors.presentation }}</p>
+        <p v-if="errors.drug" class="err">{{ errors.drug }}</p>
       </div>
     </div>
 
@@ -229,22 +229,22 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
-import type { Drug, DrugPresentationView } from '../types/Drug'
+import type { DrugView } from '../types/Drug'
 import type { BatchPostData, DrugBatchLocation } from '../types/Batch'
-import CreatePresentationForm from '../components/CreatePresentationForm.vue'
-import { listAllPresentations } from '../api/drug'
+import { listDrugs } from '../api/drug'
 import { createBatch } from '../api/batch'
+import { fmtDrugNameWithBrand, fmtStrength } from '../types/Util'
+import CreateDrugForm from '../components/CreateDrugForm.vue'
 
 // ─────────────────────────────────────────────────────────────────────────────
 const router = useRouter()
 const toast = useToast()
 
-const drugs = ref<Drug[]>([])
-const presentations = ref<DrugPresentationView[]>([])
-const selectedPresentationId = ref<number | ''>('')
-const presentationQuery = ref('')
-const showPresDropdown = ref(false)
-const presComboRef = ref<HTMLElement | null>(null)
+const drugs = ref<DrugView[]>([])
+const selectedDrugId = ref<number | ''>('')
+const drugQuery = ref('')
+const showDrugDropdown = ref(false)
+const drugComboRef = ref<HTMLElement | null>(null)
 
 // Bulk batches state
 const batches = ref<BatchPostData[]>([emptyBatch()])
@@ -273,14 +273,14 @@ const errors = ref<Record<string, string>>({})
 // Per-row errors: "b.<idx>.<field>" -> 'msg'  and "b.<idx>.loc.<lidx>.<field>" -> 'msg'
 const rowErrors = ref<Record<string, string>>({})
 
-const openCreatePresentationForm = ref(false)
+const openCreateDrugForm = ref(false)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // API
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function fetchPresentations() {
-  presentations.value = await listAllPresentations()
+async function fetchDrugs() {
+  drugs.value = await listDrugs()
 }
 
 
@@ -293,38 +293,38 @@ const inputClass = (err?: string) =>
    err ? 'border-red-500 focus:border-red-500' : 'border-gray-300'
   ].join(' ')
 
-const currentPresentation = computed(() =>
-  presentations.value.find(p => p.id === selectedPresentationId.value) ?? null
+const currentDrug = computed(() =>
+  drugs.value.find(d => d.id === selectedDrugId.value) ?? null
 )
 
-const filteredPresentations = computed(() => {
-  const q = presentationQuery.value.trim().toLowerCase()
-  if (!q) return presentations.value.slice(0, 50) // small cap
-  return presentations.value.filter(p =>
-    p.displayLabel.toLowerCase().includes(q) ||
-    p.drugName.toLowerCase().includes(q)
-  )
+const filteredDrugs = computed(() => {
+  const q = drugQuery.value.trim().toLowerCase()
+  if (!q) return drugs.value.slice(0, 50) // small cap
+  return drugs.value.filter(d => {
+    const searchText = `${d.atcCode || ''} ${d.genericName || ''} ${d.brandName || ''} ${d.displayLabel || ''}`.toLowerCase()
+    return searchText.includes(q)
+  })
 })
 
-function onPresentationQueryInput() {
-  showPresDropdown.value = true
-  selectedPresentationId.value = ''
+function onDrugQueryInput() {
+  showDrugDropdown.value = true
+  selectedDrugId.value = ''
 }
 
-function selectPresentation(p: DrugPresentationView) {
-  selectedPresentationId.value = p.id
-  presentationQuery.value = p.displayLabel
-  showPresDropdown.value = false
+function selectDrug(d: DrugView) {
+  selectedDrugId.value = d.id
+  drugQuery.value = `${fmtDrugNameWithBrand(d)} — ${fmtStrength(d)} (${d.displayRoute})`
+  showDrugDropdown.value = false
 }
 
 function onClickOutside(e: MouseEvent) {
-  if (presComboRef.value && !presComboRef.value.contains(e.target as Node) && !openCreatePresentationForm.value) {
-    showPresDropdown.value = false
+  if (drugComboRef.value && !drugComboRef.value.contains(e.target as Node) && !openCreateDrugForm.value) {
+    showDrugDropdown.value = false
   }
 }
 
 onMounted(async () => {
- fetchPresentations()
+ fetchDrugs()
  document.addEventListener('click', onClickOutside)
 })
 
@@ -367,9 +367,9 @@ function validate(): boolean {
   const e: Record<string, string> = {}
   const re: Record<string, string> = {}
 
-  // 1) presentation
-  if (!currentPresentation.value) {
-    e.presentation = 'Choose a presentation.'
+  // 1) drug
+  if (!currentDrug.value) {
+    e.drug = 'Choose a drug.'
   }
 
   // 2) at least one batch row
@@ -436,8 +436,8 @@ function validate(): boolean {
 async function handleSubmit(onSuccess?: () => void) {
   if (!validate()) return
   
-  const pres = currentPresentation.value;
-  if (!pres) return;
+  const drug = currentDrug.value;
+  if (!drug) return;
 
   saving.value = true
 
@@ -445,7 +445,7 @@ async function handleSubmit(onSuccess?: () => void) {
     await Promise.all(
       batches.value.map(async b => {
         b.batch.expiryDate = new Date(b.batch.expiryDate).toISOString()
-        await createBatch(pres.id, b)
+        await createBatch(drug.id, b)
       })
     )
 
@@ -459,17 +459,17 @@ async function handleSubmit(onSuccess?: () => void) {
   }
 }
 
-function onPresentationCreated(newPres: DrugPresentationView) {
+function onDrugCreated(newDrug: DrugView) {
   // add to local list (so it appears immediately in searches)
-  presentations.value.unshift(newPres)
-  selectedPresentationId.value = newPres.id
-  presentationQuery.value = newPres.displayLabel
-  openCreatePresentationForm.value = false
+  drugs.value.unshift(newDrug)
+  selectedDrugId.value = newDrug.id
+  drugQuery.value = `${fmtDrugNameWithBrand(newDrug)} — ${fmtStrength(newDrug)} (${newDrug.displayRoute})`
+  openCreateDrugForm.value = false
 }
 
 function resetForm() {
   batches.value = [emptyBatch()]
-  // keep the selected presentation so users can continue adding more for same item
+  // keep the selected drug so users can continue adding more for same item
 }
 </script>
 

@@ -1,4 +1,4 @@
-import type { ISODateString, ScheduleKind, UnitCode } from "./Util"
+import type { ISODateString, ScheduleKind, UnitCode, FrequencyCode } from "./Util"
 
 export interface Prescription {
     id: number
@@ -26,27 +26,21 @@ export interface PrescriptionPostData {
 export interface PrescriptionLine {
     id: number
     prescriptionId: number
-    presentationId: number
+    drugId: number
     remarks?: string
 
     doseAmount: number
     doseUnit: UnitCode
 
-    // Periodic schedule model:
-	// periods = ceil(duration / everyN); doses = periods * frequencyPerSchedule
-	// Examples:
-	//  - TID x 7 days        → kind=day,  everyN=1, freq=3,  duration=7
-	//  - q8h x 5 days        → kind=hour, everyN=8, freq=1,  duration=120
-	//  - every other day x14 → kind=day,  everyN=2, freq=1,  duration=14
-	//  - weekly x 4 weeks    → kind=week, everyN=1, freq=1,  duration=4
-    scheduleKind: ScheduleKind // "hour" | "day" | "week" | "month"
-    everyN: number
-    frequencyPerSchedule: number // administrations per schedule period
+    // Frequency code (e.g., 'TDS', 'q8h', 'BD', etc.)
+    frequencyCode: FrequencyCode
 
-    duration: number // in units of scheduleKind
+    prn: boolean // "as needed" / "pro re nata"
+
+    duration: number // in units of durationUnit
     durationUnit: ScheduleKind // "day" | "hour" | "week" | "month"
 
-    totalToDispense: number // Computed by backend (in presentation’s dispense unit)
+    totalToDispense: number // Computed by backend (in drug's dispense unit)
     dispenseUnit: UnitCode
 
     isPacked: boolean
@@ -65,15 +59,15 @@ export interface PrescriptionLine {
 }
 
 export interface PrescriptionLinePostData {
-    presentationId: number
+    drugId: number
     remarks?: string
 
     doseAmount: number
     doseUnit: UnitCode
 
-    scheduleKind: ScheduleKind // "hour" | "day" | "week" | "month"
-    everyN: number
-    frequencyPerSchedule: number // administrations per schedule period
+    frequencyCode: FrequencyCode
+
+    prn: boolean
 
     duration: number
     durationUnit: ScheduleKind 

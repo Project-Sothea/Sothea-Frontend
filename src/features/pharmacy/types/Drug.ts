@@ -1,22 +1,15 @@
 import type { DosageFormCode, RouteCode, UnitCode, ISODateString } from "./Util"
 
+// Drug entity ---
 export interface Drug {
-  id: number
-	genericName:string 
-  brandName?: string
-  atcCode?: string
-  notes?: string
-  isActive: boolean
-  createdAt?: string
-  updatedAt?: string
-}
-
-// --- Base presentation returned by some endpoints ---
-export interface DrugPresentation {
   id: number;
-  drugId: number;
+  
+  genericName: string;
+  brandName?: string;
+  atcCode?: string;
+  isActive: boolean;
 
-  // coded fields
+  // Dosage and strength fields
   dosageFormCode: DosageFormCode;
   routeCode: RouteCode;
 
@@ -37,21 +30,16 @@ export interface DrugPresentation {
 
   // optional metadata
   barcode?: string;
-  notes?: string;
+  notes?: string;  // Drug-specific notes
+  displayAsPercentage?: boolean;  // If true, display concentration as percentage
 
   createdAt?: ISODateString;
   updatedAt?: ISODateString;
 }
 
-// --- "View" returned by presentation view endpoints (adds server-computed labels) ---
-export type DrugPresentationView = DrugPresentation & {
-  drugName: string;            // e.g. "Paracetamol"
+// --- "View" returned by drug view endpoints (adds server-computed labels) ---
+export type DrugView = Drug & {
   displayStrength: string;     // e.g. "500 mg tab" or "250 mg/5 mL syrup"
   displayRoute: string;        // e.g. "PO"
   displayLabel: string;        // e.g. "Paracetamol 500 mg tablet (PO)"
 };
-
-export interface DrugWithPresentations {
-  drug: Drug
-  presentations: DrugPresentationView[]
-}
