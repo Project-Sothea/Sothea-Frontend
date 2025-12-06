@@ -276,7 +276,7 @@
             <textarea
               v-model="dentalNotes"
               rows="1"
-              placeholder="Enter dental notes"
+              :placeholder="!isEditing ? 'No dental notes' : 'Enter dental notes'"
               class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
               :disabled="!isEditing"
             ></textarea>

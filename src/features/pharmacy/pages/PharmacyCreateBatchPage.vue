@@ -123,7 +123,7 @@
 
           <!-- supplier -->
           <div class="col-span-12 sm:col-span-4">
-            <label class="block mb-1 text-gray-700">Supplier <span class="text-red-600">*</span></label>
+            <label class="block mb-1 text-gray-700">Supplier</label>
             <input
               v-model.trim="b.batch.supplier"
               :class="inputClass(rowErr(bIdx,'supplier'))"

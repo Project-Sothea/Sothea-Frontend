@@ -70,7 +70,7 @@
             v-model="headerNotes"
             maxlength="300"
             rows="3"
-            placeholder="Add any instructions for the pharmacist (optional)…"
+            :placeholder="(!headerNotesEditing || headerSaving) ? 'No instructions' : 'Add any instructions for the pharmacist (optional)…'"
             :disabled="!headerNotesEditing || headerSaving"
             class="block w-full resize-y rounded-xl border border-gray-200 bg-white p-3 text-sm placeholder:text-gray-400
                    focus:outline-none focus:ring-4 focus:ring-[#3f51b5]/20 disabled:bg-gray-50 disabled:cursor-not-allowed"
