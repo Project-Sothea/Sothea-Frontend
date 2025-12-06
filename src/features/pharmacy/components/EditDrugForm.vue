@@ -6,7 +6,7 @@
         <div class="relative z-10 w-full max-w-2xl mx-4 rounded-2xl bg-white shadow-xl">
           <!-- Header -->
           <div class="flex items-center justify-between px-5 py-4 border-b">
-            <h3 class="text-lg font-semibold">Create Drug</h3>
+            <h3 class="text-lg font-semibold">{{ drugId ? 'Edit Drug' : 'Create Drug' }}</h3>
             <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100" @click="emit('close')">✕</button>
           </div>
 
@@ -241,12 +241,12 @@ import {
   DOSAGE_FORM_LABELS, ROUTE_LABELS, UNIT_KIND, UNIT_LABELS,
   type DosageFormCode, type RouteCode, type UnitCode
 } from '../types/Util'
-import { createDrug } from '../api/drug'
+import { createDrug, updateDrug, getDrugStock } from '../api/drug'
 
 // ─── Props & Emits ────────────────────────
 
-const props = defineProps<{ open: boolean }>()
-const emit = defineEmits<{ (e:'close'): void; (e:'created', p: any): void }>()
+const props = defineProps<{ open: boolean; drugId?: number }>()
+const emit = defineEmits<{ (e:'close'): void; (e:'created', p: any): void; (e:'updated', p: any): void }>()
 
 const toast = useToast()
 
@@ -271,8 +271,36 @@ const drug = ref<Partial<Omit<Drug, 'id'>>>({
 /** Errors / UI helpers */
 const errors = ref<Record<string,string>>({})
 const submitting = ref(false)
+const loading = ref(false)
 const inputClass = (err?: string) =>
   ['mt-1 block w-full rounded border px-3 py-2', err ? 'border-red-500' : 'border-gray-300'].join(' ')
+
+// ─── Load drug data for edit mode ────────────────────────
+watch([() => props.open, () => props.drugId], async () => {
+  if (props.open && props.drugId) {
+    loading.value = true
+    try {
+      const stock = await getDrugStock(props.drugId)
+      const d = stock.drug
+      // Populate form with existing drug data
+      drug.value = stock.drug
+      errors.value = {}
+    } catch (err: any) {
+      console.error(err)
+      toast.error(err?.message ?? 'Failed to load drug data')
+    } finally {
+      loading.value = false
+    }
+  } else if (props.open && !props.drugId) {
+    // Reset form for create mode
+    drug.value = {
+      isFractionalAllowed: false,
+      isActive: true,
+      displayAsPercentage: false
+    }
+    errors.value = {}
+  }
+}, { immediate: true })
 
 // ─── Form visibility & behavior based on dosage form ────────────────────────
 const hasDosageForm = computed(() => !!drug.value.dosageFormCode)
@@ -681,20 +709,28 @@ async function submit() {
   const payload = buildPayload()
   submitting.value = true
   try {
-    const data = await createDrug(payload)
-    toast.success('Drug created')
-    emit('created', data)
-    emit('close') // Close the modal after successful creation
-    // Reset form
-    drug.value = {
-      isFractionalAllowed: false,
-      isActive: true,
-      displayAsPercentage: false
+    if (props.drugId) {
+      // Update existing drug
+      const data = await updateDrug(props.drugId, payload)
+      toast.success('Drug updated')
+      emit('updated', data)
+      emit('close')
+    } else {
+      // Create new drug
+      const data = await createDrug(payload)
+      toast.success('Drug created')
+      emit('created', data)
+      emit('close') // Close the modal after successful creation
+      // Reset form
+      drug.value = {
+        isFractionalAllowed: false,
+        isActive: true,
+        displayAsPercentage: false
+      }
+      errors.value = {}
     }
-    errors.value = {}
   } catch (err:any) {
-    console.error(err)
-    toast.error(err?.message ?? 'Failed to create drug')
+    toast.error(err?.response.data.error ?? 'Failed to save line.') ?? (props.drugId ? 'Failed to update drug' : 'Failed to create drug')
   } finally {
     submitting.value = false
   }

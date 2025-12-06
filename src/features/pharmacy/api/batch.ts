@@ -21,7 +21,7 @@ export async function getBatch(batchId: number) {
   return data
 }
 
-export async function updateBatch(batchId: number, updatedBatch: DrugBatch) {
+export async function updateBatch(batchId: number, updatedBatch: BatchPostData) {
   const { data } = await http.patch<BatchDetail>(`/pharmacy/batches/${batchId}`, updatedBatch)
   return data
 }
@@ -41,7 +41,7 @@ export async function createBatchLocation(batchId: number, newBatchLocation: Dru
   return data
 }
 
-export async function updateBatchLocation(locationId: number, updatedBatchLocation: DrugBatchLocation) {
+export async function updateBatchLocation(locationId: number, updatedBatchLocation: Omit<DrugBatchLocation, 'id' | 'batchId'>) {
   const { data } = await http.patch<DrugBatchLocation>(`/pharmacy/locations/${locationId}`, updatedBatchLocation)
   return data
 }

@@ -47,7 +47,7 @@
             ➕ Create new drug…
           </li>
 
-          <CreateDrugForm
+          <EditDrugForm
             :open="openCreateDrugForm"
             @created="onDrugCreated"
             @close="openCreateDrugForm = false"
@@ -58,35 +58,43 @@
     </div>
 
     <!-- ─────────── BATCHES TABLE (MULTI) ─────────── -->
-    <div class="flex items-center justify-between mb-2">
-      <span class="text-gray-700">Batches</span>
-      <div class="flex items-center gap-2">
-        <button type="button" class="btn-indigo !py-1" @click="addBatchRow">+ Add Batch</button>
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-800">Batches</h3>
+      <div class="flex items-center gap-3">
+        <span v-if="batches.length > 0" class="text-sm text-gray-600">
+          Total: <strong>{{ grandTotal }}</strong>
+        </span>
+        <button type="button" class="btn-indigo !py-1.5 !px-3 text-sm" @click="addBatchRow">
+          + Add Batch
+        </button>
       </div>
     </div>
-    <p v-if="errors.batches" class="err mb-2">{{ errors.batches }}</p>
+    <p v-if="errors.batches" class="err mb-3">{{ errors.batches }}</p>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
       <div
         v-for="(b, bIdx) in batches"
         :key="bIdx"
-        class="p-4 rounded border border-gray-200"
+        class="p-5 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-colors"
       >
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold">
-            Batch #{{ bIdx + 1 }}
-            <span class="text-gray-500 font-normal" v-if="perBatchTotals[bIdx] !== undefined">
-              (Total qty: {{ perBatchTotals[bIdx] }})
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium text-gray-600">Batch {{ bIdx + 1 }}</span>
+            <span v-if="perBatchTotals[bIdx] !== undefined" class="text-sm text-gray-500">
+              • {{ perBatchTotals[bIdx] }} total
             </span>
-          </h3>
+          </div>
           <button
             type="button"
             v-show="batches.length > 1"
-            class="px-3 py-1 rounded-lg text-sm text-red-600 border border-red-600 hover:bg-red-600 hover:text-white transition-colors"
+            class="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
             :disabled="batches.length === 1"
             @click="removeBatchAt(bIdx)"
+            title="Remove batch"
           >
-            Remove Batch
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+            </svg>
           </button>
         </div>
 
@@ -127,46 +135,49 @@
 
         <!-- LOCATIONS -->
         <div class="mt-4">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-gray-700">Locations <span class="text-red-600">*</span></span>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-medium text-gray-700">
+              Locations <span class="text-red-600">*</span>
+            </span>
             <div class="flex gap-2">
-              <button type="button" class="btn-indigo !py-1" @click="addLocationRow(bIdx)">Add row</button>
               <button
                 type="button"
-                class="btn-gray !py-1"
+                class="text-sm text-gray-600 hover:text-gray-800 px-3 py-1.5 rounded border border-gray-300 hover:bg-gray-100 transition-colors"
                 :disabled="bIdx === 0 || batches[bIdx - 1].locations.length === 0"
                 @click="copyLocationsFromPrev(bIdx)"
                 title="Copy locations from previous batch"
               >
                 Copy above
               </button>
+              <button type="button" class="text-sm btn-indigo !py-1.5 !px-3" @click="addLocationRow(bIdx)">
+                + Add location
+              </button>
             </div>
           </div>
           <p class="err mb-2" v-if="rowErr(bIdx,'locations')">{{ rowErr(bIdx,'locations') }}</p>
 
-          <div class="space-y-3">
+          <div class="space-y-2">
             <div
               v-for="(loc, lIdx) in b.locations"
               :key="lIdx"
               class="grid grid-cols-12 gap-2 items-start"
             >
-              <!-- Location name (free text). If you have IDs, add an autocomplete here -->
+              <!-- Location name -->
               <div class="col-span-12 sm:col-span-8">
-                <label class="sr-only">Location</label>
                 <input
                   v-model.trim="loc.location"
                   :class="inputClass(rowLocErr(bIdx,lIdx,'locationName'))"
-                  placeholder="e.g., Cupboard A / Drawer 3"
+                  placeholder="Location (e.g., Cupboard A)"
                   autocomplete="off"
+                  class="text-sm"
                 />
-                <p class="err" v-if="rowLocErr(bIdx,lIdx,'locationName')">
+                <p class="err text-xs" v-if="rowLocErr(bIdx,lIdx,'locationName')">
                   {{ rowLocErr(bIdx,lIdx,'locationName') }}
                 </p>
               </div>
 
               <!-- Quantity -->
               <div class="col-span-9 sm:col-span-3">
-                <label class="sr-only">Quantity</label>
                 <input
                   v-model.number="loc.quantity"
                   type="number"
@@ -174,8 +185,9 @@
                   step="1"
                   :class="inputClass(rowLocErr(bIdx,lIdx,'quantity'))"
                   placeholder="Qty"
+                  class="text-sm"
                 />
-                <p class="err" v-if="rowLocErr(bIdx,lIdx,'quantity')">
+                <p class="err text-xs" v-if="rowLocErr(bIdx,lIdx,'quantity')">
                   {{ rowLocErr(bIdx,lIdx,'quantity') }}
                 </p>
               </div>
@@ -185,18 +197,10 @@
                   type="button"
                   @click="removeLocationAt(bIdx,lIdx)"
                   :disabled="b.locations.length === 1"
-                  class="p-2 rounded-md text-red-600 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
-                  title="Remove row"
+                  class="w-full h-[35px] mt-1 px-1 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors flex items-center justify-center disabled:text-gray-300 disabled:border-gray-300 disabled:cursor-not-allowed text-sm"
+                  title="Remove location"
                 >
-                  <!-- icon -->
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       class="h-5 w-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
-                  </svg>
+                  ✕
                 </button>
               </div>
             </div>
@@ -206,20 +210,17 @@
       </div>
     </div>
 
-    <!-- GRAND TOTAL -->
-    <div class="mt-4 text-sm text-gray-600">
-      Grand total quantity: <strong>{{ grandTotal }}</strong>
-    </div>
-
     <!-- ACTIONS -->
-    <div class="flex justify-end gap-3 mt-6">
-      <button type="button" :disabled="saving" class="btn-indigo" @click="handleSubmit(() => router.back())">
-        {{ saving ? 'Saving…' : 'Save & Go Back' }}
-      </button>
-      <button type="button" :disabled="saving" class="btn-green" @click="handleSubmit(resetForm)">
-        {{ saving ? 'Saving…' : 'Save & Add Another' }}
-      </button>
+    <div class="flex justify-between items-center gap-3 mt-6 pt-6 border-t">
       <button type="button" class="btn-gray" @click="router.back()">Cancel</button>
+      <div class="flex gap-3">
+        <button type="button" :disabled="saving" class="btn-indigo" @click="handleSubmit(() => router.back())">
+          {{ saving ? 'Saving…' : 'Save & Go Back' }}
+        </button>
+        <button type="button" :disabled="saving" class="btn-green" @click="handleSubmit(resetForm)">
+          {{ saving ? 'Saving…' : 'Save & Add Another' }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -234,7 +235,7 @@ import type { BatchPostData, DrugBatchLocation } from '../types/Batch'
 import { listDrugs } from '../api/drug'
 import { createBatch } from '../api/batch'
 import { fmtDrugNameWithBrand, fmtStrength } from '../types/Util'
-import CreateDrugForm from '../components/CreateDrugForm.vue'
+import EditDrugForm from '../components/EditDrugForm.vue'
 
 // ─────────────────────────────────────────────────────────────────────────────
 const router = useRouter()

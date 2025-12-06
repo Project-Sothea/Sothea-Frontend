@@ -24,7 +24,7 @@ export interface DrugBatchLocation {
 
 export interface BatchPostData {
 	batch: Omit<DrugBatch, 'id' | 'drugId' | 'quantity'>
-	locations: Omit<DrugBatchLocation, 'id' | 'batchId'>[]
+	locations: (Omit<DrugBatchLocation, 'id' | 'batchId'> & { id?: number })[]
 }
 
 

@@ -17,7 +17,7 @@ export async function getDrugStock(drugId: string | number) {
   return data
 }
 
-export async function updateDrug(drugId: string | number, updatedDrug: Drug) {
+export async function updateDrug(drugId: string | number, updatedDrug: Omit<Drug, 'id'>) {
   const { data } = await http.patch<DrugView>(`/pharmacy/drugs/${drugId}`, updatedDrug)
   return data
 }
