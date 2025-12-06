@@ -19,7 +19,7 @@
           <button :class="tab === 'batches' ? activeBtn : inactiveBtn" @click="tab = 'batches'">
             All&nbsp;Batches
           </button>
-          <button :class="tab === 'presentations' ? activeBtn : inactiveBtn" @click="tab = 'presentations'">
+          <button :class="tab === 'drugs' ? activeBtn : inactiveBtn" @click="tab = 'drugs'">
             By&nbsp;Drug
           </button>
         </div>
@@ -46,7 +46,7 @@
             <thead>
               <tr>
                 <th class="th">Batch&nbsp;ID</th>
-                <th class="th">Drug Presentation</th>
+                <th class="th">Drug</th>
                 <th class="th">Total Qty</th>
                 <th class="th">Expiry</th>
                 <th class="th">View Locations</th>
@@ -60,9 +60,8 @@
               >
                 <td class="td">{{ b.batchNumber }}</td>
                 <td class="td">
-                  <PresentationLabel
-                    :drug="drugForBatch(b)"
-                    :pres="presentationsById.get(b.presentationId)!"
+                  <DrugLabel
+                    :drug="drugsById.get(b.drugId)!"
                   />
                 </td>
                 <td class="td">{{ batchTotalQty(b) }}</td>
@@ -90,10 +89,10 @@
           </table>
 
           <!-- By-drug table -->
-          <table v-else class="min-w-full leading-normal">
+          <table v-else-if="tab === 'drugs'" class="min-w-full leading-normal">
             <thead>
               <tr>
-                <th class="th">Presentation</th>
+                <th class="th">Drug</th>
                 <th class="th">Total&nbsp;Qty</th>
                 <th class="th">Earliest&nbsp;Expiry</th>
                 <th class="th">#&nbsp;Batches</th>
@@ -101,14 +100,13 @@
             </thead>
             <tbody>
               <tr
-                v-for="(row, idx) in filteredPresentationRows"
+                v-for="(row, idx) in filteredDrugRows"
                 :key="row.id"
                 :class="idx % 2 ? 'odd-row' : 'even-row'"
               >
                 <td class="px-4 py-2">
-                  <PresentationLabel
+                  <DrugLabel
                     :drug="row.drug"
-                    :pres="row.presentation"
                   />
                 </td>
                 <td class="td">{{ row.totalQty }}</td>
@@ -128,22 +126,20 @@
 import { ref, computed, onMounted } from 'vue'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
 import BatchLocationsModal from '../components/BatchLocationsModal.vue'
-import { listAllBatches, listBatchesByPresentation } from '../api/batch'
-import { listAllPresentations, listDrugs, listPresentationsForDrug } from '../api/drug'
+import { listAllBatches } from '../api/batch'
+import { listDrugs } from '../api/drug'
 import type { BatchDetail, DrugBatchLocation } from '../types/Batch'
-import type { Drug, DrugPresentationView } from '../types/Drug'
-
-import PresentationLabel from '../components/PresentationLabel.vue'
-import { fmtDate } from '../types/Util'
+import type { DrugView } from '../types/Drug'
+import DrugLabel from '../components/DrugLabel.vue'
+import { fmtDate, fmtDrugName } from '../types/Util'
 
 
 // ---------------- state ----------------
-const tab = ref<'batches' | 'presentations'>('batches')
+const tab = ref<'batches' | 'drugs'>('batches')
 
 // raw data
-const drugs = ref<Drug[]>([])
-const presentationsByDrug = ref<Record<number, DrugPresentationView[]>>({})
-const presentationsById = ref<Map<number, DrugPresentationView>>(new Map())
+const drugs = ref<DrugView[]>([])
+const drugsById = ref<Map<number, DrugView>>(new Map())
 
 const batches = ref<BatchDetail[]>([])
 
@@ -155,42 +151,21 @@ const selectedBatch = ref<BatchDetail | null>(null)
 
 // ---------------- fetchers ----------------
 async function loadAll() {
-  // 1) Drugs
+  // Drugs now contain all information (merged)
   drugs.value = await listDrugs()
-
-  const allPresentations = await listAllPresentations()
-
-  const pbd: Record<number, DrugPresentationView[]> = {}
-  const presMap = new Map<number, DrugPresentationView>()
-  for (const drugPres of allPresentations) {
-    if (!pbd[drugPres.drugId]) pbd[drugPres.drugId] = []
-    pbd[drugPres.drugId].push(drugPres)
-    presMap.set(drugPres.id, drugPres)
+  
+  const drugMap = new Map<number, DrugView>()
+  for (const drug of drugs.value) {
+    drugMap.set(drug.id, drug)
   }
-  presentationsByDrug.value = pbd
-  presentationsById.value = presMap
-  const allPresentationIds = [...presMap.keys()]
+  drugsById.value = drugMap
 
   batches.value = await listAllBatches()
 }
 
 // ---------------- helpers ----------------
-const drugById = computed(() => {
-  const m = new Map<number, Drug>()
-  for (const d of drugs.value) m.set(d.id, d)
-  return m
-})
-
-function drugIdForBatch(b: BatchDetail): number | null {
-  const pres = presentationsById.value.get(b.presentationId)
-  return pres?.drugId ?? null
-}
-
-function drugForBatch(b: BatchDetail): Drug | null {
-  const id = drugIdForBatch(b)
-  if (id == null) return null
-  // NOTE: your Drug type uses genericName (not name)
-  return drugById.value.get(id) ?? null
+function drugForBatch(b: BatchDetail): DrugView | null {
+  return drugsById.value.get(b.drugId) ?? null
 }
 
 function batchTotalQty(b: BatchDetail): number {
@@ -210,50 +185,42 @@ const filteredBatches = computed(() => {
   return batches.value.filter(b => {
     const byBatchNum = (b.batchNumber ?? '').toLowerCase().includes(term)
     const drug = drugForBatch(b)
-    const byDrug = drug?.genericName.toLowerCase().includes(term) ||
-      drug?.brandName?.toLowerCase().includes(term)
+    if (drug) {
+      const searchText = `${drug.atcCode || ''} ${drug.genericName || ''} ${drug.brandName || ''} ${drug.displayLabel || ''}`.toLowerCase()
+      const byDrug = searchText.includes(term)
+      const byLocs = b.batchLocations.some(bL => bL.location.toLowerCase().includes(term))
+      return byBatchNum || byDrug || byLocs
+    }
     const byLocs = b.batchLocations.some(bL => bL.location.toLowerCase().includes(term))
-    return byBatchNum || byDrug || byLocs
+    return byBatchNum || byLocs
   })
 })
 
 // ---------------- aggregate for "By Drug" view ----------------
-// all presentations flattened (so rows show even if 0 batches)
-const allPresentations = computed(() => {
-  const out: DrugPresentationView[] = []
-  for (const list of Object.values(presentationsByDrug.value)) {
-    if (Array.isArray(list)) out.push(...list)
-  }
-  return out
-})
-
-const presentationRows = computed(() => {
+const drugRows = computed(() => {
   type Row = {
     id: number
-    drug: Drug | null
-    presentation: DrugPresentationView
+    drug: DrugView
     totalQty: number
     earliestExpiryMs: number | null
     numBatches: number
   }
   const map = new Map<number, Row>()
 
-  // seed from presentations
-  for (const p of allPresentations.value) {
-    const d = drugById.value.get(p.drugId)
-    map.set(p.id, {
-      id: p.id,
-      drug: d ?? null,
-      presentation: p,
+  // seed from drugs
+  for (const d of drugs.value) {
+    map.set(d.id, {
+      id: d.id,
+      drug: d,
       totalQty: 0,
       earliestExpiryMs: null,
       numBatches: 0,
     })
   }
 
-  // fold in batches (you already have batches with b.presentationId)
+  // fold in batches (you already have batches with b.drugId)
   for (const b of batches.value) {
-    const row = map.get(b.presentationId)
+    const row = map.get(b.drugId)
     if (!row) continue
     row.totalQty += batchTotalQty(b)
     row.numBatches += 1
@@ -270,17 +237,20 @@ const presentationRows = computed(() => {
         ? '–'
         : new Date(r.earliestExpiryMs).toLocaleDateString('en-SG'),
     }))
-    .sort((a, b) => a.presentation.displayLabel.localeCompare(b.presentation.displayLabel))
+    .sort((a, b) => {
+      const nameA = fmtDrugName(a.drug)
+      const nameB = fmtDrugName(b.drug)
+      return nameA.localeCompare(nameB)
+    })
 })
 
-const filteredPresentationRows = computed(() => {
+const filteredDrugRows = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
-  if (!term) return presentationRows.value
-  return presentationRows.value.filter(r =>
-    r.presentation.displayLabel.toLowerCase().includes(term) ||
-    r.drug?.genericName.toLowerCase().includes(term) ||
-    r.drug?.brandName?.toLowerCase().includes(term)
-  )
+  if (!term) return drugRows.value
+  return drugRows.value.filter(r => {
+    const searchText = `${r.drug.atcCode || ''} ${r.drug.genericName || ''} ${r.drug.brandName || ''} ${r.drug.displayLabel || ''}`.toLowerCase()
+    return searchText.includes(term)
+  })
 })
 
 

@@ -145,8 +145,8 @@
                 :rx-id="rx.id"
                 :line="line"
                 :read-only="isReadOnly"
-                :all-presentations="presentations"
-                :exclude-presentation-ids="excludePresentationIds(idx)"
+                :all-drugs="drugs"
+                :exclude-ids="excludeDrugIds(idx)"
                 :has-unsaved-edits="line.id ? !!unsavedLineEdits[line.id] : false"
                 :original-line="line.id && rx ? rx.lines?.find((l: PrescriptionLine) => l.id === line.id) : undefined"
                 @refresh="refreshRx"
@@ -190,11 +190,12 @@ import {
   updatePrescription,
   dispensePrescription,
 } from '@/features/pharmacy/api/prescription'
-import type { DrugPresentationView } from '@/features/pharmacy/types/Drug'
+import type { DrugView } from '@/features/pharmacy/types/Drug'
 import PrescriptionLineRow from './PrescriptionLineRow.vue'
-import { listAllPresentations, listDrugs, listPresentationsForDrug } from '@/features/pharmacy/api/drug'
+import { listDrugs } from '@/features/pharmacy/api/drug'
 import type Patient from '../types/Patient'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
+import type { FrequencyCode, ScheduleKind } from '@/features/pharmacy/types/Util'
 
 // ─── Props ────────────────────────────────────────────────────────────────
 const props = defineProps<{
@@ -213,7 +214,7 @@ const headerSaving = ref(false)
 const dispensing = ref(false)
 
 // optional: preload this if you have an endpoint; otherwise child can remote-search
-const presentations = ref<DrugPresentationView[]>([])
+const drugs = ref<DrugView[]>([])
 
 // All existing server lines
 const lines = computed<Partial<PrescriptionLine>[]>(() => rx.value?.lines ?? [])
@@ -270,7 +271,7 @@ const allPacked = computed(() => (rx.value?.lines?.length ?? 0) > 0 && rx.value!
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────
 onMounted(async () => {
-  await Promise.all([ensureHeader(), loadPresentations()])
+  await Promise.all([ensureHeader(), loadDrugs()])
   
   // After data is loaded, initialize form draft
   // If draft was restored, it will have already been applied to the refs
@@ -320,8 +321,8 @@ async function ensureHeader() {
   }
 }
 
-async function loadPresentations() {
-  presentations.value = await listAllPresentations()
+async function loadDrugs() {
+  drugs.value = await listDrugs()
 }
 
 async function refreshRx() {
@@ -341,7 +342,7 @@ async function refreshRx() {
     }
   })
   unsavedLineEdits.value = newEdits
-  await loadPresentations()
+  await loadDrugs()
   
   // Clear draft if everything is saved
   if (draftLines.value.length === 0 && 
@@ -390,13 +391,13 @@ function addLine() {
   draftLines.value.push({
     __draft: true,
     _uid: `d-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    presentationId: undefined,
+    drugId: undefined,
     doseAmount: undefined,
     doseUnit: undefined,
-    scheduleKind: 'day',
-    everyN: 1,
-    frequencyPerSchedule: 1,
-    duration: 7
+    frequencyCode: 'OM' as FrequencyCode,
+    duration: 7,
+    durationUnit: 'day' as ScheduleKind,
+    prn: false,
   })
 }
 
@@ -447,12 +448,12 @@ function discardDraftLine(uid?: string) {
 }
 
 
-// Helpers to avoid duplicate presentations across lines
-function excludePresentationIds(idx: number) {
+// Helpers to avoid duplicate drugs across lines
+function excludeDrugIds(idx: number) {
   const chosen = new Set<number>()
   uiLines.value.forEach((l, i) => {
     if (i === idx) return
-    const id = (l as any).presentationId as number | undefined
+    const id = (l as any).drugId as number | undefined
     if (id) chosen.add(id)
   })
   return Array.from(chosen)

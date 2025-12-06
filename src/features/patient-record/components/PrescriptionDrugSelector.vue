@@ -3,9 +3,9 @@
     <input
       ref="inputEl"
       :id="inputId"
-      v-model="presQuery"
+      v-model="drugQuery"
       :disabled="disabled"
-      placeholder="Search drug presentation…"
+      placeholder="Search drug…"
       :class="inputClass(error)"
       autocomplete="off"
       role="combobox"
@@ -21,7 +21,7 @@
       :id="listboxId"
       class="absolute z-20 bg-white border rounded shadow w-full mt-1 max-h-64 overflow-auto"
       role="listbox"
-      :aria-activedescendant="selectedPresId ? String(selectedPresId) : undefined"
+      :aria-activedescendant="selectedDrugId ? String(selectedDrugId) : undefined"
     >
       <li
         v-if="loading"
@@ -32,30 +32,30 @@
       </li>
 
       <li
-        v-for="p in filteredPresentations"
-        :id="String(p.id)"
-        :key="p.id"
+        v-for="d in filteredDrugs"
+        :id="String(d.id)"
+        :key="d.id"
         role="option"
-        :aria-selected="p.id === selectedPresId"
+        :aria-selected="d.id === selectedDrugId"
         class="px-3 py-2 cursor-pointer hover:bg-indigo-100 flex items-center gap-2"
-        :class="p.id === selectedPresId ? 'bg-indigo-50' : ''"
-        @mousedown.prevent="onPick(p)"
+        :class="d.id === selectedDrugId ? 'bg-indigo-50' : ''"
+        @mousedown.prevent="onPick(d)"
       >
         <!-- Full option label (drug + dosage) -->
         <div class="flex-1 min-w-0">
           <div class="truncate">
-            <span class="font-medium">{{ p.drugName }}</span>
-            <span class="text-gray-500"> — {{ p.displayStrength }}</span>
-            <span class="text-gray-400"> ({{ p.displayRoute }})</span>
+            <span class="font-medium">{{ fmtDrugName(d) }}</span>
+            <span class="text-gray-500"> — {{ fmtStrength(d) }}</span>
+            <span class="text-gray-400"> ({{ d.displayRoute }})</span>
           </div>
         </div>
-        <code v-if="p.dispenseUnit" class="text-xs bg-gray-100 border rounded px-1">
-          {{ p.dispenseUnit }}
+        <code v-if="d.dispenseUnit" class="text-xs bg-gray-100 border rounded px-1">
+          {{ d.dispenseUnit }}
         </code>
       </li>
 
       <li
-        v-if="!loading && !filteredPresentations.length"
+        v-if="!loading && !filteredDrugs.length"
         class="px-3 py-2 text-sm text-gray-500"
       >
         No matches
@@ -68,11 +68,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import type { DrugPresentationView } from '@/features/pharmacy/types/Drug'
+import type { DrugView } from '@/features/pharmacy/types/Drug'
+import { fmtDrugName, fmtStrength } from '@/features/pharmacy/types/Util'
 
 const props = withDefaults(defineProps<{
   modelValue?: number
-  allPresentations?: DrugPresentationView[]
+  allDrugs?: DrugView[]
   excludeIds?: number[]
   error?: string
   disabled?: boolean
@@ -89,40 +90,43 @@ const emit = defineEmits<{ 'update:modelValue': [number | null] }>()
 
 // ── UI state ─────────────────────────────────────────────────────────────
 const inputEl = ref<HTMLInputElement | null>(null)
-const presQuery = ref('')   // after selection, show FULL label (drug + dosage)
+const drugQuery = ref('')   // after selection, show FULL label (drug + dosage)
 const open = ref(false)
-const listboxId = computed(() => `pres-listbox-${props.inputId ?? 'default'}`)
+const listboxId = computed(() => `drug-listbox-${props.inputId ?? 'default'}`)
 
 // Base list reactively from props + excludeIds, keep current visible
-const basePresentations = computed<DrugPresentationView[]>(() => {
-  const all = props.allPresentations ?? []
+const baseDrugs = computed<DrugView[]>(() => {
+  const all = props.allDrugs ?? []
   const exclude = new Set(props.excludeIds ?? [])
   if (props.modelValue != null) exclude.delete(props.modelValue)
-  return all.filter(p => !exclude.has(p.id))
+  return all.filter(d => !exclude.has(d.id))
 })
 
-const selectedPresId = computed<number | ''>(() => props.modelValue ?? '')
+const selectedDrugId = computed<number | ''>(() => props.modelValue ?? '')
 
-function labelFor(p: DrugPresentationView) {
-  return `${p.drugName} — ${p.displayStrength} (${p.displayRoute})`
+function labelFor(d: DrugView) {
+  return `${fmtDrugName(d)} — ${fmtStrength(d)} (${d.displayRoute})`
 }
 function labelForId(id?: number | null) {
   if (id == null) return ''
-  const p = basePresentations.value.find(x => x.id === id)
-  return p ? labelFor(p) : ''
+  const d = baseDrugs.value.find(x => x.id === id)
+  return d ? labelFor(d) : ''
 }
 
 
 // ─── Search & Filter ────────────────────────
 
 // SEARCH should use only the drug name portion.
-const filteredPresentations = computed(() => {
-  const raw = presQuery.value.trim().toLowerCase()
+const filteredDrugs = computed(() => {
+  const raw = drugQuery.value.trim().toLowerCase()
   // Take only the piece before '—' (em dash). If not present, use the whole string.
   const qDrug = (raw.split('—')[0] || raw).trim()
-  const src = basePresentations.value
+  const src = baseDrugs.value
   if (!qDrug) return src.slice(0, 50)
-  return src.filter(p => p.drugName.toLowerCase().includes(qDrug))
+  return src.filter(d => {
+    const searchText = `${d.atcCode || ''} ${d.genericName || ''} ${d.brandName || ''}`.toLowerCase()
+    return searchText.includes(qDrug)
+  })
 })
 
 const inputClass = (err?: string) =>
@@ -133,25 +137,25 @@ const inputClass = (err?: string) =>
 onMounted(() => {
   // Prime textbox with FULL label if selected
   if (props.modelValue != null) {
-    presQuery.value = labelForId(props.modelValue)
+    drugQuery.value = labelForId(props.modelValue)
   }
 })
 
 // Sync textbox if parent changes modelValue
 watch(() => props.modelValue, (nv) => {
-  presQuery.value = nv != null ? labelForId(nv) : ''
+  drugQuery.value = nv != null ? labelForId(nv) : ''
 })
 
 // Sync if list changes (async fetch/excludeIds)
-watch(basePresentations, () => {
+watch(baseDrugs, () => {
   if (props.modelValue != null) {
-    presQuery.value = labelForId(props.modelValue)
+    drugQuery.value = labelForId(props.modelValue)
   }
 }, { flush: 'post' })
 
-function onPick(p: DrugPresentationView) {
+function onPick(p: DrugView) {
   emit('update:modelValue', p.id)
-  presQuery.value = labelFor(p)  // ← show FULL option text in the input
+  drugQuery.value = labelFor(p)  // ← show FULL option text in the input
   open.value = false
   nextTick(() => inputEl.value?.blur()) // optional: remove focus after select
   return
@@ -162,7 +166,7 @@ function onBlur() {
   setTimeout(() => {
     open.value = false
     if (props.modelValue != null) {
-      presQuery.value = labelForId(props.modelValue)
+      drugQuery.value = labelForId(props.modelValue)
     }
   }, 120)
 }

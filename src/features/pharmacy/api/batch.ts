@@ -1,18 +1,18 @@
 import { http } from "@/shared/api/http"
-import type { BatchDetail, BatchPostData, DrugBatch, DrugBatchLocation, PresentationStock } from "../types/Batch"
+import type { BatchDetail, BatchPostData, DrugBatch, DrugBatchLocation } from "../types/Batch"
 
 export async function listAllBatches() {
-  const { data } = await http.get<BatchDetail[]>(`/pharmacy/presentations/batches`)
+  const { data } = await http.get<BatchDetail[]>(`/pharmacy/batches`)
   return data
 }
 
-export async function listBatchesByPresentation(presentationId: number) {
-  const { data } = await http.get<BatchDetail[]>(`/pharmacy/presentations/${presentationId}/batches`)
+export async function listBatchesByDrug(drugId: number) {
+  const { data } = await http.get<BatchDetail[]>(`/pharmacy/drugs/${drugId}/batches`)
   return data
 }
 
-export async function createBatch(presentationId: number, batchPostData: BatchPostData) {
-  const { data } = await http.post<BatchDetail>(`/pharmacy/presentations/${presentationId}/batches`, batchPostData)
+export async function createBatch(drugId: number, batchPostData: BatchPostData) {
+  const { data } = await http.post<BatchDetail>(`/pharmacy/drugs/${drugId}/batches`, batchPostData)
   return data
 }
 
@@ -21,7 +21,7 @@ export async function getBatch(batchId: number) {
   return data
 }
 
-export async function updateBatch(batchId: number, updatedBatch: DrugBatch) {
+export async function updateBatch(batchId: number, updatedBatch: BatchPostData) {
   const { data } = await http.patch<BatchDetail>(`/pharmacy/batches/${batchId}`, updatedBatch)
   return data
 }
@@ -41,7 +41,7 @@ export async function createBatchLocation(batchId: number, newBatchLocation: Dru
   return data
 }
 
-export async function updateBatchLocation(locationId: number, updatedBatchLocation: DrugBatchLocation) {
+export async function updateBatchLocation(locationId: number, updatedBatchLocation: Omit<DrugBatchLocation, 'id' | 'batchId'>) {
   const { data } = await http.patch<DrugBatchLocation>(`/pharmacy/locations/${locationId}`, updatedBatchLocation)
   return data
 }
