@@ -19,11 +19,12 @@
       <!-- Pain Scale -->
       <div class="mt-4">
         <label for="" class="mb-2 block text-sm font-medium text-dark">
-          Pain Scale <span class="req">*</span>
+          Pain Scale
         </label>
         <input
-          v-model="painScale"
           type="number"
+          :value="painScale ?? ''"
+          @input="handlePainScaleInput"
           step="1"
           placeholder="Enter pain scale (1-10)"
           class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
@@ -146,6 +147,22 @@ const formDraft = useAutoDraft<Physiotherapy>({
 // Extract functions from formDraft
 const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
 
+// Handle pain scale input - convert empty/NaN to null
+function handlePainScaleInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const value = target.value.trim()
+  if (value === '' || value === null || value === undefined) {
+    painScale.value = null
+  } else {
+    const numValue = Number(value)
+    if (!isNaN(numValue)) {
+      painScale.value = numValue
+    } else {
+      painScale.value = null
+    }
+  }
+}
+
 // Initialize when patientData changes
 watch(
   () => props.patientData,
@@ -158,18 +175,17 @@ watch(
 )
 
 function buildPayload(): Physiotherapy | null {
-  if (
-    !runChecks([
-      [painScale.value !== null && painScale.value >= 1 && painScale.value <= 10, 'Enter pain scale (1-10)']
-    ])
-  )
+  // All fields are optional, but if painScale is provided, validate it's in range
+  if (painScale.value != null && (painScale.value < 1 || painScale.value > 10)) {
+    toast.error('Pain scale must be between 1 and 10')
     return null
+  }
   return {
-    subjectiveAssessment: subjectiveAssessment.value,
-    painScale: painScale.value!,
-    objectiveAssessment: objectiveAssessment.value,
-    intervention: intervention.value,
-    evaluation: evaluation.value
+    subjectiveAssessment: subjectiveAssessment.value || undefined,
+    painScale: painScale.value ?? undefined,
+    objectiveAssessment: objectiveAssessment.value || undefined,
+    intervention: intervention.value || undefined,
+    evaluation: evaluation.value || undefined
   }
 }
 
