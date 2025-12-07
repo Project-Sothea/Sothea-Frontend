@@ -41,7 +41,8 @@
                     <label class="block mb-1 text-gray-700">Drug Code</label>
                     <input
                       type="number"
-                      v-model.number="drug.drugCode"
+                      :value="drug.drugCode ?? ''"
+                      @input="handleDrugCodeInput"
                       :class="inputClass(errors.drugCode)"
                       placeholder="e.g. 12345"
                     />
@@ -522,6 +523,22 @@ watch(() => drug.value.pieceContentUnit, () => {
   ensureCoherence()
 })
 
+// Handle drug code input - convert empty/NaN to null
+function handleDrugCodeInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const value = target.value.trim()
+  if (value === '' || value === null || value === undefined) {
+    drug.value.drugCode = null as any
+  } else {
+    const numValue = Number(value)
+    if (!isNaN(numValue)) {
+      drug.value.drugCode = numValue
+    } else {
+      drug.value.drugCode = null as any
+    }
+  }
+}
+
 // Helper to check if a number has at most 1 decimal place
 function hasMaxOneDecimal(value: number | undefined | null): boolean {
   if (value == null) return true
@@ -686,7 +703,7 @@ function buildPayload() {
   return stripUndefined({
     genericName: d.genericName!,
     brandName: d.brandName || undefined,
-    drugCode: d.drugCode != null ? d.drugCode : undefined,
+    drugCode: d.drugCode != null ? d.drugCode : null,
     notes: d.notes || undefined,
     isActive: d.isActive ?? true,
     dosageFormCode: d.dosageFormCode!,
