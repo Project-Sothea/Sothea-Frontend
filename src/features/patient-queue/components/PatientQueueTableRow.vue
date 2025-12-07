@@ -29,6 +29,11 @@
         {{ khmerName }}
       </p>
     </td>
+    <td class="px-5 py-4 text-sm border-b border-gray-200">
+      <p class="text-gray-900 whitespace-no-wrap">
+        {{ familyGroup }}
+      </p>
+    </td>
     <td class="px-3 py-4 text-sm border-b border-gray-200">
       <p class="text-gray-900 whitespace-no-wrap">
         {{ gender }}
@@ -63,6 +68,7 @@ const props = defineProps<{
   vid?: string
   name?: string
   khmerName?: string
+  familyGroup?: string
   gender?: string
   allergies?: string
   contactNumber?: string

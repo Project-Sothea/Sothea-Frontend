@@ -188,10 +188,10 @@ export type FrequencyCode =
   | 'q12h' // Every 12 hours
 
 export const FREQUENCY_OPTIONS = [
-    { code: 'OM' as FrequencyCode,   label: 'Once Morning',        scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
-    { code: 'ON' as FrequencyCode,   label: 'Once Night',          scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
-    { code: 'OA' as FrequencyCode,   label: 'Once Afternoon',      scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
-    { code: 'BD' as FrequencyCode,   label: 'Twice a day',         scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 2 },
+    { code: 'OM' as FrequencyCode,   label: 'Once every morning',        scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
+    { code: 'ON' as FrequencyCode,   label: 'Once every night',          scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
+    { code: 'OA' as FrequencyCode,   label: 'Once every afternoon',      scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
+    { code: 'BD' as FrequencyCode,   label: '2 times a day',         scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 2 },
     { code: 'TDS' as FrequencyCode,  label: '3 times a day',       scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 3 },
     { code: 'QDS' as FrequencyCode,  label: '4 times a day',       scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 4 },
     { code: 'EOD' as FrequencyCode,  label: 'Every other day',     scheduleKind: 'day'  as ScheduleKind, everyN: 2,  frequencyPerSchedule: 1 },

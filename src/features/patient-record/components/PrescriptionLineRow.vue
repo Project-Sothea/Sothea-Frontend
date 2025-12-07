@@ -969,18 +969,14 @@ const scheduleReadable = computed(() => {
 
   if (!freqOpt || !dur) return 'Set frequency and duration.'
 
-  const k = freqOpt.scheduleKind
-  const every = freqOpt.everyN
-  const freq = freqOpt.frequencyPerSchedule
-
-  // period phrase: "per day" vs "every 6 hours"
-  const periodPhrase = every === 1 ? `per ${k}` : `every ${every} ${pluralize(every, k)}`
-
   // dose phrase: "1 tab" or "5 mL" (falls back to 'the dose' if not filled yet)
   const dosePart = `${form.doseAmount} ${unitLabel(form.doseUnit)}`
 
-  // Example: "the dose, 3× per day, for 7 days."
-  const baseSchedule = `${dosePart}, ${freq}× ${periodPhrase}, for ${dur} ${pluralize(dur, durUnit)}.`
+  // frequency phrase: "Once Morning (OM)" or "Every other day (EOD)" etc.
+  const frequencyPhrase = `${freqOpt.label} (${freqOpt.code})`
+
+  // Example: "1 tab, Once Morning (OM), for 7 days."
+  const baseSchedule = `${dosePart}, ${frequencyPhrase}, for ${dur} ${pluralize(dur, durUnit)}.`
   return form.prn ? `${baseSchedule} (PRN)` : baseSchedule
 })
 
