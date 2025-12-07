@@ -133,11 +133,10 @@ function togglePasswordVisibility() {
 
 .bar {
   background-color: #3f51b5;
-  padding: 1rem;
   width: 100%;
   color: white;
   font-weight: 500;
-  padding-left: 1.5rem;
+  padding: 1rem 1rem 1rem 1.5rem;
 }
 
 .form-container {
