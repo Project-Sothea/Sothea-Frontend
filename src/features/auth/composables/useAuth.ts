@@ -6,8 +6,7 @@ export function useAuth() {
   const isAuthenticated = computed(() => !!token.value)
 
   const refreshToken = () => {
-    const currentToken = sessionStorage.getItem('authToken')
-    token.value = currentToken
+    token.value = sessionStorage.getItem('authToken')
   }
 
   // Authentication Actions

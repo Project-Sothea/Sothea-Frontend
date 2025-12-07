@@ -36,7 +36,7 @@ import { formatDateISO } from '@shared/utils/date'
 
 const props = defineProps<{ patientId?: string; patientVid?: string; patientData?: Patient }>()
 const emit = defineEmits<{
-  patientVisitCreated: [{ id: string; name: string; age: number; vid: string }]
+  patientVisitCreated: [{ id: string; name: string; vid: string }]
 }>()
 const toast = useToast()
 const maxDate = ref(formatDateISO(new Date()))
@@ -65,7 +65,6 @@ async function submitData() {
     emit('patientVisitCreated', {
       id: props.patientId,
       name: admin.name,
-      age: admin.age as number,
       vid: String(response.vid)
     })
   } catch (error) {
@@ -121,8 +120,5 @@ async function handleImageUpload(e: Event) {
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
-}
-.req {
-  color: red;
 }
 </style>

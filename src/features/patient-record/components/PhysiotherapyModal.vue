@@ -18,9 +18,7 @@
 
       <!-- Pain Scale -->
       <div class="mt-4">
-        <label for="" class="mb-2 block text-sm font-medium text-dark">
-          Pain Scale
-        </label>
+        <label for="" class="mb-2 block text-sm font-medium text-dark"> Pain Scale </label>
         <input
           type="number"
           :value="painScale ?? ''"
@@ -137,15 +135,15 @@ const formDraft = useAutoDraft<Physiotherapy>({
     { key: 'painScale', ref: painScale },
     { key: 'objectiveAssessment', ref: objectiveAssessment },
     { key: 'intervention', ref: intervention },
-    { key: 'evaluation', ref: evaluation },
+    { key: 'evaluation', ref: evaluation }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved physiotherapy assessment draft from this device.',
+  restoreMessage: 'Restored unsaved physiotherapy assessment draft from this device.'
 })
 
 // Extract functions from formDraft
-const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
+const { isEditing, toggleEdit, save, discardChanges } = formDraft
 
 // Handle pain scale input - convert empty/NaN to null
 function handlePainScaleInput(event: Event) {
@@ -219,9 +217,3 @@ function discardEdit() {
   })
 }
 </script>
-
-<style scoped>
-.req {
-  color: red;
-}
-</style>

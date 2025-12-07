@@ -1,4 +1,6 @@
 import axios from 'axios'
+import camelcaseKeys from 'camelcase-keys'
+import snakecaseKeys from 'snakecase-keys'
 
 export const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api'
@@ -14,11 +16,25 @@ http.interceptors.request.use((config) => {
       config.headers['Authorization'] = `Bearer ${token}`
     }
   }
+
+  // Convert outgoing JSON payloads to snake_case using library (skip FormData)
+  const data = config.data
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData
+  if (data && !isFormData && (typeof data === 'object' || Array.isArray(data))) {
+    config.data = snakecaseKeys(data as any, { deep: true }) as any
+  }
+
   return config
 })
 
 http.interceptors.response.use(
-  (resp) => resp,
+  (resp) => {
+    // Convert snake_case keys from backend to camelCase for the app
+    if (resp && resp.data && (typeof resp.data === 'object' || Array.isArray(resp.data))) {
+      resp.data = camelcaseKeys(resp.data as any, { deep: true }) as any
+    }
+    return resp
+  },
   (error) => {
     if (error.response?.status === 401) {
       // Clear token & force navigation to sign-in

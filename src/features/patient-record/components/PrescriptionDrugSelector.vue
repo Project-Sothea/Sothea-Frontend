@@ -23,10 +23,7 @@
       role="listbox"
       :aria-activedescendant="selectedDrugId ? String(selectedDrugId) : undefined"
     >
-      <li
-        v-if="loading"
-        class="px-3 py-2 text-sm text-gray-500 flex items-center gap-2"
-      >
+      <li v-if="loading" class="px-3 py-2 text-sm text-gray-500 flex items-center gap-2">
         <span class="inline-block h-2 w-2 rounded-full animate-pulse bg-gray-400" />
         Loading…
       </li>
@@ -54,10 +51,7 @@
         </code>
       </li>
 
-      <li
-        v-if="!loading && !filteredDrugs.length"
-        class="px-3 py-2 text-sm text-gray-500"
-      >
+      <li v-if="!loading && !filteredDrugs.length" class="px-3 py-2 text-sm text-gray-500">
         No matches
       </li>
     </ul>
@@ -71,26 +65,29 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import type { DrugView } from '@/features/pharmacy/types/Drug'
 import { fmtDrugName, fmtStrength } from '@/features/pharmacy/types/Util'
 
-const props = withDefaults(defineProps<{
-  modelValue?: number
-  allDrugs?: DrugView[]
-  excludeIds?: number[]
-  error?: string
-  disabled?: boolean
-  inputId?: string
-  loading?: boolean
-}>(), {
-  excludeIds: () => [],
-  error: '',
-  disabled: false,
-  loading: false,
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue?: number
+    allDrugs?: DrugView[]
+    excludeIds?: number[]
+    error?: string
+    disabled?: boolean
+    inputId?: string
+    loading?: boolean
+  }>(),
+  {
+    excludeIds: () => [],
+    error: '',
+    disabled: false,
+    loading: false
+  }
+)
 
 const emit = defineEmits<{ 'update:modelValue': [number | null] }>()
 
 // ── UI state ─────────────────────────────────────────────────────────────
 const inputEl = ref<HTMLInputElement | null>(null)
-const drugQuery = ref('')   // after selection, show FULL label (drug + dosage)
+const drugQuery = ref('') // after selection, show FULL label (drug + dosage)
 const open = ref(false)
 const listboxId = computed(() => `drug-listbox-${props.inputId ?? 'default'}`)
 
@@ -99,7 +96,7 @@ const baseDrugs = computed<DrugView[]>(() => {
   const all = props.allDrugs ?? []
   const exclude = new Set(props.excludeIds ?? [])
   if (props.modelValue != null) exclude.delete(props.modelValue)
-  return all.filter(d => !exclude.has(d.id))
+  return all.filter((d) => !exclude.has(d.id))
 })
 
 const selectedDrugId = computed<number | ''>(() => props.modelValue ?? '')
@@ -109,10 +106,9 @@ function labelFor(d: DrugView) {
 }
 function labelForId(id?: number | null) {
   if (id == null) return ''
-  const d = baseDrugs.value.find(x => x.id === id)
+  const d = baseDrugs.value.find((x) => x.id === id)
   return d ? labelFor(d) : ''
 }
-
 
 // ─── Search & Filter ────────────────────────
 
@@ -123,8 +119,9 @@ const filteredDrugs = computed(() => {
   const qDrug = (raw.split('—')[0] || raw).trim()
   const src = baseDrugs.value
   if (!qDrug) return src.slice(0, 50)
-  return src.filter(d => {
-    const searchText = `${d.drugCode != null ? d.drugCode : ''} ${d.genericName || ''} ${d.brandName || ''}`.toLowerCase()
+  return src.filter((d) => {
+    const searchText =
+      `${d.drugCode != null ? d.drugCode : ''} ${d.genericName || ''} ${d.brandName || ''}`.toLowerCase()
     return searchText.includes(qDrug)
   })
 })
@@ -142,20 +139,27 @@ onMounted(() => {
 })
 
 // Sync textbox if parent changes modelValue
-watch(() => props.modelValue, (nv) => {
-  drugQuery.value = nv != null ? labelForId(nv) : ''
-})
+watch(
+  () => props.modelValue,
+  (nv) => {
+    drugQuery.value = nv != null ? labelForId(nv) : ''
+  }
+)
 
 // Sync if list changes (async fetch/excludeIds)
-watch(baseDrugs, () => {
-  if (props.modelValue != null) {
-    drugQuery.value = labelForId(props.modelValue)
-  }
-}, { flush: 'post' })
+watch(
+  baseDrugs,
+  () => {
+    if (props.modelValue != null) {
+      drugQuery.value = labelForId(props.modelValue)
+    }
+  },
+  { flush: 'post' }
+)
 
 function onPick(p: DrugView) {
   emit('update:modelValue', p.id)
-  drugQuery.value = labelFor(p)  // ← show FULL option text in the input
+  drugQuery.value = labelFor(p) // ← show FULL option text in the input
   open.value = false
   nextTick(() => inputEl.value?.blur()) // optional: remove focus after select
   return
@@ -173,5 +177,9 @@ function onBlur() {
 </script>
 
 <style scoped>
-.err { color:#ef4444; font-size:0.875rem; margin-top:0.25rem; }
+.err {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
 </style>

@@ -60,14 +60,10 @@
             class="absolute right-0 inset-y-0 px-3"
           >
             <!-- Eye Icon -->
-            <div v-if="showPassword">
-              <img src="@/assets/eye.svg" alt="Eye Icon" class="w-5 h-5" />
-            </div>
+            <img v-if="showPassword" src="@/assets/eye.svg" alt="Eye Icon" class="w-5 h-5" />
 
             <!-- Slash Icon -->
-            <div v-else>
-              <img src="@/assets/eyeslash.svg" alt="Eye Slash Icon" class="w-5 h-5" />
-            </div>
+            <img v-else src="@/assets/eyeslash.svg" alt="Eye Slash Icon" class="w-5 h-5" />
           </button>
         </div>
         <br />
@@ -105,7 +101,7 @@ async function handleSignIn() {
   try {
     const { token } = await loginRequest(username.value, password.value)
     login(token)
-    router.push('/patient-directory')
+    await router.push('/patient-directory')
   } catch (error) {
     console.error(error)
     toast.error('Sign in failed')
@@ -125,10 +121,6 @@ function togglePasswordVisibility() {
   height: 80vh;
   flex-direction: column;
   margin: 0 auto;
-}
-
-.form-div {
-  justify-content: flex-start;
 }
 
 .bar {

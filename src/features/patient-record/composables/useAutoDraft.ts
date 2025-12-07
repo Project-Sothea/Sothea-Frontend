@@ -55,10 +55,7 @@ export interface UseAutoDraftReturn<TFormData> {
     onSuccess?: () => void
   }) => Promise<void>
   /** Discard changes and restore to server data */
-  discardChanges: (opts: {
-    onDiscard: () => void
-    onSuccess?: () => void
-  }) => void
+  discardChanges: (opts: { onDiscard: () => void; onSuccess?: () => void }) => void
   /** Edit mode state */
   isEditing: Ref<boolean>
   /** Toggle edit mode */
@@ -80,7 +77,7 @@ function resolveSource<T>(source: Ref<T> | ComputedRef<T> | (() => T)): T {
 
 /**
  * Comprehensive composable for automatic form draft management.
- * 
+ *
  * Features:
  * - Automatic persistence to localStorage when editing
  * - Automatic expiration handling (default: 30 minutes)
@@ -101,8 +98,7 @@ export function useAutoDraft<TFormData>(
 
   // Compute storage key
   const storageKey = computed(() => {
-    const key = resolveSource(options.storageKey)
-    return key
+    return resolveSource(options.storageKey)
   })
 
   // Internal ref for draft storage
@@ -155,9 +151,7 @@ export function useAutoDraft<TFormData>(
           // If draft was restored, user was editing - enter edit mode
           isEditing.value = true
           if (options.showRestoreToast !== false) {
-            toast.info(
-              options.restoreMessage ?? 'Restored unsaved draft from this device.'
-            )
+            toast.info(options.restoreMessage ?? 'Restored unsaved draft from this device.')
           }
         }
       } else {
@@ -175,7 +169,7 @@ export function useAutoDraft<TFormData>(
         // Function that takes isEditing as parameter
         return options.persistWhen(isEditing)
       }
-      return !!resolveSource(options.persistWhen as Ref<boolean> | (() => boolean))
+      return resolveSource(options.persistWhen as Ref<boolean> | (() => boolean))
     }
     // Default: persist when editing
     return isEditing.value
@@ -207,13 +201,13 @@ export function useAutoDraft<TFormData>(
       initialized: initialized.value,
       key: storageKey.value,
       persist: shouldPersist.value,
-      state: collectFormState(),
+      state: collectFormState()
     }),
     ({ initialized: isInit, key, persist, state }) => {
       // Don't persist if we're not initialized yet
       // This prevents clearing drafts when restoring form state
       if (!isInit) return
-      
+
       // Only persist if we have a key, should persist, and window is available
       // Don't clear drafts when persist is false - drafts should only be cleared explicitly
       if (!key || !persist || typeof window === 'undefined') {
@@ -223,7 +217,7 @@ export function useAutoDraft<TFormData>(
       // Persist current form state with timestamp
       const envelope: DraftEnvelope<Partial<TFormData>> = {
         data: state,
-        savedAt: Date.now(),
+        savedAt: Date.now()
       }
       writeDraftToStorage(envelope)
       draftStorage.value = envelope
@@ -235,7 +229,7 @@ export function useAutoDraft<TFormData>(
    * Initialize form with server data or draft.
    * Priority: Draft > Server Data
    * This ensures unsaved work is preserved on page refresh.
-   * 
+   *
    * @param serverData - Server data to use as fallback if no draft exists
    * @param force - Force re-initialization even if already initialized (use server data)
    */
@@ -261,9 +255,7 @@ export function useAutoDraft<TFormData>(
       isEditing.value = true
 
       if (options.showRestoreToast !== false) {
-        toast.info(
-          options.restoreMessage ?? 'Restored unsaved draft from this device.'
-        )
+        toast.info(options.restoreMessage ?? 'Restored unsaved draft from this device.')
       }
       return
     }
@@ -338,10 +330,7 @@ export function useAutoDraft<TFormData>(
   /**
    * Discard changes
    */
-  function discardChanges(opts: {
-    onDiscard: () => void
-    onSuccess?: () => void
-  }): void {
+  function discardChanges(opts: { onDiscard: () => void; onSuccess?: () => void }): void {
     if (!isEditing.value) return
     setEditing(false)
     clearDraft()
@@ -372,7 +361,6 @@ export function useAutoDraft<TFormData>(
     toggleEdit,
     setEditing,
     runChecks,
-    isSubmitting,
+    isSubmitting
   }
 }
-

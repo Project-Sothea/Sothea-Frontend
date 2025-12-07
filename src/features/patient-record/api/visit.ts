@@ -1,4 +1,5 @@
 import { http } from '@shared/api/http'
+import snakecaseKeys from 'snakecase-keys'
 import type VitalStatistics from '../types/VitalStatistics'
 import type VisualAcuity from '../types/VisualAcuity'
 import type FallRisk from '../types/FallRisk'
@@ -12,17 +13,16 @@ import type Admin from '../types/Admin'
 
 export interface AdminPayload {
   familyGroup: string
-  regDate: string | null
+  regDate: Date
   queueNo: string | null
   name: string
   khmerName: string
-  dob: string | null
-  age: number | null
+  dob: Date
   gender: string
   village: string
   contactNo: string
   pregnant: boolean | null
-  lastMenstrualPeriod: string | null
+  lastMenstrualPeriod: Date | null
   drugAllergies: string | null
   sentToId: boolean | null
 }
@@ -40,7 +40,11 @@ export async function createPatient(
   photoFile?: File | null
 ): Promise<CreatePatientResponse> {
   const fd = new FormData()
-  fd.append('admin', JSON.stringify(admin))
+  // Convert admin to snake_case before stringifying (FormData bypasses interceptor conversion)
+  fd.append(
+    'admin',
+    JSON.stringify(snakecaseKeys(admin as unknown as Record<string, unknown>, { deep: true }))
+  )
   if (photoFile) {
     fd.append('photo', photoFile)
   }
@@ -55,7 +59,11 @@ export async function addVisit(
   photoFile?: File | null
 ): Promise<AddVisitResponse> {
   const fd = new FormData()
-  fd.append('admin', JSON.stringify(admin))
+  // Convert admin to snake_case before stringifying
+  fd.append(
+    'admin',
+    JSON.stringify(snakecaseKeys(admin as unknown as Record<string, unknown>, { deep: true }))
+  )
   if (photoFile) {
     fd.append('photo', photoFile)
   }
@@ -80,7 +88,11 @@ export async function updateAdmin(
 ): Promise<void> {
   if (photoFile) {
     const fd = new FormData()
-    fd.append('admin', JSON.stringify(admin))
+    // Convert admin to snake_case before stringifying
+    fd.append(
+      'admin',
+      JSON.stringify(snakecaseKeys(admin as unknown as Record<string, unknown>, { deep: true }))
+    )
     fd.append('photo', photoFile)
     await patchVisit(patientId, visitId, fd)
     return

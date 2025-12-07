@@ -1,13 +1,26 @@
 <template>
   <Teleport to="body">
     <Transition name="fade">
-      <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+      <div
+        v-if="open"
+        class="fixed inset-0 z-50 flex items-center justify-center"
+        role="dialog"
+        aria-modal="true"
+      >
         <div class="absolute inset-0 bg-black/40" @click="emit('close')" />
-        <div class="relative z-10 w-full max-w-3xl mx-4 rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div
+          class="relative z-10 w-full max-w-3xl mx-4 rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-hidden flex flex-col"
+        >
           <!-- Header -->
           <div class="flex items-center justify-between px-5 py-4 border-b">
             <h3 class="text-lg font-semibold">Add Batch</h3>
-            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100" @click="emit('close')">✕</button>
+            <button
+              type="button"
+              class="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100"
+              @click="emit('close')"
+            >
+              ✕
+            </button>
           </div>
 
           <!-- Body (scrollable) -->
@@ -18,7 +31,9 @@
               <div class="grid grid-cols-12 gap-3">
                 <!-- Batch Number -->
                 <div class="col-span-12 sm:col-span-4">
-                  <label class="block mb-1 text-gray-700">Batch No. <span class="text-red-600">*</span></label>
+                  <label class="block mb-1 text-gray-700"
+                    >Batch No. <span class="text-red-600">*</span></label
+                  >
                   <input
                     v-model.trim="form.batch.batchNumber"
                     :class="inputClass(errors.batchNumber)"
@@ -30,7 +45,9 @@
 
                 <!-- Expiry Date -->
                 <div class="col-span-12 sm:col-span-4">
-                  <label class="block mb-1 text-gray-700">Expiry Date <span class="text-red-600">*</span></label>
+                  <label class="block mb-1 text-gray-700"
+                    >Expiry Date <span class="text-red-600">*</span></label
+                  >
                   <input
                     v-model="form.batch.expiryDate"
                     type="date"
@@ -56,7 +73,9 @@
             <!-- Locations -->
             <div class="space-y-4">
               <div class="flex items-center justify-between">
-                <h4 class="text-sm font-semibold text-gray-700">Locations <span class="text-red-600">*</span></h4>
+                <h4 class="text-sm font-semibold text-gray-700">
+                  Locations <span class="text-red-600">*</span>
+                </h4>
                 <button
                   type="button"
                   class="px-3 py-1 text-sm rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
@@ -80,7 +99,9 @@
                       placeholder="e.g., Cupboard A / Drawer 3"
                       autocomplete="off"
                     />
-                    <p v-if="locationErrors[idx]?.location" class="err">{{ locationErrors[idx].location }}</p>
+                    <p v-if="locationErrors[idx]?.location" class="err">
+                      {{ locationErrors[idx].location }}
+                    </p>
                   </div>
 
                   <div class="col-span-9 sm:col-span-3">
@@ -93,7 +114,9 @@
                       :class="inputClass(locationErrors[idx]?.quantity)"
                       placeholder="Qty"
                     />
-                    <p v-if="locationErrors[idx]?.quantity" class="err">{{ locationErrors[idx].quantity }}</p>
+                    <p v-if="locationErrors[idx]?.quantity" class="err">
+                      {{ locationErrors[idx].quantity }}
+                    </p>
                   </div>
 
                   <div class="col-span-3 sm:col-span-1">
@@ -128,7 +151,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
-import type { BatchPostData, DrugBatchLocation } from '../types/Batch'
+import type { BatchPostData } from '../types/Batch'
 import { createBatch } from '../api/batch'
 
 const props = defineProps<{
@@ -150,10 +173,12 @@ const form = ref<BatchPostData>({
     expiryDate: '',
     supplier: ''
   },
-  locations: [{
-    location: '',
-    quantity: 0
-  }]
+  locations: [
+    {
+      location: '',
+      quantity: 0
+    }
+  ]
 })
 
 const errors = ref<Record<string, string>>({})
@@ -161,29 +186,36 @@ const locationErrors = ref<Record<number, Record<string, string>>>({})
 const saving = ref(false)
 
 const inputClass = (err?: string) =>
-  ['mt-1 block w-full rounded border px-3 py-2',
-   err ? 'border-red-500 focus:border-red-500' : 'border-gray-300'
+  [
+    'mt-1 block w-full rounded border px-3 py-2',
+    err ? 'border-red-500 focus:border-red-500' : 'border-gray-300'
   ].join(' ')
 
 // Initialize form when modal opens
-watch(() => props.open, () => {
-  if (props.open) {
-    // Reset to empty
-    form.value = {
-      batch: {
-        batchNumber: '',
-        expiryDate: '',
-        supplier: ''
-      },
-      locations: [{
-        location: '',
-        quantity: 0
-      }]
+watch(
+  () => props.open,
+  () => {
+    if (props.open) {
+      // Reset to empty
+      form.value = {
+        batch: {
+          batchNumber: '',
+          expiryDate: '',
+          supplier: ''
+        },
+        locations: [
+          {
+            location: '',
+            quantity: 0
+          }
+        ]
+      }
+      errors.value = {}
+      locationErrors.value = {}
     }
-    errors.value = {}
-    locationErrors.value = {}
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+)
 
 function addLocation() {
   form.value.locations.push({ location: '', quantity: 0 })
@@ -194,7 +226,7 @@ function removeLocation(idx: number) {
     form.value.locations.splice(idx, 1)
     // Remove errors for this location
     const newErrors: Record<number, Record<string, string>> = {}
-    Object.keys(locationErrors.value).forEach(key => {
+    Object.keys(locationErrors.value).forEach((key) => {
       const k = Number(key)
       if (k < idx) newErrors[k] = locationErrors.value[k]
       else if (k > idx) newErrors[k - 1] = locationErrors.value[k]
@@ -238,7 +270,7 @@ function validate(): boolean {
   form.value.locations.forEach((loc, idx) => {
     const locErrors: Record<string, string> = {}
     const name = (loc.location ?? '').trim()
-    
+
     if (!name) {
       locErrors.location = 'Location is required.'
       valid = false
@@ -247,13 +279,13 @@ function validate(): boolean {
       if (!seenLocs.has(lk)) seenLocs.set(lk, [])
       seenLocs.get(lk)!.push(idx)
     }
-    
+
     const q = Number(loc.quantity)
     if (!Number.isFinite(q) || q <= 0) {
       locErrors.quantity = 'Quantity must be greater than 0.'
       valid = false
     }
-    
+
     if (Object.keys(locErrors).length > 0) {
       locationErrors.value[idx] = locErrors
     }
@@ -262,7 +294,7 @@ function validate(): boolean {
   // Check for duplicate locations
   for (const [, idxs] of seenLocs) {
     if (idxs.length > 1) {
-      idxs.forEach(i => {
+      idxs.forEach((i) => {
         if (!locationErrors.value[i]) locationErrors.value[i] = {}
         locationErrors.value[i].location = 'Duplicate location in this batch.'
       })
@@ -284,7 +316,7 @@ async function handleSubmit() {
         expiryDate: new Date(form.value.batch.expiryDate).toISOString(),
         supplier: form.value.batch.supplier || undefined
       },
-      locations: form.value.locations.map(loc => ({
+      locations: form.value.locations.map((loc) => ({
         location: loc.location,
         quantity: loc.quantity
       }))
@@ -304,14 +336,35 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-.err { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; }
-.btn-indigo { background: #4f46e5; color: #fff; padding: 0.5rem 1rem; border-radius: 0.25rem; }
-.btn-indigo:hover { background: #4338ca; }
-.btn-indigo:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-gray { background: #d1d5db; color: #000; padding: 0.5rem 1rem; border-radius: 0.25rem; }
-.btn-gray:hover { background: #9ca3af; }
-.btn-gray:disabled { opacity: 0.5; cursor: not-allowed; }
-.fade-enter-active, .fade-leave-active { transition: opacity 150ms ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.err {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+.btn-indigo {
+  background: #4f46e5;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.btn-indigo:hover {
+  background: #4338ca;
+}
+.btn-indigo:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-gray {
+  background: #d1d5db;
+  color: #000;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.btn-gray:hover {
+  background: #9ca3af;
+}
+.btn-gray:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 </style>
-

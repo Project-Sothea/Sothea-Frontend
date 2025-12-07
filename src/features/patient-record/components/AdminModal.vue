@@ -77,20 +77,20 @@ const emit = defineEmits<{
     {
       id: string
       name: string
-      age: number | null
       vid: string
       regDate: string | null
       queueNo: string | null
+      age: number | null
     }
   ]
   patientUpdated: [
     {
       id: string | undefined
       name: string
-      age: number
       vid: string | undefined
       regDate: string | null
       queueNo: string | null
+      age: number | null
     }
   ]
 }>()
@@ -145,11 +145,11 @@ const formDraft = useAutoDraft<AdminPayload>({
     { key: 'pregnant', ref: pregnant },
     { key: 'lastMenstrualPeriod', ref: lastMenstrualPeriod },
     { key: 'drugAllergies', ref: drugAllergies },
-    { key: 'sentToId', ref: sentToId },
+    { key: 'sentToId', ref: sentToId }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved admin details draft from this device.',
+  restoreMessage: 'Restored unsaved admin details draft from this device.'
 })
 
 // Extract functions from formDraft
@@ -202,10 +202,10 @@ async function submitData() {
       emit('patientCreated', {
         id: String(response.id),
         name: name.value,
-        age: ageComputed.value,
         vid: '1',
         regDate: regDate.value,
-        queueNo: queueNo.value
+        queueNo: queueNo.value,
+        age: ageComputed.value
       })
     } catch (error) {
       console.error(error)
@@ -218,16 +218,17 @@ async function submitData() {
         if (!validate()) return null
         return buildPayload()
       },
-      update: () => updateAdmin(props.patientId!, props.patientVid!, buildPayload()!, photoFile.value),
+      update: () =>
+        updateAdmin(props.patientId!, props.patientVid!, buildPayload()!, photoFile.value),
       onSuccess: () => {
         toast.success('Admin Details updated successfully!')
         emit('patientUpdated', {
           id: props.patientId,
           name: name.value,
-          age: ageComputed.value as number,
           vid: props.patientVid,
           regDate: regDate.value,
-          queueNo: queueNo.value
+          queueNo: queueNo.value,
+          age: ageComputed.value
         })
       }
     })
@@ -313,8 +314,5 @@ function discardEdit() {
 h1 {
   font-size: 1.25rem;
   font-weight: 500;
-}
-.req {
-  color: red;
 }
 </style>

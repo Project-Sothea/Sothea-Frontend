@@ -18,9 +18,7 @@
           ref="dialogEl"
         >
           <div class="flex items-center justify-between border-b px-5 py-3">
-            <h3 class="text-lg font-semibold">
-              Batch {{ batch?.batchNumber ?? '—' }} — Locations
-            </h3>
+            <h3 class="text-lg font-semibold">Batch {{ batch?.batchNumber ?? '—' }} — Locations</h3>
             <button class="p-2 rounded hover:bg-gray-100" aria-label="Close" @click="emitClose">
               <!-- X icon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24">
@@ -58,7 +56,10 @@
           </div>
 
           <div class="flex justify-end gap-2 border-t px-5 py-3">
-            <button class="rounded bg-indigo-600 px-4 py-2 text-white shadow hover:bg-indigo-700 transition" @click="emitClose">
+            <button
+              class="rounded bg-indigo-600 px-4 py-2 text-white shadow hover:bg-indigo-700 transition"
+              @click="emitClose"
+            >
               Close
             </button>
           </div>
@@ -112,9 +113,4 @@ watch(
 onUnmounted(() => window.removeEventListener('keydown', onKey))
 </script>
 
-<style scoped>
-.fade-enter-active,
-.fade-leave-active { transition: opacity 150ms ease; }
-.fade-enter-from,
-.fade-leave-to { opacity: 0; }
-</style>
+<style scoped></style>

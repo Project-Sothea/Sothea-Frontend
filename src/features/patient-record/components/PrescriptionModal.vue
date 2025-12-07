@@ -11,9 +11,16 @@
         <span
           v-if="rx"
           class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs"
-          :class="isReadOnly ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-emerald-300 bg-emerald-50 text-emerald-700'"
+          :class="
+            isReadOnly
+              ? 'border-amber-300 bg-amber-50 text-amber-800'
+              : 'border-emerald-300 bg-emerald-50 text-emerald-700'
+          "
         >
-          <span class="inline-block h-2 w-2 rounded-full" :class="isReadOnly ? 'bg-amber-500' : 'bg-emerald-500'"></span>
+          <span
+            class="inline-block h-2 w-2 rounded-full"
+            :class="isReadOnly ? 'bg-amber-500' : 'bg-emerald-500'"
+          ></span>
           {{ isReadOnly ? 'Dispensed' : 'Open' }}
         </span>
       </div>
@@ -23,7 +30,8 @@
         v-if="isReadOnly"
         class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800 text-sm"
       >
-        This prescription has already been <strong>dispensed</strong> by <strong>{{ rx?.dispenserName }}</strong> and can’t be edited.
+        This prescription has already been <strong>dispensed</strong> by
+        <strong>{{ rx?.dispenserName }}</strong> and can’t be edited.
       </div>
 
       <section class="mt-6 rounded-2xl border border-gray-200 bg-white/90 shadow-sm">
@@ -33,19 +41,18 @@
           </div>
         </header>
 
-      <div class="px-5 py-4 text-sm text-gray-900">
-        <span class="font-semibold">Drug Allergies:</span>
-        <span class="ml-1">{{ patientData?.admin?.drugAllergies ?? 'No Data' }}</span>
-      </div>
-      <div class="px-5 text-sm text-gray-900">
-        <span class="font-semibold">Diagnosis:</span>
-        <span class="ml-1">{{ patientData?.doctorsconsultation?.diagnosis ?? 'No Data' }}</span>
-      </div>
-      <div class="px-5 py-4 text-sm text-gray-900">
-        <span class="font-semibold">Treatment:</span>
-        <span class="ml-1">{{ patientData?.doctorsconsultation?.treatment ?? 'No Data' }}</span>
-      </div>
-
+        <div class="px-5 py-4 text-sm text-gray-900">
+          <span class="font-semibold">Drug Allergies:</span>
+          <span class="ml-1">{{ patientData?.admin?.drugAllergies ?? 'No Data' }}</span>
+        </div>
+        <div class="px-5 text-sm text-gray-900">
+          <span class="font-semibold">Diagnosis:</span>
+          <span class="ml-1">{{ patientData?.doctorsconsultation?.diagnosis ?? 'No Data' }}</span>
+        </div>
+        <div class="px-5 py-4 text-sm text-gray-900">
+          <span class="font-semibold">Treatment:</span>
+          <span class="ml-1">{{ patientData?.doctorsconsultation?.treatment ?? 'No Data' }}</span>
+        </div>
       </section>
 
       <!-- Notes -->
@@ -60,9 +67,7 @@
               Unsaved changes
             </span>
           </div>
-          <div class="text-xs text-gray-400">
-            {{ (headerNotes || '').length }}/300
-          </div>
+          <div class="text-xs text-gray-400">{{ (headerNotes || '').length }}/300</div>
         </header>
 
         <div class="px-5 py-4">
@@ -70,10 +75,13 @@
             v-model="headerNotes"
             maxlength="300"
             rows="3"
-            :placeholder="(!headerNotesEditing || headerSaving) ? 'No instructions' : 'Add any instructions for the pharmacist (optional)…'"
+            :placeholder="
+              !headerNotesEditing || headerSaving
+                ? 'No instructions'
+                : 'Add any instructions for the pharmacist (optional)…'
+            "
             :disabled="!headerNotesEditing || headerSaving"
-            class="block w-full resize-y rounded-xl border border-gray-200 bg-white p-3 text-sm placeholder:text-gray-400
-                   focus:outline-none focus:ring-4 focus:ring-[#3f51b5]/20 disabled:bg-gray-50 disabled:cursor-not-allowed"
+            class="block w-full resize-y rounded-xl border border-gray-200 bg-white p-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-[#3f51b5]/20 disabled:bg-gray-50 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -114,8 +122,7 @@
           <h2 class="text-base font-semibold">Lines</h2>
           <button
             v-if="!isReadOnly"
-            class="px-3 py-1.5 rounded-lg text-sm text-[#3f51b5] border border-[#3f51b5]
-                   hover:bg-[#3f51b5] hover:text-white transition disabled:opacity-60"
+            class="px-3 py-1.5 rounded-lg text-sm text-[#3f51b5] border border-[#3f51b5] hover:bg-[#3f51b5] hover:text-white transition disabled:opacity-60"
             @click="addLine"
             :disabled="!rx"
           >
@@ -148,7 +155,11 @@
                 :all-drugs="drugs"
                 :exclude-ids="excludeDrugIds(idx)"
                 :has-unsaved-edits="line.id ? !!unsavedLineEdits[line.id] : false"
-                :original-line="line.id && rx ? rx.lines?.find((l: PrescriptionLine) => l.id === line.id) : undefined"
+                :original-line="
+                  line.id && rx
+                    ? rx.lines?.find((l: PrescriptionLine) => l.id === line.id)
+                    : undefined
+                "
                 @refresh="refreshRx"
                 @discard-draft="discardDraftLine((line as DraftLine)._uid)"
                 @update-line-edit="updateLineEdit"
@@ -164,8 +175,7 @@
       <div class="w-full mt-6 flex justify-end">
         <div class="grid grid-cols-[max-content] gap-3">
           <button
-            class="px-5 py-2 rounded-lg text-sm text-white bg-orange-500 hover:bg-orange-600
-                   shadow-sm hover:shadow disabled:opacity-60 transition"
+            class="px-5 py-2 rounded-lg text-sm text-white bg-orange-500 hover:bg-orange-600 shadow-sm hover:shadow disabled:opacity-60 transition"
             @click="onDispense"
             :disabled="!rx || isReadOnly || !allPacked || dispensing"
             :title="!allPacked ? 'All lines must be packed' : ''"
@@ -178,9 +188,8 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import type { Prescription, PrescriptionLine } from '@/features/pharmacy/types/Prescription'
 import {
@@ -188,7 +197,7 @@ import {
   getPrescriptionByID,
   createPrescription,
   updatePrescription,
-  dispensePrescription,
+  dispensePrescription
 } from '@/features/pharmacy/api/prescription'
 import type { DrugView } from '@/features/pharmacy/types/Drug'
 import PrescriptionLineRow from './PrescriptionLineRow.vue'
@@ -200,8 +209,8 @@ import type { FrequencyCode, ScheduleKind } from '@/features/pharmacy/types/Util
 // ─── Props ────────────────────────────────────────────────────────────────
 const props = defineProps<{
   patientData?: Patient
-  patientId: string | number;
-  patientVid: string | number;
+  patientId: string | number
+  patientVid: string | number
 }>()
 const pid = Number(props.patientId)
 const vid = Number(props.patientVid)
@@ -216,9 +225,6 @@ const dispensing = ref(false)
 // optional: preload this if you have an endpoint; otherwise child can remote-search
 const drugs = ref<DrugView[]>([])
 
-// All existing server lines
-const lines = computed<Partial<PrescriptionLine>[]>(() => rx.value?.lines ?? [])
-
 // New draft lines which have not been added yet
 type DraftLine = Partial<PrescriptionLine> & { __draft: true; _uid: string }
 const draftLines = ref<DraftLine[]>([])
@@ -231,7 +237,11 @@ const headerNotesEditing = ref(false)
 
 // Computed to check if we should persist (any unsaved changes)
 const shouldPersist = computed(() => {
-  return headerNotesEditing.value || draftLines.value.length > 0 || Object.keys(unsavedLineEdits.value).length > 0
+  return (
+    headerNotesEditing.value ||
+    draftLines.value.length > 0 ||
+    Object.keys(unsavedLineEdits.value).length > 0
+  )
 })
 
 // Automatic draft management
@@ -247,16 +257,16 @@ const formDraft = useAutoDraft<{
   fields: [
     { key: 'headerNotes', ref: headerNotes },
     { key: 'draftLines', ref: draftLines },
-    { key: 'unsavedLineEdits', ref: unsavedLineEdits },
+    { key: 'unsavedLineEdits', ref: unsavedLineEdits }
   ],
   persistWhen: () => shouldPersist.value,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved prescription draft from this device.',
+  restoreMessage: 'Restored unsaved prescription draft from this device.'
 })
 
 // For UI rendering - merge saved lines with unsaved edits
 const uiLines = computed<Partial<PrescriptionLine>[]>(() => {
-  const savedLines = (rx.value?.lines ?? []).map(line => {
+  const savedLines = (rx.value?.lines ?? []).map((line) => {
     // If there are unsaved edits for this line, merge them
     if (line.id && unsavedLineEdits.value[line.id]) {
       return { ...line, ...unsavedLineEdits.value[line.id] }
@@ -267,12 +277,14 @@ const uiLines = computed<Partial<PrescriptionLine>[]>(() => {
 })
 
 const isReadOnly = computed(() => !!rx?.value?.isDispensed)
-const allPacked = computed(() => (rx.value?.lines?.length ?? 0) > 0 && rx.value!.lines.every(l => l.isPacked))
+const allPacked = computed(
+  () => (rx.value?.lines?.length ?? 0) > 0 && rx.value!.lines.every((l) => l.isPacked)
+)
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────
 onMounted(async () => {
   await Promise.all([ensureHeader(), loadDrugs()])
-  
+
   // After data is loaded, initialize form draft
   // If draft was restored, it will have already been applied to the refs
   // If not, initialize with server data
@@ -280,12 +292,12 @@ onMounted(async () => {
     formDraft.initialize({
       headerNotes: rx.value?.notes ?? '',
       draftLines: [],
-      unsavedLineEdits: {},
+      unsavedLineEdits: {}
     })
   } else {
     // Draft was restored - filter out unsaved edits for lines that no longer exist
     if (rx.value) {
-      const existingLineIds = new Set(rx.value.lines?.map(l => l.id) ?? [])
+      const existingLineIds = new Set(rx.value.lines?.map((l) => l.id) ?? [])
       const validEdits: Record<number, Partial<PrescriptionLine>> = {}
       Object.entries(unsavedLineEdits.value).forEach(([id, edits]) => {
         if (existingLineIds.has(Number(id))) {
@@ -313,8 +325,7 @@ async function ensureHeader() {
     return
   }
   // Otherwise create a fresh header immediately (draft)
-  const created = await createPrescription({ patientId: pid, vid, notes: '' })
-  rx.value = created
+  rx.value = await createPrescription({ patientId: pid, vid, notes: '' })
   // Only set headerNotes if no draft was restored
   if (!formDraft.draftRestored.value) {
     headerNotes.value = ''
@@ -334,20 +345,22 @@ async function refreshRx() {
     headerNotes.value = fresh.notes ?? ''
   }
   // Clear unsaved edits for lines that no longer exist
-  const existingLineIds = new Set(fresh.lines?.map(l => l.id) ?? [])
+  const existingLineIds = new Set(fresh.lines?.map((l) => l.id) ?? [])
   const newEdits = { ...unsavedLineEdits.value }
-  Object.keys(newEdits).forEach(id => {
+  Object.keys(newEdits).forEach((id) => {
     if (!existingLineIds.has(Number(id))) {
       delete newEdits[Number(id)]
     }
   })
   unsavedLineEdits.value = newEdits
   await loadDrugs()
-  
+
   // Clear draft if everything is saved
-  if (draftLines.value.length === 0 && 
-      Object.keys(unsavedLineEdits.value).length === 0 &&
-      !formDraft.isEditing.value) {
+  if (
+    draftLines.value.length === 0 &&
+    Object.keys(unsavedLineEdits.value).length === 0 &&
+    !formDraft.isEditing.value
+  ) {
     formDraft.clearDraft()
   }
 }
@@ -397,7 +410,7 @@ function addLine() {
     frequencyCode: 'OM' as FrequencyCode,
     duration: 7,
     durationUnit: 'day' as ScheduleKind,
-    prn: false,
+    prn: false
   })
 }
 
@@ -405,7 +418,7 @@ function addLine() {
 function updateLineEdit(lineId: number, data: Partial<PrescriptionLine>) {
   unsavedLineEdits.value = {
     ...unsavedLineEdits.value,
-    [lineId]: { ...unsavedLineEdits.value[lineId], ...data },
+    [lineId]: { ...unsavedLineEdits.value[lineId], ...data }
   }
 }
 
@@ -425,7 +438,7 @@ function clearLineEdit(lineId: number) {
 
 // Handle updates to draft lines
 function updateDraftLine(uid: string, data: Partial<PrescriptionLine>) {
-  const i = draftLines.value.findIndex(d => d._uid === uid)
+  const i = draftLines.value.findIndex((d) => d._uid === uid)
   if (i !== -1) {
     draftLines.value[i] = { ...draftLines.value[i], ...data }
   }
@@ -433,7 +446,7 @@ function updateDraftLine(uid: string, data: Partial<PrescriptionLine>) {
 
 function discardDraftLine(uid?: string) {
   if (!uid) return
-  const i = draftLines.value.findIndex(d => d._uid === uid)
+  const i = draftLines.value.findIndex((d) => d._uid === uid)
   if (i !== -1) {
     draftLines.value.splice(i, 1)
     // useAutoDraft watch should detect the change and persist the updated state
@@ -446,7 +459,6 @@ function discardDraftLine(uid?: string) {
     })
   }
 }
-
 
 // Helpers to avoid duplicate drugs across lines
 function excludeDrugIds(idx: number) {
@@ -468,8 +480,7 @@ async function onDispense() {
   }
   dispensing.value = true
   try {
-    const updated = await dispensePrescription(rx.value.id)
-    rx.value = updated
+    rx.value = await dispensePrescription(rx.value.id)
     // Clear draft and exit edit mode
     formDraft.clearDraft()
     formDraft.setEditing(false)
@@ -482,17 +493,4 @@ async function onDispense() {
 }
 </script>
 
-<style scoped>
-.list-fade-enter-active,
-.list-fade-leave-active {
-  transition: all 160ms ease;
-}
-.list-fade-enter-from {
-  opacity: 0;
-  transform: translateY(2px);
-}
-.list-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-2px);
-}
-</style>
+<style scoped></style>

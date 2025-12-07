@@ -13,9 +13,7 @@
 
     <!-- ─────────── DRUG PICKER ─────────── -->
     <div class="mb-6">
-      <label class="block mb-2 text-gray-700">
-        Drug <span class="text-red-600">*</span>
-      </label>
+      <label class="block mb-2 text-gray-700"> Drug <span class="text-red-600">*</span> </label>
 
       <div class="relative" ref="drugComboRef">
         <input
@@ -38,7 +36,9 @@
             class="px-3 py-2 cursor-pointer hover:bg-indigo-100"
           >
             <!-- common display format you've been using -->
-            <span class="font-medium">{{ fmtDrugNameWithBrand(d) }} — {{ fmtStrength(d) }} ({{ d.displayRoute }})</span>
+            <span class="font-medium"
+              >{{ fmtDrugNameWithBrand(d) }} — {{ fmtStrength(d) }} ({{ d.displayRoute }})</span
+            >
           </li>
           <li
             @click="openCreateDrugForm = true"
@@ -92,8 +92,19 @@
             @click="removeBatchAt(bIdx)"
             title="Remove batch"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+              />
             </svg>
           </button>
         </div>
@@ -101,24 +112,28 @@
         <div class="grid grid-cols-12 gap-3">
           <!-- batchNumber -->
           <div class="col-span-12 sm:col-span-4">
-            <label class="block mb-1 text-gray-700">Batch No. <span class="text-red-600">*</span></label>
+            <label class="block mb-1 text-gray-700"
+              >Batch No. <span class="text-red-600">*</span></label
+            >
             <input
               v-model.trim="b.batch.batchNumber"
               :class="inputClass(rowErr(bIdx, 'batchNumber'))"
               autocomplete="off"
             />
-            <p class="err" v-if="rowErr(bIdx,'batchNumber')">{{ rowErr(bIdx,'batchNumber') }}</p>
+            <p class="err" v-if="rowErr(bIdx, 'batchNumber')">{{ rowErr(bIdx, 'batchNumber') }}</p>
           </div>
 
           <!-- expiryDate -->
           <div class="col-span-12 sm:col-span-4">
-            <label class="block mb-1 text-gray-700">Expiry Date <span class="text-red-600">*</span></label>
+            <label class="block mb-1 text-gray-700"
+              >Expiry Date <span class="text-red-600">*</span></label
+            >
             <input
               v-model="b.batch.expiryDate"
               type="date"
               :class="inputClass(rowErr(bIdx, 'expiryDate'))"
             />
-            <p class="err" v-if="rowErr(bIdx,'expiryDate')">{{ rowErr(bIdx,'expiryDate') }}</p>
+            <p class="err" v-if="rowErr(bIdx, 'expiryDate')">{{ rowErr(bIdx, 'expiryDate') }}</p>
           </div>
 
           <!-- supplier -->
@@ -126,10 +141,10 @@
             <label class="block mb-1 text-gray-700">Supplier</label>
             <input
               v-model.trim="b.batch.supplier"
-              :class="inputClass(rowErr(bIdx,'supplier'))"
+              :class="inputClass(rowErr(bIdx, 'supplier'))"
               autocomplete="off"
             />
-            <p class="err" v-if="rowErr(bIdx,'supplier')">{{ rowErr(bIdx,'supplier') }}</p>
+            <p class="err" v-if="rowErr(bIdx, 'supplier')">{{ rowErr(bIdx, 'supplier') }}</p>
           </div>
         </div>
 
@@ -149,12 +164,16 @@
               >
                 Copy above
               </button>
-              <button type="button" class="text-sm btn-indigo !py-1.5 !px-3" @click="addLocationRow(bIdx)">
+              <button
+                type="button"
+                class="text-sm btn-indigo !py-1.5 !px-3"
+                @click="addLocationRow(bIdx)"
+              >
                 + Add location
               </button>
             </div>
           </div>
-          <p class="err mb-2" v-if="rowErr(bIdx,'locations')">{{ rowErr(bIdx,'locations') }}</p>
+          <p class="err mb-2" v-if="rowErr(bIdx, 'locations')">{{ rowErr(bIdx, 'locations') }}</p>
 
           <div class="space-y-2">
             <div
@@ -166,13 +185,13 @@
               <div class="col-span-12 sm:col-span-8">
                 <input
                   v-model.trim="loc.location"
-                  :class="inputClass(rowLocErr(bIdx,lIdx,'locationName'))"
+                  :class="inputClass(rowLocErr(bIdx, lIdx, 'locationName'))"
                   placeholder="Location (e.g., Cupboard A)"
                   autocomplete="off"
                   class="text-sm"
                 />
-                <p class="err text-xs" v-if="rowLocErr(bIdx,lIdx,'locationName')">
-                  {{ rowLocErr(bIdx,lIdx,'locationName') }}
+                <p class="err text-xs" v-if="rowLocErr(bIdx, lIdx, 'locationName')">
+                  {{ rowLocErr(bIdx, lIdx, 'locationName') }}
                 </p>
               </div>
 
@@ -183,19 +202,19 @@
                   type="number"
                   min="1"
                   step="1"
-                  :class="inputClass(rowLocErr(bIdx,lIdx,'quantity'))"
+                  :class="inputClass(rowLocErr(bIdx, lIdx, 'quantity'))"
                   placeholder="Qty"
                   class="text-sm"
                 />
-                <p class="err text-xs" v-if="rowLocErr(bIdx,lIdx,'quantity')">
-                  {{ rowLocErr(bIdx,lIdx,'quantity') }}
+                <p class="err text-xs" v-if="rowLocErr(bIdx, lIdx, 'quantity')">
+                  {{ rowLocErr(bIdx, lIdx, 'quantity') }}
                 </p>
               </div>
 
               <div class="col-span-3 sm:col-span-1">
                 <button
                   type="button"
-                  @click="removeLocationAt(bIdx,lIdx)"
+                  @click="removeLocationAt(bIdx, lIdx)"
                   :disabled="b.locations.length === 1"
                   class="w-full h-[35px] mt-1 px-1 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors flex items-center justify-center disabled:text-gray-300 disabled:border-gray-300 disabled:cursor-not-allowed text-sm"
                   title="Remove location"
@@ -206,7 +225,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -214,7 +232,12 @@
     <div class="flex justify-between items-center gap-3 mt-6 pt-6 border-t">
       <button type="button" class="btn-gray" @click="router.back()">Cancel</button>
       <div class="flex gap-3">
-        <button type="button" :disabled="saving" class="btn-indigo" @click="handleSubmit(() => router.back())">
+        <button
+          type="button"
+          :disabled="saving"
+          class="btn-indigo"
+          @click="handleSubmit(() => router.back())"
+        >
           {{ saving ? 'Saving…' : 'Save & Go Back' }}
         </button>
         <button type="button" :disabled="saving" class="btn-green" @click="handleSubmit(resetForm)">
@@ -260,12 +283,10 @@ function emptyBatchLocation(): Omit<DrugBatchLocation, 'id' | 'batchId'> {
 function emptyBatch(): BatchPostData {
   return {
     batch: {
-        batchNumber: '',
-        expiryDate: ''
+      batchNumber: '',
+      expiryDate: ''
     },
-    locations: [
-      emptyBatchLocation()
-    ]
+    locations: [emptyBatchLocation()]
   }
 }
 
@@ -284,25 +305,24 @@ async function fetchDrugs() {
   drugs.value = await listDrugs()
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
 const inputClass = (err?: string) =>
-  ['mt-1 block w-full rounded border px-3 py-2',
-   err ? 'border-red-500 focus:border-red-500' : 'border-gray-300'
+  [
+    'mt-1 block w-full rounded border px-3 py-2',
+    err ? 'border-red-500 focus:border-red-500' : 'border-gray-300'
   ].join(' ')
 
-const currentDrug = computed(() =>
-  drugs.value.find(d => d.id === selectedDrugId.value) ?? null
-)
+const currentDrug = computed(() => drugs.value.find((d) => d.id === selectedDrugId.value) ?? null)
 
 const filteredDrugs = computed(() => {
   const q = drugQuery.value.trim().toLowerCase()
   if (!q) return drugs.value.slice(0, 50) // small cap
-  return drugs.value.filter(d => {
-    const searchText = `${d.drugCode != null ? d.drugCode : ''} ${d.genericName || ''} ${d.brandName || ''} ${d.displayLabel || ''}`.toLowerCase()
+  return drugs.value.filter((d) => {
+    const searchText =
+      `${d.drugCode != null ? d.drugCode : ''} ${d.genericName || ''} ${d.brandName || ''} ${d.displayLabel || ''}`.toLowerCase()
     return searchText.includes(q)
   })
 })
@@ -319,20 +339,26 @@ function selectDrug(d: DrugView) {
 }
 
 function onClickOutside(e: MouseEvent) {
-  if (drugComboRef.value && !drugComboRef.value.contains(e.target as Node) && !openCreateDrugForm.value) {
+  if (
+    drugComboRef.value &&
+    !drugComboRef.value.contains(e.target as Node) &&
+    !openCreateDrugForm.value
+  ) {
     showDrugDropdown.value = false
   }
 }
 
 onMounted(async () => {
- fetchDrugs()
- document.addEventListener('click', onClickOutside)
+  await fetchDrugs()
+  document.addEventListener('click', onClickOutside)
 })
 
 onUnmounted(() => document.removeEventListener('click', onClickOutside))
 
 // ───────────── Batches ops
-function addBatchRow() { batches.value.push(emptyBatch()) }
+function addBatchRow() {
+  batches.value.push(emptyBatch())
+}
 
 function removeBatchAt(idx: number) {
   if (batches.value.length > 1) batches.value.splice(idx, 1)
@@ -348,20 +374,25 @@ function removeLocationAt(bIdx: number, lIdx: number) {
 }
 function copyLocationsFromPrev(bIdx: number) {
   const prev = batches.value[bIdx - 1]
-  batches.value[bIdx].locations = prev.locations.map(l => ({ ...l }))
+  batches.value[bIdx].locations = prev.locations.map((l) => ({ ...l }))
 }
 
 // Computed totals
 const perBatchTotals = computed(() =>
-  batches.value.map(b => b.locations.reduce((s, l) => s + (Number(l.quantity) || 0), 0))
+  batches.value.map((b) => b.locations.reduce((s, l) => s + (Number(l.quantity) || 0), 0))
 )
 const grandTotal = computed(() => perBatchTotals.value.reduce((a, b) => a + b, 0))
 
 // Error helpers
-function keyB(bIdx: number, field: string) { return `b.${bIdx}.${field}` }
-function keyL(bIdx: number, lIdx: number, field: string) { return `b.${bIdx}.loc.${lIdx}.${field}` }
+function keyB(bIdx: number, field: string) {
+  return `b.${bIdx}.${field}`
+}
+function keyL(bIdx: number, lIdx: number, field: string) {
+  return `b.${bIdx}.loc.${lIdx}.${field}`
+}
 const rowErr = (bIdx: number, field: string) => rowErrors.value[keyB(bIdx, field)]
-const rowLocErr = (bIdx: number, lIdx: number, field: string) => rowErrors.value[keyL(bIdx, lIdx, field)]
+const rowLocErr = (bIdx: number, lIdx: number, field: string) =>
+  rowErrors.value[keyL(bIdx, lIdx, field)]
 
 // ───────────── Validation
 function validate(): boolean {
@@ -379,7 +410,8 @@ function validate(): boolean {
   }
 
   // 3) each batch row
-  const today = new Date(); today.setHours(0,0,0,0)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   // cross-row: duplicate batch numbers (client side)
   const seenBatchNos = new Map<string, number[]>()
@@ -412,19 +444,24 @@ function validate(): boolean {
         seenLocs.get(lk)!.push(lIdx)
       }
       const q = Number(l.quantity)
-      if (!Number.isFinite(q) || q <= 0) re[keyL(bIdx, lIdx, 'quantity')] = 'Enter a positive number.'
+      if (!Number.isFinite(q) || q <= 0)
+        re[keyL(bIdx, lIdx, 'quantity')] = 'Enter a positive number.'
     })
     // mark duplicates
     for (const [, idxs] of seenLocs) {
       if (idxs.length > 1) {
-        idxs.forEach(i => { re[keyL(bIdx, i, 'locationName')] = 'Duplicate location in this batch.' })
+        idxs.forEach((i) => {
+          re[keyL(bIdx, i, 'locationName')] = 'Duplicate location in this batch.'
+        })
       }
     }
   })
 
   for (const [, idxs] of seenBatchNos) {
     if (idxs.length > 1) {
-      idxs.forEach(i => { re[keyB(i, 'batchNumber')] = 'Each batch number must be unique.' })
+      idxs.forEach((i) => {
+        re[keyB(i, 'batchNumber')] = 'Each batch number must be unique.'
+      })
     }
   }
 
@@ -436,15 +473,15 @@ function validate(): boolean {
 // ───────────── Submit
 async function handleSubmit(onSuccess?: () => void) {
   if (!validate()) return
-  
-  const drug = currentDrug.value;
-  if (!drug) return;
+
+  const drug = currentDrug.value
+  if (!drug) return
 
   saving.value = true
 
   try {
     await Promise.all(
-      batches.value.map(async b => {
+      batches.value.map(async (b) => {
         b.batch.expiryDate = new Date(b.batch.expiryDate).toISOString()
         await createBatch(drug.id, b)
       })
@@ -475,11 +512,36 @@ function resetForm() {
 </script>
 
 <style scoped>
-.err { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; }
-.btn-indigo { background: #4f46e5; color: #fff; padding: 0.5rem 1rem; border-radius: 0.25rem; }
-.btn-indigo:hover { background: #4338ca; }
-.btn-green { background: #16a34a; color: #fff; padding: 0.5rem 1rem; border-radius: 0.25rem; }
-.btn-green:hover { background: #15803d; }
-.btn-gray { background: #d1d5db; color: #000; padding: 0.5rem 1rem; border-radius: 0.25rem; }
-.btn-gray:hover { background: #9ca3af; }
+.err {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+.btn-indigo {
+  background: #4f46e5;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.btn-indigo:hover {
+  background: #4338ca;
+}
+.btn-green {
+  background: #16a34a;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.btn-green:hover {
+  background: #15803d;
+}
+.btn-gray {
+  background: #d1d5db;
+  color: #000;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.btn-gray:hover {
+  background: #9ca3af;
+}
 </style>

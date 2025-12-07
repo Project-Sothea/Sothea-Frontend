@@ -127,6 +127,7 @@ import PrescriptionModal from '@patient-record/components/PrescriptionModal.vue'
 import { fetchPatientRecord, deletePatientVisit } from '@patient-record/api/patient'
 import type Patient from '@patient-record/types/Patient'
 import { useToast } from 'vue-toast-notification'
+import { calculateAge } from '@shared/utils/age'
 
 const route = useRoute()
 const router = useRouter()
@@ -172,14 +173,6 @@ const componentMap: Record<string, any> = {
 
 const activeComponent = computed(() => componentMap[activeSection.value] || AdminModal)
 
-function sectionDraftKey(section: string | null) {
-  if (!section) return null
-  const patientId = id.value ?? createdPatientId.value
-  const visitId = vid.value ?? createdVisitVid.value
-  if (!patientId || !visitId) return null
-  return `patient-record:draft:${patientId}:${visitId}:${section}`
-}
-
 function clearPersistedState() {
   const storageKey = activeSectionStorageKey.value
 
@@ -188,7 +181,6 @@ function clearPersistedState() {
   if (storageKey) {
     localStorage.removeItem(storageKey)
   }
-
 }
 
 watch(
@@ -207,7 +199,7 @@ watch(
   { immediate: true }
 )
 
-watch(activeSection, (section, prev) => {
+watch(activeSection, (section) => {
   const storageKey = activeSectionStorageKey.value
   if (storageKey && typeof window !== 'undefined' && section in componentMap) {
     try {
@@ -238,7 +230,7 @@ async function loadPatientData() {
     const data = await fetchPatientRecord(id.value, vid.value)
     patient.value = structuredClone(data)
     const admin = patient.value.admin
-    age.value = admin.dob ? new Date().getFullYear() - new Date(admin.dob).getFullYear() : null
+    age.value = calculateAge(admin?.dob)
     name.value = admin.name
     regDate.value = formatDateForInput(admin.regDate)
     queueNo.value = admin.queueNo
@@ -256,14 +248,23 @@ function formatDateForInput(dateString: string) {
   return `${year}-${month}-${day}`
 }
 
-function handlePatientCreated(evt: { id: string; vid: number; name: string; age: number | null }) {
+function handlePatientCreated(evt: { id: string; vid: string; name: string; age: number | null }) {
   createdPatientId.value = String(evt.id)
   createdVisitVid.value = String(evt.vid)
   // switch to view mode route
   router.replace(`/patient/${evt.id}/${evt.vid}`)
 }
 
-function handlePatientUpdated(evt: any) {
+type PatientUpdatedPayload = {
+  id?: string
+  name: string
+  vid?: string
+  age: number | null
+  regDate: string | null
+  queueNo: string | null
+}
+
+function handlePatientUpdated(evt: PatientUpdatedPayload) {
   name.value = evt.name
   age.value = evt.age
   regDate.value = evt.regDate
@@ -287,7 +288,7 @@ async function handleDeleteVisit() {
   try {
     await deletePatientVisit(id.value, vid.value)
     toast.success('Patient visit deleted')
-    router.push('/patient-directory')
+    await router.push('/patient-directory')
   } catch (e) {
     console.error(e)
     toast.error('Failed to delete visit')

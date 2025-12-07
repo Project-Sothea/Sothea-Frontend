@@ -1,13 +1,11 @@
 import { ref, computed, type Ref } from 'vue'
-import { formatDateISO } from '@shared/utils/date'
 import type Admin from '@patient-record/types/Admin'
 import type { AdminPayload } from '@patient-record/api/visit'
+import { calculateAge } from '@shared/utils/age'
 
 export interface UseAdminFormOptions {
   /** Existing admin data for edit mode */
   initial?: Partial<Admin> | null
-  /** Auto fill regDate with today if not provided (default true) */
-  autoTodayRegDate?: boolean
   /** Callback to surface first validation error (e.g., toast) */
   onError?: (message: string) => void
 }
@@ -16,15 +14,15 @@ export interface UseAdminForm {
   // state
   name: Ref<string>
   khmerName: Ref<string>
-  dob: Ref<string | null>
+  dob: Ref<Date>
   gender: Ref<'M' | 'F' | ''>
   contactNo: Ref<string>
-  regDate: Ref<string>
+  regDate: Ref<Date>
   queueNo: Ref<string>
   village: Ref<string>
   familyGroup: Ref<string>
   pregnant: Ref<boolean | null>
-  lastMenstrualPeriod: Ref<string | null>
+  lastMenstrualPeriod: Ref<Date | null>
   drugAllergies: Ref<string | null>
   sentToId: Ref<boolean | null>
   selectedPhoto: Ref<string>
@@ -35,46 +33,40 @@ export interface UseAdminForm {
   buildPayload(): AdminPayload | null
   validate(): boolean
   reset(next?: Partial<Admin> | null): void
+  // setters (for child components to avoid prop mutation)
+  setDob(next: Date): void
+  setRegDate(next: Date): void
+  setLastMenstrualPeriod(next: Date | null): void
+}
+
+function normalizeDate(input: unknown, fallback: Date | null = null): Date | null {
+  if (input instanceof Date) return isNaN(input.getTime()) ? fallback : input
+  if (typeof input === 'string') {
+    const d = new Date(input)
+    return isNaN(d.getTime()) ? fallback : d
+  }
+  return fallback
 }
 
 export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
-  const { initial = null, autoTodayRegDate = true, onError } = options
+  const { initial = null, onError } = options
 
   const name = ref(initial?.name ?? '')
   const khmerName = ref(initial?.khmerName ?? '')
-  const dob = ref<string | null>(initial?.dob ? formatDateISO(initial.dob) : null)
+  const dob = ref(normalizeDate(initial?.dob, new Date()) as Date)
   const gender = ref<'M' | 'F' | ''>((initial?.gender as any) ?? '')
   const contactNo = ref(initial?.contactNo ?? '')
-  const regDate = ref(
-    initial?.regDate
-      ? formatDateISO(initial.regDate)
-      : autoTodayRegDate
-        ? formatDateISO(new Date())
-        : ''
-  )
+  const regDate = ref((normalizeDate(initial?.regDate, new Date()) || new Date()) as Date)
   const queueNo = ref(initial?.queueNo ?? '')
   const village = ref(initial?.village ?? '')
   const familyGroup = ref(initial?.familyGroup ?? '')
   const pregnant = ref<boolean | null>(initial?.pregnant ?? null)
-  const lastMenstrualPeriod = ref<string | null>(
-    initial?.lastMenstrualPeriod ? formatDateISO(initial.lastMenstrualPeriod) : null
-  )
+  const lastMenstrualPeriod = ref<Date | null>(normalizeDate(initial?.lastMenstrualPeriod, null))
   const drugAllergies = ref<string | null>(initial?.drugAllergies ?? '')
   const sentToId = ref<boolean | null>(initial?.sentToId ?? null)
   const selectedPhoto = ref('')
   const photoFile = ref<File | null>(null)
   const isMale = computed(() => gender.value === 'M')
-
-  function calculateAge(dateString: string | null): number | null {
-    if (!dateString) return null
-    const birth = new Date(dateString)
-    if (isNaN(birth.getTime())) return null
-    const today = new Date()
-    let yrs = today.getFullYear() - birth.getFullYear()
-    const m = today.getMonth() - birth.getMonth()
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) yrs--
-    return yrs
-  }
 
   const ageComputed = computed(() => calculateAge(dob.value))
 
@@ -104,19 +96,16 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
     if (!validate()) return null
     return {
       familyGroup: familyGroup.value,
-      regDate: regDate.value ? new Date(regDate.value).toISOString() : null,
+      regDate: regDate.value,
       queueNo: queueNo.value || null,
       name: name.value.trim(),
       khmerName: khmerName.value.trim(),
-      dob: dob.value ? new Date(dob.value).toISOString() : null,
-      age: ageComputed.value,
+      dob: dob.value,
       gender: gender.value || '',
       village: village.value.trim(),
       contactNo: contactNo.value.trim(),
       pregnant: pregnant.value,
-      lastMenstrualPeriod: lastMenstrualPeriod.value
-        ? new Date(lastMenstrualPeriod.value).toISOString()
-        : null,
+      lastMenstrualPeriod: lastMenstrualPeriod.value,
       drugAllergies: (drugAllergies.value || '').trim() || null,
       sentToId: sentToId.value
     }
@@ -126,26 +115,29 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
     const src = next ?? null
     name.value = src?.name ?? ''
     khmerName.value = src?.khmerName ?? ''
-    dob.value = src?.dob ? formatDateISO(src.dob) : null
+    dob.value = (normalizeDate(src?.dob, dob.value) || dob.value) as Date
     gender.value = (src?.gender as any) ?? ''
     contactNo.value = src?.contactNo ?? ''
-    regDate.value = src?.regDate
-      ? formatDateISO(src.regDate)
-      : autoTodayRegDate
-        ? formatDateISO(new Date())
-        : ''
+    regDate.value = (normalizeDate(src?.regDate, regDate.value) || regDate.value) as Date
     queueNo.value = src?.queueNo ?? ''
     village.value = src?.village ?? ''
     familyGroup.value = src?.familyGroup ?? ''
     pregnant.value = src?.pregnant ?? null
-    lastMenstrualPeriod.value = src?.lastMenstrualPeriod
-      ? formatDateISO(src.lastMenstrualPeriod)
-      : null
+    lastMenstrualPeriod.value = normalizeDate(src?.lastMenstrualPeriod, null)
     drugAllergies.value = src?.drugAllergies ?? ''
     sentToId.value = src?.sentToId ?? null
-  selectedPhoto.value = ''
-  photoFile.value = null
-    // isMale is computed now; no manual assignment needed
+    selectedPhoto.value = ''
+    photoFile.value = null
+  }
+
+  function setDob(next: Date) {
+    dob.value = normalizeDate(next, dob.value) as Date
+  }
+  function setRegDate(next: Date) {
+    regDate.value = normalizeDate(next, regDate.value) as Date
+  }
+  function setLastMenstrualPeriod(next: Date | null) {
+    lastMenstrualPeriod.value = normalizeDate(next, null)
   }
 
   return {
@@ -168,6 +160,9 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
     ageComputed: ageComputed as Ref<number | null>,
     buildPayload,
     validate,
-    reset
+    reset,
+    setDob,
+    setRegDate,
+    setLastMenstrualPeriod
   }
 }

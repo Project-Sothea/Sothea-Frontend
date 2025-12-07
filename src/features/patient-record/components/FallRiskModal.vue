@@ -75,14 +75,12 @@
       <!-- Tandem -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-medium text-sm">
-            Balance Test (Tandem): <span class="req">*</span>
-          </div>
+          <div class="font-medium text-sm">Balance Test (Tandem): <span class="req">*</span></div>
         </div>
 
         <!-- Options (displayed vertically) -->
         <div class="flex flex-col items-start mt-2 space-y-2">
-            <label>
+          <label>
             <input
               type="radio"
               name="tandemBalance"
@@ -118,9 +116,7 @@
       <!-- Gait Speed Test -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-medium text-sm">
-            Gait Speed Test: <span class="req">*</span>
-          </div>
+          <div class="font-medium text-sm">Gait Speed Test: <span class="req">*</span></div>
         </div>
 
         <!-- Options (displayed vertically) -->
@@ -198,7 +194,9 @@
               :value="0"
               :disabled="!isEditing"
             />
-            <span class="ml-2 text-sm"> Can’t complete 5 chair stands / Can’t complete in &lt;60s (0 points) </span>
+            <span class="ml-2 text-sm">
+              Can’t complete 5 chair stands / Can’t complete in &lt;60s (0 points)
+            </span>
           </label>
 
           <label>
@@ -266,9 +264,7 @@
       </div>
 
       <div v-if="showIcope">
-        <div class="font-medium text-lg mt-6">
-          ICOPE (60 yo and above):
-        </div>
+        <div class="font-medium text-lg mt-6">ICOPE (60 yo and above):</div>
 
         <div class="mt-4 flex flex-nowrap items-start gap-x-6">
           <div class="text-sm text-dark basis-[26rem] shrink-0">
@@ -278,13 +274,25 @@
 
           <div class="flex items-center gap-6 pt-0.5">
             <label class="inline-flex items-center gap-2">
-              <input type="radio" name="icopeCompleteChairStands" class="w-4 h-4"
-                    v-model="icopeCompleteChairStands" :value="true" :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="icopeCompleteChairStands"
+                class="w-4 h-4"
+                v-model="icopeCompleteChairStands"
+                :value="true"
+                :disabled="!isEditing"
+              />
               <span class="text-sm">Y</span>
             </label>
             <label class="inline-flex items-center gap-2">
-              <input type="radio" name="icopeCompleteChairStands" class="w-4 h-4"
-                    v-model="icopeCompleteChairStands" :value="false" :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="icopeCompleteChairStands"
+                class="w-4 h-4"
+                v-model="icopeCompleteChairStands"
+                :value="false"
+                :disabled="!isEditing"
+              />
               <span class="text-sm">N</span>
             </label>
           </div>
@@ -297,13 +305,25 @@
 
           <div class="flex items-center gap-6 pt-0.5">
             <label class="inline-flex items-center gap-2">
-              <input type="radio" name="icopeChairStandsTime" class="w-4 h-4"
-                    v-model="icopeChairStandsTime" :value="true" :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="icopeChairStandsTime"
+                class="w-4 h-4"
+                v-model="icopeChairStandsTime"
+                :value="true"
+                :disabled="!isEditing"
+              />
               <span class="text-sm">Y</span>
             </label>
             <label class="inline-flex items-center gap-2">
-              <input type="radio" name="icopeChairStandsTime" class="w-4 h-4"
-                    v-model="icopeChairStandsTime" :value="false" :disabled="!isEditing" />
+              <input
+                type="radio"
+                name="icopeChairStandsTime"
+                class="w-4 h-4"
+                v-model="icopeChairStandsTime"
+                :value="false"
+                :disabled="!isEditing"
+              />
               <span class="text-sm">N</span>
             </label>
           </div>
@@ -349,6 +369,7 @@ import type Patient from '@patient-record/types/Patient'
 import type FallRisk from '@patient-record/types/FallRisk'
 import { updateSection } from '@features/patient-record/api/visit'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
+import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
   patientId: string
@@ -366,16 +387,22 @@ const tandemBalance = ref<number | null>(null)
 const gaitSpeedTest = ref<number | null>(null)
 const chairStandTest = ref<number | null>(null)
 
-const showIcope = computed<boolean>(() => 
-  props.age != null ? props.age >= 60 : true
-);
+const calculatedAge = computed(() => props.age ?? calculateAge(props.patientData?.admin?.dob))
+const showIcope = computed<boolean>(() =>
+  calculatedAge.value != null ? calculatedAge.value >= 60 : true
+)
 
 const icopeCompleteChairStands = ref<boolean | null>(null)
-const icopeChairStandsTime = ref<boolean | null> (null)
+const icopeChairStandsTime = ref<boolean | null>(null)
 
 const fallRiskScore = computed(() => {
- return (sideToSideBalance.value ?? 0) + (semiTandemBalance.value ?? 0) + (tandemBalance.value ?? 0)
- + (gaitSpeedTest.value ?? 0) + (chairStandTest.value ?? 0)
+  return (
+    (sideToSideBalance.value ?? 0) +
+    (semiTandemBalance.value ?? 0) +
+    (tandemBalance.value ?? 0) +
+    (gaitSpeedTest.value ?? 0) +
+    (chairStandTest.value ?? 0)
+  )
 })
 
 // Automatic draft management - handles everything
@@ -391,11 +418,11 @@ const formDraft = useAutoDraft<FallRisk>({
     { key: 'gaitSpeedTest', ref: gaitSpeedTest },
     { key: 'chairStandTest', ref: chairStandTest },
     { key: 'icopeCompleteChairStands', ref: icopeCompleteChairStands },
-    { key: 'icopeChairStandsTime', ref: icopeChairStandsTime },
+    { key: 'icopeChairStandsTime', ref: icopeChairStandsTime }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved fall risk draft from this device.',
+  restoreMessage: 'Restored unsaved fall risk draft from this device.'
 })
 
 // Extract functions from formDraft
@@ -407,7 +434,7 @@ watch(
   (patientData) => {
     if (props.isAdd || isEditing.value) return
     if (!patientData) return
-    formDraft.initialize(patientData.fallrisk || null)
+    formDraft.initialize(patientData.fallRisk || null)
   },
   { immediate: true }
 )
@@ -421,7 +448,7 @@ function buildPayload(): FallRisk | null {
       [gaitSpeedTest.value !== null, 'Select gait balance'],
       [chairStandTest.value !== null, 'Select chair stand test'],
       [!showIcope.value || icopeCompleteChairStands.value !== null, 'Answer ICOPE Questions'],
-      [!showIcope.value || icopeChairStandsTime.value !== null, 'Answer ICOPE Questions'],
+      [!showIcope.value || icopeChairStandsTime.value !== null, 'Answer ICOPE Questions']
     ])
   )
     return null
@@ -458,7 +485,7 @@ function discardEdit() {
   discardChanges({
     onDiscard: () => {
       // Reset to server data or defaults (force re-initialization)
-      formDraft.initialize(props.patientData?.fallrisk || null, true)
+      formDraft.initialize(props.patientData?.fallRisk || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

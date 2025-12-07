@@ -93,17 +93,9 @@ onMounted(() => {
 .table {
   width: 1240px;
 }
-.table-heading {
-  background: rgba(63, 81, 181);
-}
+
 .line {
   height: 1px;
   background: rgba(0, 0, 0, 0.17);
-}
-.even-row {
-  background-color: #ffffff;
-}
-.odd-row {
-  background-color: #f2f2f2;
 }
 </style>

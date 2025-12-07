@@ -1,5 +1,5 @@
-import type { DrugView } from "./Drug"
-import type { ISODateString, UnitCode } from "./Util"
+import type { DrugView } from './Drug'
+import type { ISODateString, UnitCode } from './Util'
 
 // Batch = one lot for a drug. Quantity is in the drug's DispenseUnit.
 export interface DrugBatch {
@@ -14,28 +14,27 @@ export interface DrugBatch {
 }
 
 export interface DrugBatchLocation {
-	id: number
-	batchId: number
-	location: string
-	quantity: number
-	createdAt?: ISODateString
-	updatedAt?: ISODateString
+  id: number
+  batchId: number
+  location: string
+  quantity: number
+  createdAt?: ISODateString
+  updatedAt?: ISODateString
 }
 
 export interface BatchPostData {
-	batch: Omit<DrugBatch, 'id' | 'drugId' | 'quantity'>
-	locations: (Omit<DrugBatchLocation, 'id' | 'batchId'> & { id?: number })[]
+  batch: Omit<DrugBatch, 'id' | 'drugId' | 'quantity'>
+  locations: (Omit<DrugBatchLocation, 'id' | 'batchId'> & { id?: number })[]
 }
 
-
-export type BatchDetail =  DrugBatch & {
-	dispenseUnit: UnitCode
-	expirySortKey: string
-	batchLocations: DrugBatchLocation[]
+export type BatchDetail = DrugBatch & {
+  dispenseUnit: UnitCode
+  expirySortKey: string
+  batchLocations: DrugBatchLocation[]
 }
 
 export interface DrugStock {
-	drug: DrugView
-	batches: BatchDetail[]
-	totalQty: number
+  drug: DrugView
+  batches: BatchDetail[]
+  totalQty: number
 }

@@ -481,11 +481,11 @@ const formDraft = useAutoDraft<DoctorsConsultation>({
     { key: 'treatment', ref: treatment },
     { key: 'referralNeeded', ref: referralNeeded },
     { key: 'referralLoc', ref: referralLoc },
-    { key: 'remarks', ref: remarks },
+    { key: 'remarks', ref: remarks }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved doctor consultation draft from this device.',
+  restoreMessage: 'Restored unsaved doctor consultation draft from this device.'
 })
 
 // Extract functions from formDraft
@@ -497,7 +497,7 @@ watch(
   (patientData) => {
     if (props.isAdd || isEditing.value) return
     if (!patientData) return
-    formDraft.initialize(patientData.doctorsconsultation || null)
+    formDraft.initialize(patientData.doctorsConsultation || null)
   },
   { immediate: true }
 )
@@ -505,15 +505,18 @@ watch(
 function buildPayload(): DoctorsConsultation | null {
   if (
     !runChecks([
-      [well.value !== null ||
-      msk.value !== null ||
-      cvs.value !== null ||
-      respi.value !== null ||
-      gu.value !== null ||
-      git.value !== null ||
-      eye.value !== null ||
-      derm.value !== null ||
-      (others.value !== null && others.value.trim() !== ''), 'Please indicate at least one condition status'],
+      [
+        well.value !== null ||
+          msk.value !== null ||
+          cvs.value !== null ||
+          respi.value !== null ||
+          gu.value !== null ||
+          git.value !== null ||
+          eye.value !== null ||
+          derm.value !== null ||
+          (others.value !== null && others.value.trim() !== ''),
+        'Please indicate at least one condition status'
+      ],
       [referralNeeded.value !== null, 'Indicate referral need']
     ])
   )
@@ -556,7 +559,7 @@ function discardEdit() {
   discardChanges({
     onDiscard: () => {
       // Reset to server data or defaults (force re-initialization)
-      formDraft.initialize(props.patientData?.doctorsconsultation || null, true)
+      formDraft.initialize(props.patientData?.doctorsConsultation || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

@@ -30,7 +30,7 @@
               SpO2 <span class="req">*</span></label
             >
             <input
-              v-model="spO2"
+              v-model="spo2"
               type="number"
               step="0.01"
               placeholder="%"
@@ -49,7 +49,7 @@
           <div class="w-1/4">
             <label for="" class="mb-1 block text-sm font-medium text-dark"> Systolic BP1</label>
             <input
-              v-model="systolicBP1"
+              v-model="systolicBp1"
               type="number"
               step="0.01"
               placeholder="mmHg"
@@ -64,7 +64,7 @@
           <div class="ml-3 w-1/4">
             <label for="" class="mb-1 block text-sm font-medium text-dark"> Systolic BP2</label>
             <input
-              v-model="systolicBP2"
+              v-model="systolicBp2"
               type="number"
               step="0.01"
               placeholder="mmHg"
@@ -96,7 +96,7 @@
           <div class="w-1/4">
             <label for="" class="mb-1 block text-sm font-medium text-dark"> Diastolic BP1</label>
             <input
-              v-model="diastolicBP1"
+              v-model="diastolicBp1"
               type="number"
               step="0.01"
               placeholder="mmHg"
@@ -111,7 +111,7 @@
           <div class="ml-3 w-1/4">
             <label for="" class="mb-1 block text-sm font-medium text-dark"> Diastolic BP2</label>
             <input
-              v-model="diastolicBP2"
+              v-model="diastolicBp2"
               type="number"
               step="0.01"
               placeholder="mmHg"
@@ -200,7 +200,7 @@
               Random Blood Glucose (mmol/L)
             </label>
             <input
-              v-model="randomBloodGlucoseMmolL"
+              v-model="randBloodGlucoseMmolL"
               type="number"
               step="0.01"
               placeholder="mmol/L"
@@ -216,9 +216,7 @@
         <!-- ICOPE: High blood pressure? -->
         <div class="mb-2" v-if="showIcope">
           <!-- Row 1 -->
-          <div class="text-sm font-medium text-dark">
-            ICOPE (60 yo and above):
-          </div>
+          <div class="text-sm font-medium text-dark">ICOPE (60 yo and above):</div>
 
           <!-- Row 2: text + radios side by side -->
           <div class="mt-1 flex flex-wrap items-center gap-x-6 gap-y-2">
@@ -256,8 +254,6 @@
             </div>
           </div>
         </div>
-
-
 
         <!-- Edit Button -->
         <div class="flex flex-row-reverse w-full mt-5">
@@ -299,6 +295,7 @@ import type VitalStatistics from '@patient-record/types/VitalStatistics'
 import type Patient from '@patient-record/types/Patient'
 import { updateSection } from '@features/patient-record/api/visit'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
+import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
   patientId: string
@@ -309,20 +306,21 @@ const props = defineProps<{
 }>()
 
 const temperature = ref<number | null>(null)
-const spO2 = ref<number | null>(null)
-const systolicBP1 = ref<number | null>(null)
-const systolicBP2 = ref<number | null>(null)
-const diastolicBP1 = ref<number | null>(null)
-const diastolicBP2 = ref<number | null>(null)
+const spo2 = ref<number | null>(null)
+const systolicBp1 = ref<number | null>(null)
+const systolicBp2 = ref<number | null>(null)
+const diastolicBp1 = ref<number | null>(null)
+const diastolicBp2 = ref<number | null>(null)
 const hr1 = ref<number | null>(null)
 const hr2 = ref<number | null>(null)
-const randomBloodGlucoseMmolL = ref<number | null>(null)
+const randBloodGlucoseMmolL = ref<number | null>(null)
 
-const showIcope = computed<boolean>(() => 
-  props.age != null ? props.age >= 60 : true
-);
+const calculatedAge = computed(() => props.age ?? calculateAge(props.patientData?.admin?.dob))
+const showIcope = computed<boolean>(() =>
+  calculatedAge.value != null ? calculatedAge.value >= 60 : true
+)
 
-const icopeHighBp = ref<boolean | null> (null)
+const icopeHighBp = ref<boolean | null>(null)
 
 const toast = useToast()
 
@@ -334,19 +332,19 @@ const formDraft = useAutoDraft<VitalStatistics>({
   }),
   fields: [
     { key: 'temperature', ref: temperature },
-    { key: 'spO2', ref: spO2 },
-    { key: 'systolicBP1', ref: systolicBP1 },
-    { key: 'systolicBP2', ref: systolicBP2 },
-    { key: 'diastolicBP1', ref: diastolicBP1 },
-    { key: 'diastolicBP2', ref: diastolicBP2 },
+    { key: 'spo2', ref: spo2 },
+    { key: 'systolicBp1', ref: systolicBp1 },
+    { key: 'systolicBp2', ref: systolicBp2 },
+    { key: 'diastolicBp1', ref: diastolicBp1 },
+    { key: 'diastolicBp2', ref: diastolicBp2 },
     { key: 'hr1', ref: hr1 },
     { key: 'hr2', ref: hr2 },
-    { key: 'randomBloodGlucoseMmolL', ref: randomBloodGlucoseMmolL },
-    { key: 'icopeHighBp', ref: icopeHighBp },
+    { key: 'randBloodGlucoseMmolL', ref: randBloodGlucoseMmolL },
+    { key: 'icopeHighBp', ref: icopeHighBp }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved vital statistics draft from this device.',
+  restoreMessage: 'Restored unsaved vital statistics draft from this device.'
 })
 
 // Extract functions from formDraft
@@ -358,20 +356,20 @@ watch(
   (patientData) => {
     if (props.isAdd || isEditing.value) return
     if (!patientData) return
-    formDraft.initialize(patientData.vitalstatistics || null)
+    formDraft.initialize(patientData.vitalStatistics || null)
   },
   { immediate: true }
 )
 const avgSystolicBP = computed(() => {
-  if (systolicBP1.value && systolicBP2.value) {
-    return (Number(systolicBP1.value) + Number(systolicBP2.value)) / 2
+  if (systolicBp1.value && systolicBp2.value) {
+    return (Number(systolicBp1.value) + Number(systolicBp2.value)) / 2
   }
   return null
 })
 
 const avgDiastolicBP = computed(() => {
-  if (diastolicBP1.value && diastolicBP2.value) {
-    return (Number(diastolicBP1.value) + Number(diastolicBP2.value)) / 2
+  if (diastolicBp1.value && diastolicBp2.value) {
+    return (Number(diastolicBp1.value) + Number(diastolicBp2.value)) / 2
   }
   return null
 })
@@ -387,7 +385,7 @@ function buildPayload(): VitalStatistics | null {
   if (
     !runChecks([
       [temperature.value !== null, 'Please enter temperature'],
-      [spO2.value !== null, 'Please enter SpO2'],
+      [spo2.value !== null, 'Please enter SpO2'],
       [hr1.value !== null, 'Please enter HR1'],
       [hr2.value !== null, 'Please enter HR2'],
       [avgHR.value !== null, 'Average HR cannot be empty'],
@@ -397,31 +395,31 @@ function buildPayload(): VitalStatistics | null {
     return null
   if (
     temperature.value! > 9999 ||
-    spO2.value! > 9999 ||
-    (systolicBP1.value && systolicBP1.value > 9999) ||
-    (systolicBP2.value && systolicBP2.value > 9999) ||
-    (diastolicBP1.value && diastolicBP1.value > 9999) ||
-    (diastolicBP2.value && diastolicBP2.value > 9999) ||
+    spo2.value! > 9999 ||
+    (systolicBp1.value && systolicBp1.value > 9999) ||
+    (systolicBp2.value && systolicBp2.value > 9999) ||
+    (diastolicBp1.value && diastolicBp1.value > 9999) ||
+    (diastolicBp2.value && diastolicBp2.value > 9999) ||
     hr1.value! > 9999 ||
     hr2.value! > 9999 ||
-    randomBloodGlucoseMmolL.value! > 9999
+    randBloodGlucoseMmolL.value! > 9999
   ) {
     toast.error('Values cannot be greater than 9999')
     return null
   }
   return {
     temperature: temperature.value!,
-    spO2: spO2.value!,
-    systolicBP1: systolicBP1.value || null,
-    systolicBP2: systolicBP2.value || null,
-    diastolicBP1: diastolicBP1.value || null,
-    diastolicBP2: diastolicBP2.value || null,
+    spo2: spo2.value!,
+    systolicBp1: systolicBp1.value || null,
+    systolicBp2: systolicBp2.value || null,
+    diastolicBp1: diastolicBp1.value || null,
+    diastolicBp2: diastolicBp2.value || null,
     averageSystolicBP: avgSystolicBP.value,
     averageDiastolicBP: avgDiastolicBP.value,
     hr1: hr1.value!,
     hr2: hr2.value!,
     averageHR: avgHR.value!,
-    randomBloodGlucoseMmolL: randomBloodGlucoseMmolL.value || null,
+    randBloodGlucoseMmolL: randBloodGlucoseMmolL.value || null,
     icopeHighBp: icopeHighBp.value || null
   }
 }
@@ -448,7 +446,7 @@ function discardEdit() {
   discardChanges({
     onDiscard: () => {
       // Reset to server data or defaults (force re-initialization)
-      formDraft.initialize(props.patientData?.vitalstatistics || null, true)
+      formDraft.initialize(props.patientData?.vitalStatistics || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

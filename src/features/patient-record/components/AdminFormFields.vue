@@ -17,7 +17,7 @@
                 placeholder="Name"
                 class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
               />
-              <span class="absolute top-1/2 left-4 -translate-y-1/2">
+              <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none z-30">
                 <img src="@/assets/user.svg" width="20" height="20" />
               </span>
             </div>
@@ -35,7 +35,7 @@
                 placeholder="Khmer Name"
                 class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
               />
-              <span class="absolute top-1/2 left-4 -translate-y-1/2">
+              <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none z-30">
                 <img src="@/assets/user.svg" width="20" height="20" />
               </span>
             </div>
@@ -95,7 +95,7 @@
                 placeholder="Contact No."
                 class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
               />
-              <span class="absolute top-1/2 left-4 -translate-y-1/2">
+              <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none z-30">
                 <img src="@/assets/phone.svg" width="20" height="20" />
               </span>
             </div>
@@ -126,29 +126,29 @@
                 for="file"
                 class="flex w-full h-[11rem] justify-center items-center cursor-pointer rounded-md border border-dashed border-gray-300 p-3 mr-2"
               >
-                <div>
-                  <input
-                    type="file"
-                    name="file"
-                    id="file"
-                    class="sr-only"
-                    :disabled="disabled"
-                    @change="$emit('imageUpload', $event)"
-                    accept=".jpg,.jpeg,.png,.heic"
-                  />
-                  <img
-                    v-if="form.selectedPhoto.value"
-                    :src="form.selectedPhoto.value"
-                    alt="Selected Image"
-                    class="object-cover rounded-lg w-52 h-40"
-                  />
-                  <template v-else>
-                    <span class="flex items-center justify-center">
-                      <img src="@/assets/camera.svg" height="20" width="20" />
-                    </span>
-                    <span class="text-sm text-body-color">{{ disabled ? 'no Photo' : 'Add Photo ID' }}</span>
-                  </template>
-                </div>
+                <input
+                  type="file"
+                  name="file"
+                  id="file"
+                  class="sr-only"
+                  :disabled="disabled"
+                  @change="$emit('imageUpload', $event)"
+                  accept=".jpg,.jpeg,.png,.heic"
+                />
+                <img
+                  v-if="form.selectedPhoto.value"
+                  :src="form.selectedPhoto.value"
+                  alt="Selected Image"
+                  class="object-cover rounded-lg w-52 h-40"
+                />
+                <template v-else>
+                  <span class="flex items-center justify-center">
+                    <img src="@/assets/camera.svg" height="20" width="20" />
+                  </span>
+                  <span class="text-sm text-body-color">{{
+                    disabled ? 'no Photo' : 'Add Photo ID'
+                  }}</span>
+                </template>
               </label>
             </div>
           </div>
@@ -169,7 +169,7 @@
             placeholder="Queue Number"
             class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
           />
-          <span class="absolute top-1/2 left-4 -translate-y-1/2">
+          <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none z-30">
             <img src="@/assets/queueno.svg" width="20" height="20" />
           </span>
         </div>
@@ -189,7 +189,7 @@
           </select>
 
           <!-- left icon stays the same -->
-          <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none">
+          <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none z-30">
             <img src="@/assets/house.svg" width="20" height="20" />
           </span>
         </div>
@@ -206,7 +206,7 @@
             placeholder="Family Group"
             class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
           />
-          <span class="absolute top-1/2 left-4 -translate-y-1/2">
+          <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none z-30">
             <img src="@/assets/users.svg" width="20" height="20" />
           </span>
         </div>
@@ -219,7 +219,7 @@
           >Pregnant? <span class="req">*</span></label
         >
         <div class="relative z-20">
-          <span class="absolute top-1/2 left-4 -translate-y-1/2">
+          <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none z-30">
             <img src="@/assets/pregnantwoman.svg" width="25" height="25" />
           </span>
           <select
@@ -260,7 +260,7 @@
             :placeholder="disabled ? 'No drug allergies' : 'Enter Drug Allergies'"
             class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
           />
-          <span class="absolute top-1/2 left-4 -translate-y-1/2">
+          <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none z-30">
             <img src="@/assets/drug.svg" width="20" height="20" />
           </span>
         </div>
@@ -270,7 +270,7 @@
           >Sent to Infectious Disease? <span class="req">*</span></label
         >
         <div class="relative z-20">
-          <span class="absolute top-1/2 left-4 -translate-y-1/2">
+          <span class="absolute top-1/2 left-4 -translate-y-1/2 pointer-events-none z-30">
             <img src="@/assets/mask.svg" width="25" height="25" />
           </span>
           <select
@@ -293,6 +293,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useAdminForm } from '@patient-record/composables/useAdminForm'
+import { formatDateISO } from '@shared/utils/date'
 
 const props = defineProps<{
   form: ReturnType<typeof useAdminForm>
@@ -316,15 +317,40 @@ function map<K extends keyof ReturnType<typeof useAdminForm>>(key: K) {
 
 const name = map('name')
 const khmerName = map('khmerName')
-const dob = map('dob')
+const dob = computed<string | null>({
+  get() {
+    const v = props.form.dob.value as Date
+    return formatDateISO(v)
+  },
+  set(dateOnly: string | null) {
+    // dob should not be null per requirements; if cleared, keep current value or set to today
+    props.form.setDob(dateOnly ? new Date(dateOnly) : props.form.dob.value)
+  }
+})
 const gender = map('gender')
 const contactNo = map('contactNo')
-const regDate = map('regDate')
+const regDate = computed<string>({
+  get() {
+    const v = props.form.regDate.value as Date
+    return formatDateISO(v)
+  },
+  set(dateOnly: string) {
+    props.form.setRegDate(new Date(dateOnly))
+  }
+})
 const queueNo = map('queueNo')
 const village = map('village')
 const familyGroup = map('familyGroup')
 const pregnant = map('pregnant')
-const lastMenstrualPeriod = map('lastMenstrualPeriod')
+const lastMenstrualPeriod = computed<string | null>({
+  get() {
+    const v = props.form.lastMenstrualPeriod.value as Date | null
+    return v ? formatDateISO(v) : null
+  },
+  set(dateOnly: string | null) {
+    props.form.setLastMenstrualPeriod(dateOnly ? new Date(dateOnly) : null)
+  }
+})
 const drugAllergies = map('drugAllergies')
 const sentToId = map('sentToId')
 </script>

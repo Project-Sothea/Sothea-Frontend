@@ -297,7 +297,7 @@
             <span class="flex-grow text-right"> </span>
           </a>
 
-                    <a
+          <a
             class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'dental',
@@ -342,7 +342,6 @@
               height="20"
               fill="none"
               viewBox="0 0 32 32"
-              version="1.1"
               xmlns="http://www.w3.org/2000/svg"
               stroke="#ffffff"
             >

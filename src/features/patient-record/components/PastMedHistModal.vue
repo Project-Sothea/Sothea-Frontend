@@ -24,7 +24,9 @@
       <!-- Cough -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Cough <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Cough <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -64,11 +66,13 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Fever -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Fever <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Fever <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -112,7 +116,9 @@
       <!-- Blocked Nose -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Blocked Nose <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Blocked Nose <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -156,7 +162,9 @@
       <!-- Sore Throat -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Sore Throat <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Sore Throat <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -200,7 +208,9 @@
       <!-- Night Sweats -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Night Sweats <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Night Sweats <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -244,7 +254,9 @@
       <!-- Unintentional Weight Los -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Unintentional Weight Loss <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Unintentional Weight Loss <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -294,7 +306,9 @@
       <!-- Tuberculosis -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Tuberculosis <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Tuberculosis <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -338,7 +352,9 @@
       <!-- Has Tuberculosis been treated -->
       <div class="flex flex-col mt-4" v-if="tuberculosis">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">If Y to Tuberculosis, has it been treated? <span class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            If Y to Tuberculosis, has it been treated? <span class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -382,7 +398,9 @@
       <!-- Diabetes -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Diabetes <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Diabetes <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -426,7 +444,9 @@
       <!-- Hypertension -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Hypertension <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Hypertension <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -470,7 +490,9 @@
       <!-- Hyperlipidemia -->
       <div class="flex flex-col mt-4">
         <div class="flex flex-row">
-          <div class="font-normal text-sm w-1/3">Hyperlipidemia <span v-if="!showPaeds" class="req">*</span></div>
+          <div class="font-normal text-sm w-1/3">
+            Hyperlipidemia <span v-if="!showPaeds" class="req">*</span>
+          </div>
 
           <div class="flex items-center w-1/6">
             <label class="inline-flex items-center">
@@ -659,7 +681,7 @@
             rows="2"
             placeholder="Remarks"
             class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
-            v-model="specifiedSTDs"
+            v-model="specifiedStds"
             :disabled="!isEditing"
           ></textarea>
         </label>
@@ -718,6 +740,7 @@ import type Patient from '@patient-record/types/Patient'
 import type PastMedicalHistory from '@patient-record/types/PastMedicalHistory'
 import { updateSection } from '@features/patient-record/api/visit'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
+import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
   patientId: string
@@ -734,7 +757,7 @@ const fever = ref<boolean | null>(null)
 const blockedNose = ref<boolean | null>(null)
 const soreThroat = ref<boolean | null>(null)
 const nightSweats = ref<boolean | null>(null)
-const unintentionalWeightLoss = ref<boolean | null>(null) 
+const unintentionalWeightLoss = ref<boolean | null>(null)
 
 const tuberculosis = ref<boolean | null>(null)
 const tuberculosisHasBeenTreated = ref<boolean | null>(null)
@@ -745,11 +768,12 @@ const hyperlipidemia = ref<boolean | null>(null)
 const chronicJointPains = ref<boolean | null>(null)
 const chronicMuscleAches = ref<boolean | null>(null)
 const sexuallyTransmittedDisease = ref<boolean | null>(null)
-const specifiedSTDs = ref<string | null>('')
+const specifiedStds = ref<string | null>('')
 const others = ref<string | null>('')
 
-const showPaeds = computed<boolean>(() => 
-  props.age != null ? props.age <= 16 : true
+const calculatedAge = computed(() => props.age ?? calculateAge(props.patientData?.admin?.dob))
+const showPaeds = computed<boolean>(() =>
+  calculatedAge.value != null ? calculatedAge.value <= 16 : true
 )
 
 // Automatic draft management - handles everything
@@ -773,12 +797,12 @@ const formDraft = useAutoDraft<PastMedicalHistory>({
     { key: 'chronicJointPains', ref: chronicJointPains },
     { key: 'chronicMuscleAches', ref: chronicMuscleAches },
     { key: 'sexuallyTransmittedDisease', ref: sexuallyTransmittedDisease },
-    { key: 'specifiedSTDs', ref: specifiedSTDs },
-    { key: 'others', ref: others },
+    { key: 'specifiedStds', ref: specifiedStds },
+    { key: 'others', ref: others }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved past medical history draft from this device.',
+  restoreMessage: 'Restored unsaved past medical history draft from this device.'
 })
 
 // Extract functions from formDraft
@@ -790,7 +814,7 @@ watch(
   (patientData) => {
     if (props.isAdd || isEditing.value) return
     if (!patientData) return
-    formDraft.initialize(patientData.pastmedicalhistory || null)
+    formDraft.initialize(patientData.pastMedicalHistory || null)
   },
   { immediate: true }
 )
@@ -809,7 +833,10 @@ function buildPayload(): PastMedicalHistory | null {
     !runChecks([
       // All fields now accept null as valid (Nil), so we only validate conditional fields
       // Only require tuberculosisHasBeenTreated when tuberculosis is true
-      [tuberculosis.value !== true || tuberculosisHasBeenTreated.value !== null, 'Select Has Tuberculosis been treated before'],
+      [
+        tuberculosis.value !== true || tuberculosisHasBeenTreated.value !== null,
+        'Select Has Tuberculosis been treated before'
+      ]
     ])
   )
     return null
@@ -830,7 +857,7 @@ function buildPayload(): PastMedicalHistory | null {
     chronicJointPains: chronicJointPains.value,
     chronicMuscleAches: chronicMuscleAches.value,
     sexuallyTransmittedDisease: sexuallyTransmittedDisease.value,
-    specifiedSTDs: specifiedSTDs.value,
+    specifiedStds: specifiedStds.value,
     others: others.value
   }
 }
@@ -857,7 +884,7 @@ function discardEdit() {
   discardChanges({
     onDiscard: () => {
       // Reset to server data or defaults (force re-initialization)
-      formDraft.initialize(props.patientData?.pastmedicalhistory || null, true)
+      formDraft.initialize(props.patientData?.pastMedicalHistory || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')
