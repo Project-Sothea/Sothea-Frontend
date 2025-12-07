@@ -40,11 +40,12 @@
                   <div class="col-span-12 sm:col-span-6">
                     <label class="block mb-1 text-gray-700">Drug Code</label>
                     <input
-                      v-model.trim="drug.atcCode"
-                      :class="inputClass(errors.atcCode)"
-                      placeholder="e.g. N02BE01"
+                      type="number"
+                      v-model.number="drug.drugCode"
+                      :class="inputClass(errors.drugCode)"
+                      placeholder="e.g. 12345"
                     />
-                    <p v-if="errors.atcCode" class="err">{{ errors.atcCode }}</p>
+                    <p v-if="errors.drugCode" class="err">{{ errors.drugCode }}</p>
                   </div>
 
                   <div class="col-span-12">
@@ -355,7 +356,7 @@ const pieceContentUnitOpts = computed(() => {
 const previewLabel = computed(() => {
   // Format drug name with ATC code prefix
   const baseName = drug.value.genericName || drug.value.brandName || 'Drug'
-  const drugName = drug.value.atcCode ? `${drug.value.atcCode}. ${baseName}` : baseName
+  const drugName = drug.value.drugCode != null ? `${drug.value.drugCode}. ${baseName}` : baseName
   
   const df = drug.value.dosageFormCode ? DOSAGE_FORM_LABELS[drug.value.dosageFormCode as DosageFormCode] : 'form'
   const n = drug.value.strengthNum
@@ -685,7 +686,7 @@ function buildPayload() {
   return stripUndefined({
     genericName: d.genericName!,
     brandName: d.brandName || undefined,
-    atcCode: d.atcCode || undefined,
+    drugCode: d.drugCode != null ? d.drugCode : undefined,
     notes: d.notes || undefined,
     isActive: d.isActive ?? true,
     dosageFormCode: d.dosageFormCode!,

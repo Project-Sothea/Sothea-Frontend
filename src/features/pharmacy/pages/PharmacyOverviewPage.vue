@@ -186,7 +186,7 @@ const filteredBatches = computed(() => {
     const byBatchNum = (b.batchNumber ?? '').toLowerCase().includes(term)
     const drug = drugForBatch(b)
     if (drug) {
-      const searchText = `${drug.atcCode || ''} ${drug.genericName || ''} ${drug.brandName || ''} ${drug.displayLabel || ''}`.toLowerCase()
+      const searchText = `${drug.drugCode != null ? drug.drugCode : ''} ${drug.genericName || ''} ${drug.brandName || ''} ${drug.displayLabel || ''}`.toLowerCase()
       const byDrug = searchText.includes(term)
       const byLocs = b.batchLocations.some(bL => bL.location.toLowerCase().includes(term))
       return byBatchNum || byDrug || byLocs
@@ -248,7 +248,7 @@ const filteredDrugRows = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
   if (!term) return drugRows.value
   return drugRows.value.filter(r => {
-    const searchText = `${r.drug.atcCode || ''} ${r.drug.genericName || ''} ${r.drug.brandName || ''} ${r.drug.displayLabel || ''}`.toLowerCase()
+    const searchText = `${r.drug.drugCode != null ? r.drug.drugCode : ''} ${r.drug.genericName || ''} ${r.drug.brandName || ''} ${r.drug.displayLabel || ''}`.toLowerCase()
     return searchText.includes(term)
   })
 })

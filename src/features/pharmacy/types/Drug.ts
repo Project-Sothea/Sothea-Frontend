@@ -6,7 +6,7 @@ export interface Drug {
   
   genericName: string;
   brandName?: string;
-  atcCode?: string;
+  drugCode?: number;
   isActive: boolean;
 
   // Dosage and strength fields

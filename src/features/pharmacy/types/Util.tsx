@@ -147,19 +147,19 @@ export function fmtDispenseUnit(drug?: DrugView) {
   return ''
 }
 
-// Format drug name with ATC code prefix
-export function fmtDrugName(drug?: DrugView | { genericName: string; brandName?: string; atcCode?: string }): string {
+// Format drug name with drug code prefix
+export function fmtDrugName(drug?: DrugView | { genericName: string; brandName?: string; drugCode?: number }): string {
   if (!drug) return '—'
   const name = drug.genericName || drug.brandName || 'Drug'
-  const atcCode = 'atcCode' in drug ? drug.atcCode : undefined
-  if (atcCode) {
-    return `${atcCode}. ${name}`
+  const drugCode = 'drugCode' in drug ? drug.drugCode : undefined
+  if (drugCode != null) {
+    return `${drugCode}. ${name}`
   }
   return name
 }
 
 // Format drug name with brand name in parentheses
-export function fmtDrugNameWithBrand(drug?: DrugView | { genericName: string; brandName?: string; atcCode?: string }): string {
+export function fmtDrugNameWithBrand(drug?: DrugView | { genericName: string; brandName?: string; drugCode?: number }): string {
   if (!drug) return '—'
   const baseName = fmtDrugName(drug)
   const brand = 'brandName' in drug ? drug.brandName : undefined

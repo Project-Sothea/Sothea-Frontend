@@ -302,7 +302,7 @@ const filteredDrugs = computed(() => {
   const q = drugQuery.value.trim().toLowerCase()
   if (!q) return drugs.value.slice(0, 50) // small cap
   return drugs.value.filter(d => {
-    const searchText = `${d.atcCode || ''} ${d.genericName || ''} ${d.brandName || ''} ${d.displayLabel || ''}`.toLowerCase()
+    const searchText = `${d.drugCode != null ? d.drugCode : ''} ${d.genericName || ''} ${d.brandName || ''} ${d.displayLabel || ''}`.toLowerCase()
     return searchText.includes(q)
   })
 })
