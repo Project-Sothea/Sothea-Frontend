@@ -10,11 +10,6 @@
         @keyup.enter="emitSearch"
       />
     </div>
-    <div class="flex items-center space-x-3 mx-5 hover:cursor-pointer">
-      <p style="font-size: medium" class="hover:text-gray-500" @click="emit('export')">
-        Export Patient Data &#x2913;
-      </p>
-    </div>
     <div class="flex items-center space-x-3 hover:cursor-pointer">
       <p style="font-size: medium" class="hover:text-gray-500" @click="emit('refresh')">
         Refresh List &#x21bb;
@@ -28,7 +23,6 @@ import { ref } from 'vue'
 
 const emit = defineEmits<{
   (e: 'search', value: string): void
-  (e: 'export'): void
   (e: 'refresh'): void
 }>()
 
