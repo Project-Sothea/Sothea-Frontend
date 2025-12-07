@@ -7,7 +7,6 @@
         :form="formRef"
         :disabled="!isEditing && !isAdd"
         :maxDate="maxDate"
-        @imageUpload="handleImageUpload"
       />
 
       <!-- Save Button -->
@@ -57,11 +56,10 @@ import { formatDateISO } from '@shared/utils/date'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
-import { createPatient, updateAdmin } from '@features/patient-record/api/visit'
+import { addVisit, updateAdmin } from '@features/patient-record/api/visit'
 import { handleApiError } from '@shared/api/handleApiError'
 import { useAdminForm } from '@patient-record/composables/useAdminForm'
 import AdminFormFields from './AdminFormFields.vue'
-import { getPatientPhotoBlob } from '@patient-record/api/photo'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 import type { AdminPayload } from '@features/patient-record/api/visit'
 
@@ -73,26 +71,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  patientCreated: [
-    {
-      id: string
-      name: string
-      vid: string
-      regDate: string | null
-      queueNo: string | null
-      age: number | null
-    }
-  ]
-  patientUpdated: [
-    {
-      id: string | undefined
-      name: string
-      vid: string | undefined
-      regDate: string | null
-      queueNo: string | null
-      age: number | null
-    }
-  ]
+  patientVisitCreated: [{ id: string; vid: string; regDate: string | null; queueNo: string | null }]
+  adminUpdated: [{ id: string | undefined; vid: string | undefined; regDate: string | null; queueNo: string | null }]
 }>()
 
 const toast = useToast()
@@ -103,28 +83,17 @@ const formRef = useAdminForm({
 })
 
 const {
-  name,
-  khmerName,
-  dob,
-  gender,
-  contactNo,
   regDate,
   queueNo,
-  village,
-  familyGroup,
   pregnant,
   lastMenstrualPeriod,
-  drugAllergies,
   sentToId,
-  photoFile,
-  selectedPhoto,
-  ageComputed,
   buildPayload,
   validate,
   reset
 } = formRef
 
-if (props.isAdd && !regDate.value) regDate.value = formatDateISO(new Date())
+if (props.isAdd && !regDate.value) regDate.value = new Date()
 
 // Automatic draft management - handles everything
 const formDraft = useAutoDraft<AdminPayload>({
@@ -133,18 +102,10 @@ const formDraft = useAutoDraft<AdminPayload>({
     return `patient-record:draft:${props.patientId}:${props.patientVid}:admin`
   }),
   fields: [
-    { key: 'name', ref: name },
-    { key: 'khmerName', ref: khmerName },
-    { key: 'dob', ref: dob },
-    { key: 'gender', ref: gender },
-    { key: 'contactNo', ref: contactNo },
     { key: 'regDate', ref: regDate },
     { key: 'queueNo', ref: queueNo },
-    { key: 'village', ref: village },
-    { key: 'familyGroup', ref: familyGroup },
     { key: 'pregnant', ref: pregnant },
     { key: 'lastMenstrualPeriod', ref: lastMenstrualPeriod },
-    { key: 'drugAllergies', ref: drugAllergies },
     { key: 'sentToId', ref: sentToId }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
@@ -162,7 +123,7 @@ watch(
     if (isAdd) {
       // Clear form when entering create mode
       reset()
-      if (!regDate.value) regDate.value = formatDateISO(new Date())
+      if (!regDate.value) regDate.value = new Date()
     }
   },
   { immediate: true }
@@ -179,115 +140,45 @@ watch(
   { immediate: true }
 )
 
-// Load existing photo when patient id/vid becomes available or changes
-watch(
-  [() => props.isAdd, () => props.patientId, () => props.patientVid],
-  ([isAdd, pid, vid]) => {
-    if (!isAdd && pid && vid) {
-      loadExistingPhoto(pid as string, vid as string)
-    }
-  },
-  { immediate: true }
-)
-
 async function submitData() {
   if (props.isAdd) {
-    // For new patients, use the existing logic
+    if (!props.patientId) {
+      toast.error('Create a patient before adding admin details.')
+      return
+    }
     if (!validate()) return
     const payload = buildPayload()
     if (!payload) return
     try {
-      const response = await createPatient(payload, photoFile.value)
-      toast.success('New Patient created successfully!')
-      emit('patientCreated', {
-        id: String(response.id),
-        name: name.value,
-        vid: '1',
-        regDate: regDate.value,
-        queueNo: queueNo.value,
-        age: ageComputed.value
+      const response = await addVisit(props.patientId, payload)
+      toast.success('New patient visit created successfully!')
+      emit('patientVisitCreated', {
+        id: String(props.patientId),
+        vid: String(response.vid),
+        regDate: regDate.value ? formatDateISO(regDate.value as any) : null,
+        queueNo: queueNo.value
       })
     } catch (error) {
       console.error(error)
       toast.error(handleApiError(error))
     }
   } else if (!props.isAdd && props.patientId && props.patientVid) {
-    // For existing patients, use useEditableSection's save
     await save({
       buildPayload: () => {
         if (!validate()) return null
         return buildPayload()
       },
-      update: () =>
-        updateAdmin(props.patientId!, props.patientVid!, buildPayload()!, photoFile.value),
+      update: () => updateAdmin(props.patientId!, props.patientVid!, buildPayload()!),
       onSuccess: () => {
         toast.success('Admin Details updated successfully!')
-        emit('patientUpdated', {
+        emit('adminUpdated', {
           id: props.patientId,
-          name: name.value,
           vid: props.patientVid,
-          regDate: regDate.value,
-          queueNo: queueNo.value,
-          age: ageComputed.value
+          regDate: regDate.value ? formatDateISO(regDate.value as any) : null,
+          queueNo: queueNo.value
         })
       }
     })
-  }
-}
-
-async function handleImageUpload(e: Event) {
-  const input = e.target as HTMLInputElement | null
-  const file = input?.files?.[0]
-  if (!file) return
-  const allowed = ['image/jpeg', 'image/png', 'image/heic', 'image/jpg']
-  if (!allowed.includes(file.type)) {
-    toast.error('Unsupported file type')
-    return
-  }
-  const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true }
-  try {
-    let fileToProcess: Blob = file
-    if (fileToProcess.type === 'image/heic') {
-      const heic = await import('heic2any')
-      try {
-        fileToProcess = (await heic.default({ blob: fileToProcess, toType: 'image/jpeg' })) as Blob
-      } catch {
-        return toast.error('HEIC conversion failed')
-      }
-    }
-    const fileLike: File =
-      fileToProcess instanceof File
-        ? fileToProcess
-        : new File([fileToProcess], 'upload.jpg', { type: 'image/jpeg' })
-    const comp = (await import('browser-image-compression')).default
-    const compressed = await comp(fileLike, options)
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      if (!ev.target || typeof ev.target.result !== 'string') return
-      selectedPhoto.value = ev.target.result
-      photoFile.value = compressed
-    }
-    reader.readAsDataURL(compressed)
-  } catch (err) {
-    console.error(err)
-    selectedPhoto.value = ''
-    toast.error('Image upload failed')
-  }
-}
-
-async function loadExistingPhoto(patientId: string, vid: string) {
-  try {
-    const blob = await getPatientPhotoBlob(patientId, vid)
-    // Revoke prior object URL (if any) to avoid leaks
-    if (selectedPhoto.value && selectedPhoto.value.startsWith('blob:')) {
-      URL.revokeObjectURL(selectedPhoto.value)
-    }
-    selectedPhoto.value = URL.createObjectURL(blob)
-  } catch (err: any) {
-    // 404 means no photo; ignore silently
-    if (err?.response?.status !== 404) {
-      console.warn('Failed to load existing photo', err)
-    }
   }
 }
 

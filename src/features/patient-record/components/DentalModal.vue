@@ -340,7 +340,9 @@ const drinkOtherWater = ref<boolean | null>(null)
 
 const riskForDentalCarries = ref<'Low Risk' | 'Middle Risk' | 'High Risk' | null>(null)
 
-const calculatedAge = computed(() => props.age ?? calculateAge(props.patientData?.admin?.dob))
+const calculatedAge = computed(
+  () => props.age ?? calculateAge(props.patientData?.patientdetails?.dob)
+)
 const showIcope = computed<boolean>(() =>
   calculatedAge.value != null ? calculatedAge.value >= 60 : true
 )

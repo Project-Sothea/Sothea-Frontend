@@ -315,7 +315,9 @@ const paedsWeight = ref<number | null>(null)
 const icopeLostWeightPastMonths = ref<boolean | null>(null)
 const icopeNoDesireToEat = ref<boolean | null>(null)
 
-const calculatedAge = computed(() => props.age ?? calculateAge(props.patientData?.admin?.dob))
+const calculatedAge = computed(
+  () => props.age ?? calculateAge(props.patientData?.patientdetails?.dob)
+)
 const showIcope = computed<boolean>(() =>
   calculatedAge.value != null ? calculatedAge.value >= 60 : true
 )

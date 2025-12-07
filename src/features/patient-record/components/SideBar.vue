@@ -11,6 +11,32 @@
           <a
             class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
             :class="{
+              'border-l-white bg-[#3f51b5] text-white': activeSection === 'patient',
+              'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'patient'
+            }"
+            @click="setActiveSection('patient')"
+            href="#"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 19.128a9.383 9.383 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM12.003 12.057a6.375 6.375 0 0 1 6.372-6.182c.934 0 1.818.207 2.607.578"
+              />
+            </svg>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Patient
+            </span>
+          </a>
+          <a
+            class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
+            :class="{
               'border-l-white bg-[#3f51b5] text-white': activeSection === 'admin',
               'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'admin'
             }"
@@ -533,6 +559,28 @@
             </span>
             <span class="flex-grow text-right"> </span>
           </a>
+          <a
+            class="border-l-4 border-l-transparent flex hover:cursor-pointer items-center p-2 my-2 transition-colors duration-200 text-gray-500 hover:bg-red-600 hover:text-white w-full"
+            v-if="!isAdd"
+            @click="tryDeletePatient"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M9 2a1 1 0 00-.894.553L7.382 4H5a1 1 0 100 2h10a1 1 0 100-2h-2.382l-.724-1.447A1 1 0 0011 2H9zM5 7a1 1 0 011 1v7a1 1 0 001 1h6a1 1 0 001-1V8a1 1 0 112 0v7a3 3 0 01-3 3H7a3 3 0 01-3-3V8a1 1 0 011-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span class="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+              Delete Patient
+            </span>
+            <span class="flex-grow text-right"> </span>
+          </a>
         </nav>
       </div>
     </div>
@@ -551,6 +599,7 @@ defineProps<{
 const emit = defineEmits<{
   'update:activeSection': [section: string]
   openTryDeleteVisitModal: []
+  openTryDeletePatientModal: []
 }>()
 
 function setActiveSection(section: string) {
@@ -558,6 +607,9 @@ function setActiveSection(section: string) {
 }
 function tryDeleteVisit() {
   emit('openTryDeleteVisitModal')
+}
+function tryDeletePatient() {
+  emit('openTryDeletePatientModal')
 }
 </script>
 

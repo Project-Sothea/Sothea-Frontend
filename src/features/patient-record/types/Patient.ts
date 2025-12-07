@@ -1,4 +1,5 @@
 import type Admin from './Admin'
+import type PatientDetails from './PatientDetails'
 import type PastMedicalHistory from './PastMedicalHistory'
 import type SocialHistory from './SocialHistory'
 import type HeightAndWeight from './HeightAndWeight'
@@ -11,6 +12,7 @@ import type Physiotherapy from './Physiotherapy'
 
 // The Patient type is a composite type that contains all the other types.
 export default interface Patient {
+  patientdetails: PatientDetails
   admin: Admin
   pastMedicalHistory: PastMedicalHistory | null
   socialHistory: SocialHistory | null

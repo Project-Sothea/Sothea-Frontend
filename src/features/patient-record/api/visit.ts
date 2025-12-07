@@ -1,5 +1,4 @@
 import { http } from '@shared/api/http'
-import snakecaseKeys from 'snakecase-keys'
 import type VitalStatistics from '../types/VitalStatistics'
 import type VisualAcuity from '../types/VisualAcuity'
 import type FallRisk from '../types/FallRisk'
@@ -10,64 +9,27 @@ import type Physiotherapy from '../types/Physiotherapy'
 import type Dental from '../types/Dental'
 import type DoctorsConsultation from '../types/DoctorsConsultation'
 import type Admin from '../types/Admin'
+import type Patient from '../types/Patient'
 
 export interface AdminPayload {
-  familyGroup: string
   regDate: Date
   queueNo: string | null
-  name: string
-  khmerName: string
-  dob: Date
-  gender: string
-  village: string
-  contactNo: string
-  pregnant: boolean | null
+  pregnant: boolean
   lastMenstrualPeriod: Date | null
-  drugAllergies: string | null
-  sentToId: boolean | null
+  sentToId: boolean
 }
 
 // Responses as observed / required by callers
-export interface CreatePatientResponse {
-  id: number
-}
 export interface AddVisitResponse {
   vid: number
 }
 
-export async function createPatient(
-  admin: AdminPayload,
-  photoFile?: File | null
-): Promise<CreatePatientResponse> {
-  const fd = new FormData()
-  // Convert admin to snake_case before stringifying (FormData bypasses interceptor conversion)
-  fd.append(
-    'admin',
-    JSON.stringify(snakecaseKeys(admin as unknown as Record<string, unknown>, { deep: true }))
-  )
-  if (photoFile) {
-    fd.append('photo', photoFile)
-  }
-  const { data } = await http.post<CreatePatientResponse>('/patient', fd)
-  return data
-}
-
-// Accept either AdminPayload (used when creating new patient) or Admin (built from existing form) to avoid casts at call sites
+// Accept either AdminPayload (used when creating a visit) or Admin (built from existing form) to avoid casts at call sites
 export async function addVisit(
   patientId: string | number,
-  admin: AdminPayload | Admin,
-  photoFile?: File | null
+  admin: AdminPayload | Admin
 ): Promise<AddVisitResponse> {
-  const fd = new FormData()
-  // Convert admin to snake_case before stringifying
-  fd.append(
-    'admin',
-    JSON.stringify(snakecaseKeys(admin as unknown as Record<string, unknown>, { deep: true }))
-  )
-  if (photoFile) {
-    fd.append('photo', photoFile)
-  }
-  const { data } = await http.post<AddVisitResponse>(`/patient/${patientId}`, fd)
+  const { data } = await http.post<AddVisitResponse>(`/patient/${patientId}`, { admin })
   return data
 }
 
@@ -83,21 +45,18 @@ export async function patchVisit<T = unknown>(
 export async function updateAdmin(
   patientId: string | number,
   visitId: string | number,
-  admin: AdminPayload,
-  photoFile?: File | null
+  admin: AdminPayload
 ): Promise<void> {
-  if (photoFile) {
-    const fd = new FormData()
-    // Convert admin to snake_case before stringifying
-    fd.append(
-      'admin',
-      JSON.stringify(snakecaseKeys(admin as unknown as Record<string, unknown>, { deep: true }))
-    )
-    fd.append('photo', photoFile)
-    await patchVisit(patientId, visitId, fd)
-    return
-  }
   await patchVisit(patientId, visitId, { admin })
+}
+
+export async function fetchPatientRecord(patientId: string, visitId: string): Promise<Patient> {
+  const { data } = await http.get<Patient>(`/patient/${patientId}/${visitId}`)
+  return data
+}
+
+export async function deletePatientVisit(patientId: string, visitId: string): Promise<void> {
+  await http.delete(`/patient/${patientId}/${visitId}`)
 }
 
 // Generic section updater (e.g., vitalStats, visualAcuity, etc.)

@@ -266,7 +266,9 @@ const rEyeVision = ref<number | null>(null)
 const sentToOpto = ref<boolean>(false)
 const referredForGlasses = ref<boolean | null>(null)
 
-const calculatedAge = computed(() => props.age ?? calculateAge(props.patientData?.admin?.dob))
+const calculatedAge = computed(
+  () => props.age ?? calculateAge(props.patientData?.patientdetails?.dob)
+)
 const showIcope = computed<boolean>(() =>
   calculatedAge.value != null ? calculatedAge.value >= 60 : true
 )

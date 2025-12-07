@@ -43,15 +43,15 @@
 
         <div class="px-5 py-4 text-sm text-gray-900">
           <span class="font-semibold">Drug Allergies:</span>
-          <span class="ml-1">{{ patientData?.admin?.drugAllergies ?? 'No Data' }}</span>
+          <span class="ml-1">{{ patientData?.patientdetails?.drugAllergies ?? 'No Data' }}</span>
         </div>
         <div class="px-5 text-sm text-gray-900">
           <span class="font-semibold">Diagnosis:</span>
-          <span class="ml-1">{{ patientData?.doctorsconsultation?.diagnosis ?? 'No Data' }}</span>
+          <span class="ml-1">{{ patientData?.doctorsConsultation?.diagnosis ?? 'No Data' }}</span>
         </div>
         <div class="px-5 py-4 text-sm text-gray-900">
           <span class="font-semibold">Treatment:</span>
-          <span class="ml-1">{{ patientData?.doctorsconsultation?.treatment ?? 'No Data' }}</span>
+          <span class="ml-1">{{ patientData?.doctorsConsultation?.treatment ?? 'No Data' }}</span>
         </div>
       </section>
 
