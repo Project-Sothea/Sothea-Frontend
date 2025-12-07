@@ -147,19 +147,19 @@ export function fmtDispenseUnit(drug?: DrugView) {
   return ''
 }
 
-// Format drug name with ATC code prefix
-export function fmtDrugName(drug?: DrugView | { genericName: string; brandName?: string; atcCode?: string }): string {
+// Format drug name with drug code prefix
+export function fmtDrugName(drug?: DrugView | { genericName: string; brandName?: string; drugCode?: number }): string {
   if (!drug) return '—'
   const name = drug.genericName || drug.brandName || 'Drug'
-  const atcCode = 'atcCode' in drug ? drug.atcCode : undefined
-  if (atcCode) {
-    return `${atcCode}. ${name}`
+  const drugCode = 'drugCode' in drug ? drug.drugCode : undefined
+  if (drugCode != null) {
+    return `${drugCode}. ${name}`
   }
   return name
 }
 
 // Format drug name with brand name in parentheses
-export function fmtDrugNameWithBrand(drug?: DrugView | { genericName: string; brandName?: string; atcCode?: string }): string {
+export function fmtDrugNameWithBrand(drug?: DrugView | { genericName: string; brandName?: string; drugCode?: number }): string {
   if (!drug) return '—'
   const baseName = fmtDrugName(drug)
   const brand = 'brandName' in drug ? drug.brandName : undefined
@@ -182,20 +182,20 @@ export type FrequencyCode =
   | 'TDS'  // 3 times a day
   | 'QDS'  // 4 times a day
   | 'EOD'  // Every other day
-  | 'q5h'  // Every 5 hours
+  | 'q4h'  // Every 4 hours
   | 'q6h'  // Every 6 hours
   | 'q8h'  // Every 8 hours
   | 'q12h' // Every 12 hours
 
 export const FREQUENCY_OPTIONS = [
-    { code: 'OM' as FrequencyCode,   label: 'Once Morning',        scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
-    { code: 'ON' as FrequencyCode,   label: 'Once Night',          scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
-    { code: 'OA' as FrequencyCode,   label: 'Once Afternoon',      scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
-    { code: 'BD' as FrequencyCode,   label: 'Twice a day',         scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 2 },
+    { code: 'OM' as FrequencyCode,   label: 'Once every morning',        scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
+    { code: 'ON' as FrequencyCode,   label: 'Once every night',          scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
+    { code: 'OA' as FrequencyCode,   label: 'Once every afternoon',      scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 1 },
+    { code: 'BD' as FrequencyCode,   label: '2 times a day',         scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 2 },
     { code: 'TDS' as FrequencyCode,  label: '3 times a day',       scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 3 },
     { code: 'QDS' as FrequencyCode,  label: '4 times a day',       scheduleKind: 'day'  as ScheduleKind, everyN: 1,  frequencyPerSchedule: 4 },
     { code: 'EOD' as FrequencyCode,  label: 'Every other day',     scheduleKind: 'day'  as ScheduleKind, everyN: 2,  frequencyPerSchedule: 1 },
-    { code: 'q5h' as FrequencyCode,  label: 'Every 5 hours',       scheduleKind: 'hour' as ScheduleKind, everyN: 5,  frequencyPerSchedule: 1 },
+    { code: 'q4h' as FrequencyCode,  label: 'Every 4 hours',       scheduleKind: 'hour' as ScheduleKind, everyN: 4,  frequencyPerSchedule: 1 },
     { code: 'q6h' as FrequencyCode,  label: 'Every 6 hours',       scheduleKind: 'hour' as ScheduleKind, everyN: 6,  frequencyPerSchedule: 1 },
     { code: 'q8h' as FrequencyCode,  label: 'Every 8 hours',       scheduleKind: 'hour' as ScheduleKind, everyN: 8,  frequencyPerSchedule: 1 },
     { code: 'q12h' as FrequencyCode, label: 'Every 12 hours',      scheduleKind: 'hour' as ScheduleKind, everyN: 12, frequencyPerSchedule: 1 },

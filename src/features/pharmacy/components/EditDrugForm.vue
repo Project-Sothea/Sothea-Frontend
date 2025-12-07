@@ -40,11 +40,13 @@
                   <div class="col-span-12 sm:col-span-6">
                     <label class="block mb-1 text-gray-700">Drug Code</label>
                     <input
-                      v-model.trim="drug.atcCode"
-                      :class="inputClass(errors.atcCode)"
-                      placeholder="e.g. N02BE01"
+                      type="number"
+                      :value="drug.drugCode ?? ''"
+                      @input="handleDrugCodeInput"
+                      :class="inputClass(errors.drugCode)"
+                      placeholder="e.g. 12345"
                     />
-                    <p v-if="errors.atcCode" class="err">{{ errors.atcCode }}</p>
+                    <p v-if="errors.drugCode" class="err">{{ errors.drugCode }}</p>
                   </div>
 
                   <div class="col-span-12">
@@ -355,7 +357,7 @@ const pieceContentUnitOpts = computed(() => {
 const previewLabel = computed(() => {
   // Format drug name with ATC code prefix
   const baseName = drug.value.genericName || drug.value.brandName || 'Drug'
-  const drugName = drug.value.atcCode ? `${drug.value.atcCode}. ${baseName}` : baseName
+  const drugName = drug.value.drugCode != null ? `${drug.value.drugCode}. ${baseName}` : baseName
   
   const df = drug.value.dosageFormCode ? DOSAGE_FORM_LABELS[drug.value.dosageFormCode as DosageFormCode] : 'form'
   const n = drug.value.strengthNum
@@ -521,6 +523,22 @@ watch(() => drug.value.pieceContentUnit, () => {
   ensureCoherence()
 })
 
+// Handle drug code input - convert empty/NaN to null
+function handleDrugCodeInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const value = target.value.trim()
+  if (value === '' || value === null || value === undefined) {
+    drug.value.drugCode = null as any
+  } else {
+    const numValue = Number(value)
+    if (!isNaN(numValue)) {
+      drug.value.drugCode = numValue
+    } else {
+      drug.value.drugCode = null as any
+    }
+  }
+}
+
 // Helper to check if a number has at most 1 decimal place
 function hasMaxOneDecimal(value: number | undefined | null): boolean {
   if (value == null) return true
@@ -685,7 +703,7 @@ function buildPayload() {
   return stripUndefined({
     genericName: d.genericName!,
     brandName: d.brandName || undefined,
-    atcCode: d.atcCode || undefined,
+    drugCode: d.drugCode != null ? d.drugCode : null,
     notes: d.notes || undefined,
     isActive: d.isActive ?? true,
     dosageFormCode: d.dosageFormCode!,

@@ -146,7 +146,7 @@
                     <span class="flex items-center justify-center">
                       <img src="@/assets/camera.svg" height="20" width="20" />
                     </span>
-                    <span class="text-sm text-body-color">Add Photo ID</span>
+                    <span class="text-sm text-body-color">{{ disabled ? 'no Photo' : 'Add Photo ID' }}</span>
                   </template>
                 </div>
               </label>
@@ -257,7 +257,7 @@
             v-model="drugAllergies"
             :disabled="disabled"
             type="text"
-            placeholder="Enter Drug Allergies"
+            :placeholder="disabled ? 'No drug allergies' : 'Enter Drug Allergies'"
             class="w-full bg-transparent rounded-md border border-stroke py-1.5 pr-3 pl-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
           />
           <span class="absolute top-1/2 left-4 -translate-y-1/2">

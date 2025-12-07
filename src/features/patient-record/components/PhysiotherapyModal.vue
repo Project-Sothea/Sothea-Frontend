@@ -4,237 +4,70 @@
       <h1>Physiotherapy Assessment</h1>
       <br />
 
-      <!-- Pain/Stiffness During the Day -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-col">
-          <div class="font-medium text-sm">Pain/stiffness during the day:</div>
-          <div class="text-xs mt-1">
-            How severe was your usual joint or muscle pain and/or stiffness overall during the day
-            in the last 2 weeks? <span class="req">*</span>
-          </div>
-        </div>
-
-        <!-- Pain levels (0-5) -->
-        <div class="flex flex-row mt-2 space-x-4">
-          <label v-for="level in [0, 1, 2, 3, 4, 5]" :key="'day' + level">
-            <input
-              type="radio"
-              :name="'painStiffnessDay'"
-              v-model="painStiffnessDay"
-              :value="level"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">{{ level }}</span>
-          </label>
-        </div>
+      <!-- Subjective Assessment -->
+      <div class="mt-4">
+        <label for="" class="mb-2 block text-sm font-medium text-dark">Subjective Assessment</label>
+        <textarea
+          v-model="subjectiveAssessment"
+          rows="3"
+          placeholder="Enter subjective assessment"
+          class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+          :disabled="!isEditing"
+        ></textarea>
       </div>
 
-      <!-- Pain/Stiffness During the Night -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-col">
-          <div class="font-medium text-sm">Pain/stiffness during the night:</div>
-          <div class="text-xs mt-1">
-            How severe was your usual joint or muscle pain and/or stiffness overall during the night
-            in the last 2 weeks? <span class="req">*</span>
-          </div>
-        </div>
-
-        <!-- Pain levels (0-5) -->
-        <div class="flex flex-row mt-2 space-x-4">
-          <label v-for="level in [0, 1, 2, 3, 4, 5]" :key="'night' + level">
-            <input
-              type="radio"
-              :name="'painStiffnessNight'"
-              v-model="painStiffnessNight"
-              :value="level"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">{{ level }}</span>
-          </label>
-        </div>
+      <!-- Pain Scale -->
+      <div class="mt-4">
+        <label for="" class="mb-2 block text-sm font-medium text-dark">
+          Pain Scale
+        </label>
+        <input
+          type="number"
+          :value="painScale ?? ''"
+          @input="handlePainScaleInput"
+          step="1"
+          placeholder="Enter pain scale (1-10)"
+          class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+          :disabled="!isEditing"
+          min="1"
+          max="10"
+        />
       </div>
 
-      <!-- Symptoms Interfere with Tasks -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-medium text-sm">
-            How much has your symptoms interfered with your ability to walk or do everyday tasks
-            like cooking, cleaning or dressing in the last 2 weeks? <span class="req">*</span>
-          </div>
-        </div>
-
-        <!-- Interference levels -->
-        <div class="flex flex-col items-start mt-2 space-y-2">
-          <label
-            v-for="option in ['Never', 'Rarely', 'Sometimes', 'Often', 'Always']"
-            :key="'tasks' + option"
-          >
-            <input
-              type="radio"
-              :name="'symptomsInterfereTasks'"
-              v-model="symptomsInterfereTasks"
-              :value="option"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">{{ option }}</span>
-          </label>
-        </div>
+      <!-- Objective Assessment -->
+      <div class="mt-4">
+        <label for="" class="mb-2 block text-sm font-medium text-dark">Objective Assessment</label>
+        <textarea
+          v-model="objectiveAssessment"
+          rows="3"
+          placeholder="Enter objective assessment"
+          class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+          :disabled="!isEditing"
+        ></textarea>
       </div>
 
-      <!-- Symptoms Change -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-medium text-sm">
-            Have your symptoms improved, worsened, or stayed the same over the last 2 weeks?
-            <span class="req">*</span>
-          </div>
-        </div>
-
-        <!-- Symptoms change options -->
-        <div class="flex flex-col items-start mt-2 space-y-2">
-          <label
-            v-for="option in ['Improved', 'Worsened', 'Stayed the same']"
-            :key="'symptomsChange' + option"
-          >
-            <input
-              type="radio"
-              :name="'symptomsChange'"
-              v-model="symptomsChange"
-              :value="option"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">{{ option }}</span>
-          </label>
-        </div>
+      <!-- Intervention -->
+      <div class="mt-4">
+        <label for="" class="mb-2 block text-sm font-medium text-dark">Intervention</label>
+        <textarea
+          v-model="intervention"
+          rows="3"
+          placeholder="Enter intervention"
+          class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+          :disabled="!isEditing"
+        ></textarea>
       </div>
 
-      <!-- Need Help Because of Symptoms -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-medium text-sm">
-            How often have you needed help from others (including family, friends, or carers)
-            because of your joint or muscle symptoms in the last 2 weeks? <span class="req">*</span>
-          </div>
-        </div>
-
-        <!-- Help needed options -->
-        <div class="flex flex-col items-start mt-2 space-y-2">
-          <label
-            v-for="option in ['Never', 'Rarely', 'Sometimes', 'Often', 'Always']"
-            :key="'needHelp' + option"
-          >
-            <input
-              type="radio"
-              :name="'symptomsNeedHelp'"
-              v-model="symptomsNeedHelp"
-              :value="option"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">{{ option }}</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Trouble Sleeping Due to Symptoms -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-medium text-sm">
-            How often have you had trouble with either falling asleep or staying asleep because of
-            your joint or muscle symptoms in the last 2 weeks? <span class="req">*</span>
-          </div>
-        </div>
-
-        <!-- Trouble sleeping options -->
-        <div class="flex flex-col items-start mt-2 space-y-2">
-          <label
-            v-for="option in ['Never', 'Rarely', 'Sometimes', 'Often', 'Always']"
-            :key="'troubleSleep' + option"
-          >
-            <input
-              type="radio"
-              :name="'troubleSleepSymptoms'"
-              v-model="troubleSleepSymptoms"
-              :value="option"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">{{ option }}</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Fatigue -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-medium text-sm">
-            How much fatigue or low energy have you felt in the last 2 weeks?
-            <span class="req">*</span>
-          </div>
-        </div>
-
-        <!-- Fatigue levels (0-5) -->
-        <div class="flex flex-row mt-2 space-x-4">
-          <label v-for="level in [0, 1, 2, 3, 4, 5]" :key="'fatigue' + level">
-            <input
-              type="radio"
-              :name="'howMuchFatigue'"
-              v-model="howMuchFatigue"
-              :value="level"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">{{ level }}</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Anxiety/Low Mood -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-medium text-sm">
-            How much have you felt anxious or low in your mood because of your joint or muscle
-            symptoms in the last 2 weeks? <span class="req">*</span>
-          </div>
-        </div>
-
-        <!-- Anxiety/low mood levels (0-5) -->
-        <div class="flex flex-row mt-2 space-x-4">
-          <label v-for="level in [0, 1, 2, 3, 4, 5]" :key="'mood' + level">
-            <input
-              type="radio"
-              :name="'anxiousLowMood'"
-              v-model="anxiousLowMood"
-              :value="level"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">{{ level }}</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Medication to Manage Symptoms -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-medium text-sm">
-            Have you used any medication to manage your symptoms in the last 2 weeks? If yes, how
-            often? <span class="req">*</span>
-          </div>
-        </div>
-
-        <!-- Medication options -->
-        <div class="flex flex-col items-start mt-2 space-y-2">
-          <label
-            v-for="option in ['Never', 'Rarely', 'Sometimes', 'Often', 'Always']"
-            :key="'medication' + option"
-          >
-            <input
-              type="radio"
-              :name="'medicationManageSymptoms'"
-              v-model="medicationManageSymptoms"
-              :value="option"
-              :disabled="!isEditing"
-            />
-            <span class="ml-2 text-sm">{{ option }}</span>
-          </label>
-        </div>
+      <!-- Evaluation -->
+      <div class="mt-4">
+        <label for="" class="mb-2 block text-sm font-medium text-dark">Evaluation</label>
+        <textarea
+          v-model="evaluation"
+          rows="3"
+          placeholder="Enter evaluation"
+          class="w-full bg-transparent rounded-md border border-stroke p-3 font-normal text-sm text-dark-4 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+          :disabled="!isEditing"
+        ></textarea>
       </div>
 
       <!-- Edit Button -->
@@ -274,8 +107,9 @@ import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type Physiotherapy from '@patient-record/types/Physiotherapy'
-import { updateSection } from '@features/patient-record/api/visit'
+
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
+import { updateSection } from '../api/visit'
 
 const props = defineProps<{
   patientId: string
@@ -286,15 +120,11 @@ const props = defineProps<{
 
 const toast = useToast()
 
-const painStiffnessDay = ref<0 | 1 | 2 | 3 | 4 | 5 | null>(null)
-const painStiffnessNight = ref<0 | 1 | 2 | 3 | 4 | 5 | null>(null)
-const symptomsInterfereTasks = ref<'Never' | 'Rarely' | 'Sometimes' | 'Often' | 'Always' | ''>('')
-const symptomsChange = ref<'Improved' | 'Worsened' | 'Stayed the same' | ''>('')
-const symptomsNeedHelp = ref<'Never' | 'Rarely' | 'Sometimes' | 'Often' | 'Always' | ''>('')
-const troubleSleepSymptoms = ref<'Never' | 'Rarely' | 'Sometimes' | 'Often' | 'Always' | ''>('')
-const howMuchFatigue = ref<0 | 1 | 2 | 3 | 4 | 5 | null>(null)
-const anxiousLowMood = ref<0 | 1 | 2 | 3 | 4 | 5 | null>(null)
-const medicationManageSymptoms = ref<'Never' | 'Rarely' | 'Sometimes' | 'Often' | 'Always' | ''>('')
+const subjectiveAssessment = ref<string>('')
+const painScale = ref<number | null>(null)
+const objectiveAssessment = ref<string>('')
+const intervention = ref<string>('')
+const evaluation = ref<string>('')
 
 // Automatic draft management - handles everything
 const formDraft = useAutoDraft<Physiotherapy>({
@@ -303,15 +133,11 @@ const formDraft = useAutoDraft<Physiotherapy>({
     return `patient-record:draft:${props.patientId}:${props.patientVid}:physiotherapy`
   }),
   fields: [
-    { key: 'painStiffnessDay', ref: painStiffnessDay },
-    { key: 'painStiffnessNight', ref: painStiffnessNight },
-    { key: 'symptomsInterfereTasks', ref: symptomsInterfereTasks },
-    { key: 'symptomsChange', ref: symptomsChange },
-    { key: 'symptomsNeedHelp', ref: symptomsNeedHelp },
-    { key: 'troubleSleepSymptoms', ref: troubleSleepSymptoms },
-    { key: 'howMuchFatigue', ref: howMuchFatigue },
-    { key: 'anxiousLowMood', ref: anxiousLowMood },
-    { key: 'medicationManageSymptoms', ref: medicationManageSymptoms },
+    { key: 'subjectiveAssessment', ref: subjectiveAssessment },
+    { key: 'painScale', ref: painScale },
+    { key: 'objectiveAssessment', ref: objectiveAssessment },
+    { key: 'intervention', ref: intervention },
+    { key: 'evaluation', ref: evaluation },
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
@@ -320,6 +146,22 @@ const formDraft = useAutoDraft<Physiotherapy>({
 
 // Extract functions from formDraft
 const { isEditing, toggleEdit, save, discardChanges, runChecks } = formDraft
+
+// Handle pain scale input - convert empty/NaN to null
+function handlePainScaleInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const value = target.value.trim()
+  if (value === '' || value === null || value === undefined) {
+    painScale.value = null
+  } else {
+    const numValue = Number(value)
+    if (!isNaN(numValue)) {
+      painScale.value = numValue
+    } else {
+      painScale.value = null
+    }
+  }
+}
 
 // Initialize when patientData changes
 watch(
@@ -333,50 +175,17 @@ watch(
 )
 
 function buildPayload(): Physiotherapy | null {
-  if (
-    !runChecks([
-      [painStiffnessDay.value !== null, 'Select pain stiffness (day)'],
-      [painStiffnessNight.value !== null, 'Select pain stiffness (night)'],
-      [symptomsInterfereTasks.value !== '', 'Select tasks interference'],
-      [symptomsChange.value !== '', 'Select symptoms change'],
-      [symptomsNeedHelp.value !== '', 'Select need help'],
-      [troubleSleepSymptoms.value !== '', 'Select sleep trouble'],
-      [howMuchFatigue.value !== null, 'Select fatigue'],
-      [anxiousLowMood.value !== null, 'Select mood'],
-      [medicationManageSymptoms.value !== '', 'Select medication management']
-    ])
-  )
+  // All fields are optional, but if painScale is provided, validate it's in range
+  if (painScale.value != null && (painScale.value < 1 || painScale.value > 10)) {
+    toast.error('Pain scale must be between 1 and 10')
     return null
+  }
   return {
-    painStiffnessDay: painStiffnessDay.value!,
-    painStiffnessNight: painStiffnessNight.value!,
-    symptomsInterfereTasks: symptomsInterfereTasks.value as
-      | 'Never'
-      | 'Rarely'
-      | 'Sometimes'
-      | 'Often'
-      | 'Always',
-    symptomsChange: symptomsChange.value as 'Improved' | 'Worsened' | 'Stayed the same',
-    symptomsNeedHelp: symptomsNeedHelp.value as
-      | 'Never'
-      | 'Rarely'
-      | 'Sometimes'
-      | 'Often'
-      | 'Always',
-    troubleSleepSymptoms: troubleSleepSymptoms.value as
-      | 'Never'
-      | 'Rarely'
-      | 'Sometimes'
-      | 'Often'
-      | 'Always',
-    howMuchFatigue: howMuchFatigue.value!,
-    anxiousLowMood: anxiousLowMood.value!,
-    medicationManageSymptoms: medicationManageSymptoms.value as
-      | 'Never'
-      | 'Rarely'
-      | 'Sometimes'
-      | 'Often'
-      | 'Always'
+    subjectiveAssessment: subjectiveAssessment.value || undefined,
+    painScale: painScale.value ?? undefined,
+    objectiveAssessment: objectiveAssessment.value || undefined,
+    intervention: intervention.value || undefined,
+    evaluation: evaluation.value || undefined
   }
 }
 

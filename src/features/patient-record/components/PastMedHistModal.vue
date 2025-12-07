@@ -10,7 +10,7 @@
           <div class="font-medium text-md w-1/3"></div>
           <div class="font-medium text-md w-1/6">Yes</div>
           <div class="font-medium text-md w-1/6">No</div>
-          <div class="font-medium text-md w-1/6">Nil</div>
+          <div class="font-medium text-md w-1/6">Unsure</div>
         </div>
       </div>
 
@@ -808,7 +808,8 @@ function buildPayload(): PastMedicalHistory | null {
     !showPaeds.value &&
     !runChecks([
       // All fields now accept null as valid (Nil), so we only validate conditional fields
-      [tuberculosis.value === false || tuberculosisHasBeenTreated.value !== null, 'Select Has Tuberculosis been treated before'],
+      // Only require tuberculosisHasBeenTreated when tuberculosis is true
+      [tuberculosis.value !== true || tuberculosisHasBeenTreated.value !== null, 'Select Has Tuberculosis been treated before'],
     ])
   )
     return null

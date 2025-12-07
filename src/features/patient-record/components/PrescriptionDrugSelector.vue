@@ -124,7 +124,7 @@ const filteredDrugs = computed(() => {
   const src = baseDrugs.value
   if (!qDrug) return src.slice(0, 50)
   return src.filter(d => {
-    const searchText = `${d.atcCode || ''} ${d.genericName || ''} ${d.brandName || ''}`.toLowerCase()
+    const searchText = `${d.drugCode != null ? d.drugCode : ''} ${d.genericName || ''} ${d.brandName || ''}`.toLowerCase()
     return searchText.includes(qDrug)
   })
 })

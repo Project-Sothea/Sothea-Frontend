@@ -41,6 +41,12 @@
               Khmer Name
             </th>
             <th
+              class="px-5 py-5 text-sm font-medium text-left text-gray-800 uppercase bg-indigo-200 border-b border-gray-200"
+              style="background: rgba(63, 81, 181, 0.3)"
+            >
+              Family Group
+            </th>
+            <th
               class="px-3 py-5 text-sm font-medium text-left text-gray-800 uppercase bg-indigo-200 border-b border-gray-200"
               style="background: rgba(63, 81, 181, 0.3)"
             >
@@ -87,6 +93,7 @@
             :vid="String(patientVisit.vid)"
             :name="patientVisit.name"
             :khmerName="patientVisit.khmerName"
+            :familyGroup="patientVisit.familyGroup"
             :gender="patientVisit.gender"
             :allergies="patientVisit.drugAllergies"
             :referralNeeded="patientVisit.referralNeeded"

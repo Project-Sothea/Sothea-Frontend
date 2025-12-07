@@ -123,7 +123,7 @@
 
           <!-- supplier -->
           <div class="col-span-12 sm:col-span-4">
-            <label class="block mb-1 text-gray-700">Supplier <span class="text-red-600">*</span></label>
+            <label class="block mb-1 text-gray-700">Supplier</label>
             <input
               v-model.trim="b.batch.supplier"
               :class="inputClass(rowErr(bIdx,'supplier'))"
@@ -302,7 +302,7 @@ const filteredDrugs = computed(() => {
   const q = drugQuery.value.trim().toLowerCase()
   if (!q) return drugs.value.slice(0, 50) // small cap
   return drugs.value.filter(d => {
-    const searchText = `${d.atcCode || ''} ${d.genericName || ''} ${d.brandName || ''} ${d.displayLabel || ''}`.toLowerCase()
+    const searchText = `${d.drugCode != null ? d.drugCode : ''} ${d.genericName || ''} ${d.brandName || ''} ${d.displayLabel || ''}`.toLowerCase()
     return searchText.includes(q)
   })
 })
