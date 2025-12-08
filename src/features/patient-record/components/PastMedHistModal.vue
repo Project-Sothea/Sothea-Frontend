@@ -772,7 +772,7 @@ const specifiedStds = ref<string | null>('')
 const others = ref<string | null>('')
 
 const calculatedAge = computed(
-  () => props.age ?? calculateAge(props.patientData?.patientdetails?.dob)
+  () => props.age ?? calculateAge(props.patientData?.patientDetails?.dob)
 )
 const showPaeds = computed<boolean>(() =>
   calculatedAge.value != null ? calculatedAge.value <= 16 : true
