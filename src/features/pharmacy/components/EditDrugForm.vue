@@ -889,8 +889,7 @@ async function submit() {
     }
   } catch (err: any) {
     toast.error(
-      err?.response.data.error ??
-        (props.drugId ? 'Failed to update drug' : 'Failed to create drug')
+      err?.response.data.error ?? (props.drugId ? 'Failed to update drug' : 'Failed to create drug')
     )
   } finally {
     submitting.value = false

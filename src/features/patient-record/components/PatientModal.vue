@@ -56,7 +56,7 @@ import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
 import type PatientDetails from '@patient-record/types/PatientDetails'
-import { createPatient, updatePatient } from '@features/patient-record/api/patient'
+import { updatePatient } from '@features/patient-record/api/patient'
 import { usePatientForm } from '@patient-record/composables/usePatientForm'
 import PatientFormFields from './PatientFormFields.vue'
 import { handleApiError } from '@shared/api/handleApiError'
@@ -72,6 +72,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+  capturePatientPayload: [details: PatientDetails, photoFile?: File | null]
   patientCreated: [{ id: string; patientDetails: PatientDetails; age: number | null }]
   patientUpdated: [{ id?: string; patientDetails: PatientDetails; age: number | null }]
 }>()
@@ -160,11 +161,13 @@ async function submitData() {
   const payload = buildPayload()
   if (!payload) return
   try {
-    const response = await createPatient(payload, photoFile.value)
-    const created: PatientDetails = { ...payload, id: response.id } as PatientDetails
-    toast.success('New patient created successfully!')
+    const created: PatientDetails = { ...payload } as PatientDetails
+    // Hold patient payload for combined create with visit
+    emit('capturePatientPayload', created, photoFile.value || null)
+    toast.success('Patient details captured. Proceed to Admin to create visit.')
+    // Seed downstream forms with patient details (id assigned after combined create)
     emit('patientCreated', {
-      id: String(response.id),
+      id: '',
       patientDetails: created,
       age: ageComputed.value
     })

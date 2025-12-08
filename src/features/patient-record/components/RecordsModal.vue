@@ -23,10 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useToast } from 'vue-toast-notification'
-import 'vue-toast-notification/dist/theme-sugar.css'
-import { fetchPatientMeta } from '@patient-record/api/record'
+import { computed } from 'vue'
 import RecordSection from './RecordSection.vue'
 import type PatientMeta from '@patient-record/types/PatientMeta'
 
@@ -34,29 +31,17 @@ const props = defineProps<{
   id: string
   vid: string
   isOpen: boolean
+  patientMeta?: PatientMeta | null
 }>()
 
 defineEmits<{
   close: [void]
 }>()
 
-const toast = useToast()
-
-const patientMeta = ref<PatientMeta | null>(null)
-
-watch(
-  () => props.isOpen,
-  async (newValue) => {
-    if (newValue) {
-      await getPatientMeta()
-    }
-  }
-)
-
 // Computed: sortedVisits
 const sortedVisits = computed(() => {
-  if (patientMeta.value && patientMeta.value.visits) {
-    return Object.entries(patientMeta.value.visits)
+  if (props.patientMeta && props.patientMeta.visits) {
+    return Object.entries(props.patientMeta.visits)
       .sort(([, regDateA], [, regDateB]) => {
         const dateA = new Date(regDateA as string)
         const dateB = new Date(regDateB as string)
@@ -69,15 +54,6 @@ const sortedVisits = computed(() => {
   }
   return []
 })
-
-async function getPatientMeta() {
-  try {
-    patientMeta.value = await fetchPatientMeta(props.id)
-  } catch (error) {
-    console.error(error)
-    toast.error('Failed to load patient record metadata')
-  }
-}
 </script>
 
 <style scoped>

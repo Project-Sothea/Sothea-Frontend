@@ -7,6 +7,7 @@
         :form="formRef"
         :disabled="!isEditing && !isAdd"
         :maxDate="maxDate"
+        :gender="patientGender"
       />
 
       <!-- Save Button -->
@@ -56,23 +57,35 @@ import { formatDateISO } from '@shared/utils/date'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
-import { addVisit, updateAdmin } from '@features/patient-record/api/visit'
+import { createPatientVisit, updateAdmin } from '@features/patient-record/api/visit'
+import { createPatientWithVisit } from '@features/patient-record/api/patient'
 import { handleApiError } from '@shared/api/handleApiError'
 import { useAdminForm } from '@patient-record/composables/useAdminForm'
 import AdminFormFields from './AdminFormFields.vue'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 import type { AdminPayload } from '@features/patient-record/api/visit'
+import type PatientDetails from '@patient-record/types/PatientDetails'
+import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
   patientId?: string
   patientData?: Patient
   isAdd?: boolean
   patientVid?: string
+  pendingPatientPayload?: { patient?: PatientDetails; photoFile?: File | null }
 }>()
 
 const emit = defineEmits<{
   patientVisitCreated: [{ id: string; vid: string; regDate: string | null; queueNo: string | null }]
-  adminUpdated: [{ id: string | undefined; vid: string | undefined; regDate: string | null; queueNo: string | null }]
+  adminUpdated: [
+    {
+      id: string | undefined
+      vid: string | undefined
+      regDate: string | null
+      queueNo: string | null
+    }
+  ]
+  patientCreated: [{ id: string; patientDetails: PatientDetails; age: number | null }]
 }>()
 
 const toast = useToast()
@@ -82,16 +95,10 @@ const formRef = useAdminForm({
   onError: (m) => toast.error(m)
 })
 
-const {
-  regDate,
-  queueNo,
-  pregnant,
-  lastMenstrualPeriod,
-  sentToId,
-  buildPayload,
-  validate,
-  reset
-} = formRef
+const { regDate, queueNo, pregnant, lastMenstrualPeriod, sentToId, buildPayload, validate, reset } =
+  formRef
+
+const patientGender = computed(() => props.patientData?.patientDetails?.gender ?? '')
 
 if (props.isAdd && !regDate.value) regDate.value = new Date()
 
@@ -140,17 +147,58 @@ watch(
   { immediate: true }
 )
 
+watch(
+  patientGender,
+  (gender) => {
+    if (gender === 'M') {
+      pregnant.value = false
+      lastMenstrualPeriod.value = null
+    }
+  },
+  { immediate: true }
+)
+
 async function submitData() {
   if (props.isAdd) {
-    if (!props.patientId) {
-      toast.error('Create a patient before adding admin details.')
-      return
-    }
     if (!validate()) return
     const payload = buildPayload()
     if (!payload) return
+
+    // If no patientId yet, create patient + visit together
+    if (!props.patientId) {
+      const patientDetails = props.pendingPatientPayload?.patient
+      if (!patientDetails) {
+        toast.error('Please complete patient details first.')
+        return
+      }
+      try {
+        const response = await createPatientWithVisit(
+          patientDetails as any,
+          payload,
+          props.pendingPatientPayload?.photoFile || null
+        )
+        toast.success('Patient and visit created successfully!')
+        emit('patientCreated', {
+          id: String(response.id),
+          patientDetails: patientDetails as any,
+          age: calculateAge(patientDetails.dob)
+        })
+        emit('patientVisitCreated', {
+          id: String(response.id),
+          vid: String(response.vid),
+          regDate: regDate.value ? formatDateISO(regDate.value as any) : null,
+          queueNo: queueNo.value
+        })
+        return
+      } catch (error) {
+        console.error(error)
+        toast.error(handleApiError(error))
+        return
+      }
+    }
+
     try {
-      const response = await addVisit(props.patientId, payload)
+      const response = await createPatientVisit(props.patientId, payload)
       toast.success('New patient visit created successfully!')
       emit('patientVisitCreated', {
         id: String(props.patientId),

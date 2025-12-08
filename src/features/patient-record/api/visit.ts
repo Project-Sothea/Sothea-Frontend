@@ -13,27 +13,27 @@ import type Patient from '../types/Patient'
 
 export interface AdminPayload {
   regDate: Date
-  queueNo: string | null
+  queueNo: string
   pregnant: boolean
   lastMenstrualPeriod: Date | null
   sentToId: boolean
 }
 
 // Responses as observed / required by callers
-export interface AddVisitResponse {
+export interface createPatientVisitResponse {
   vid: number
 }
 
 // Accept either AdminPayload (used when creating a visit) or Admin (built from existing form) to avoid casts at call sites
-export async function addVisit(
+export async function createPatientVisit(
   patientId: string | number,
   admin: AdminPayload | Admin
-): Promise<AddVisitResponse> {
-  const { data } = await http.post<AddVisitResponse>(`/patient/${patientId}`, { admin })
+): Promise<createPatientVisitResponse> {
+  const { data } = await http.post<createPatientVisitResponse>(`/patient/${patientId}`, admin)
   return data
 }
 
-export async function patchVisit<T = unknown>(
+export async function updatePatientVisit<T = unknown>(
   patientId: string | number,
   visitId: string | number,
   body: unknown
@@ -47,7 +47,7 @@ export async function updateAdmin(
   visitId: string | number,
   admin: AdminPayload
 ): Promise<void> {
-  await patchVisit(patientId, visitId, { admin })
+  await updatePatientVisit(patientId, visitId, { admin })
 }
 
 export async function fetchPatientRecord(patientId: string, visitId: string): Promise<Patient> {
@@ -81,5 +81,5 @@ export async function updateSection<K extends SectionName>(
   sectionName: K,
   payload: SectionPayloadMap[K]
 ): Promise<void> {
-  await patchVisit(patientId, visitId, { [sectionName]: payload })
+  await updatePatientVisit(patientId, visitId, { [sectionName]: payload })
 }

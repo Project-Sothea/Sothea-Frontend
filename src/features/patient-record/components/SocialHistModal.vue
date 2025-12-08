@@ -145,8 +145,11 @@
           <div class="flex w-1/3 grow">
             <select
               v-model="howRegular"
-              :disabled="!isEditing"
-              class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+              :disabled="!isEditing || alcoholHistory === false"
+              :class="[
+                'relative z-20 w-full appearance-none rounded-md border border-stroke py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default',
+                alcoholHistory === false ? 'bg-[#3f51b5]/50 disabled:bg-[#3f51b5]/50' : 'bg-transparent disabled:bg-gray-200'
+              ]"
             >
               <option :value="'A'">A</option>
               <option :value="'B'">B</option>
@@ -269,7 +272,7 @@ function buildPayload(): SocialHistory | null {
     currentSmokingHistory: currentSmokingHistory.value!,
     cigarettesPerDay: cigarettesPerDay.value || null,
     alcoholHistory: alcoholHistory.value!,
-    howRegular: howRegular.value || null
+    howRegular: alcoholHistory.value === false ? null : howRegular.value || null
   }
 }
 
@@ -302,6 +305,12 @@ function discardEdit() {
     }
   })
 }
+
+watch(alcoholHistory, (val) => {
+  if (val === false) {
+    howRegular.value = null
+  }
+})
 </script>
 
 <style scoped>

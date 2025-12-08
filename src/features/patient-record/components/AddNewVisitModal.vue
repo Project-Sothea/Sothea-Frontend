@@ -7,6 +7,7 @@
         :form="formRef"
         :disabled="false"
         :maxDate="maxDate"
+        :gender="patientData?.patientDetails?.gender || ''"
       />
 
       <!-- Save Button -->
@@ -27,7 +28,7 @@ import { ref } from 'vue'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { useToast } from 'vue-toast-notification'
 import type Patient from '@patient-record/types/Patient'
-import { addVisit } from '@patient-record/api/visit'
+import { createPatientVisit } from '@patient-record/api/visit'
 import { handleApiError } from '@shared/api/handleApiError'
 import { useAdminForm } from '@patient-record/composables/useAdminForm'
 import AdminFormFields from './AdminFormFields.vue'
@@ -59,7 +60,7 @@ async function submitData() {
   if (!admin) return
   isSubmitting.value = true
   try {
-    const response = await addVisit(props.patientId, admin)
+    const response = await createPatientVisit(props.patientId, admin)
     toast.success('New Patient Visit created successfully!')
     emit('patientVisitCreated', { id: props.patientId, vid: String(response.vid) })
   } catch (error) {

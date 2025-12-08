@@ -29,6 +29,10 @@ http.interceptors.request.use((config) => {
 
 http.interceptors.response.use(
   (resp) => {
+    // Skip transformation for binary responses
+    if (resp?.config?.responseType === 'blob' || resp?.config?.responseType === 'arraybuffer') {
+      return resp
+    }
     // Convert snake_case keys from backend to camelCase for the app
     if (resp && resp.data && (typeof resp.data === 'object' || Array.isArray(resp.data))) {
       resp.data = camelcaseKeys(resp.data as any, { deep: true }) as any

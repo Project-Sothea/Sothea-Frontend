@@ -62,7 +62,7 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
     if (!validate()) return null
     return {
       regDate: regDate.value,
-      queueNo: queueNo.value || null,
+      queueNo: queueNo.value,
       pregnant: pregnant.value ?? false,
       lastMenstrualPeriod: lastMenstrualPeriod.value,
       sentToId: sentToId.value ?? false

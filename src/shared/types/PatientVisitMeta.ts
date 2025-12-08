@@ -2,7 +2,7 @@ export default interface PatientVisitMeta {
   id?: number
   vid?: number
   familyGroup: string
-  regDate: string // ISO date string
+  regDate: string
   queueNo: string
   name: string
   khmerName: string
