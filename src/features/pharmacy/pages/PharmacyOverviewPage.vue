@@ -16,11 +16,11 @@
 
         <!-- pill-style toggle -->
         <div class="space-x-2">
-          <button :class="tab === 'batches' ? activeBtn : inactiveBtn" @click="tab = 'batches'">
-            All&nbsp;Batches
-          </button>
           <button :class="tab === 'drugs' ? activeBtn : inactiveBtn" @click="tab = 'drugs'">
             By&nbsp;Drug
+          </button>
+          <button :class="tab === 'batches' ? activeBtn : inactiveBtn" @click="tab = 'batches'">
+            All&nbsp;Batches
           </button>
         </div>
       </div>
@@ -127,7 +127,7 @@ import DrugLabel from '../components/DrugLabel.vue'
 import { fmtDate, fmtDrugName } from '../types/Util'
 
 // ---------------- state ----------------
-const tab = ref<'batches' | 'drugs'>('batches')
+const tab = ref<'batches' | 'drugs'>('drugs')
 
 // raw data
 const drugs = ref<DrugView[]>([])
