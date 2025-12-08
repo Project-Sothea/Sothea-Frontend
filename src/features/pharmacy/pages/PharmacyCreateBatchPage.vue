@@ -151,9 +151,7 @@
         <!-- LOCATIONS -->
         <div class="mt-4">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-700">
-              Locations <span class="text-red-600">*</span>
-            </span>
+            <span class="text-sm font-medium text-gray-700">Locations</span>
             <div class="flex gap-2">
               <button
                 type="button"
@@ -173,7 +171,6 @@
               </button>
             </div>
           </div>
-          <p class="err mb-2" v-if="rowErr(bIdx, 'locations')">{{ rowErr(bIdx, 'locations') }}</p>
 
           <div class="space-y-2">
             <div
@@ -215,7 +212,6 @@
                 <button
                   type="button"
                   @click="removeLocationAt(bIdx, lIdx)"
-                  :disabled="b.locations.length === 1"
                   class="w-full h-[35px] mt-1 px-1 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors flex items-center justify-center disabled:text-gray-300 disabled:border-gray-300 disabled:cursor-not-allowed text-sm"
                   title="Remove location"
                 >
@@ -370,7 +366,7 @@ function addLocationRow(bIdx: number) {
 
 function removeLocationAt(bIdx: number, lIdx: number) {
   const arr = batches.value[bIdx].locations
-  if (arr.length > 1) arr.splice(lIdx, 1)
+  if (arr.length > 0) arr.splice(lIdx, 1)
 }
 function copyLocationsFromPrev(bIdx: number) {
   const prev = batches.value[bIdx - 1]
@@ -432,27 +428,28 @@ function validate(): boolean {
       }
     }
 
-    // locations
-    if (!b.locations.length) re[keyB(bIdx, 'locations')] = 'Add at least one location.'
-    const seenLocs = new Map<string, number[]>()
-    b.locations.forEach((l, lIdx) => {
-      const name = (l.location ?? '').trim()
-      if (!name) re[keyL(bIdx, lIdx, 'locationName')] = 'Enter a location name.'
-      else {
-        const lk = name.toLowerCase()
-        if (!seenLocs.has(lk)) seenLocs.set(lk, [])
-        seenLocs.get(lk)!.push(lIdx)
-      }
-      const q = Number(l.quantity)
-      if (!Number.isFinite(q) || q <= 0)
-        re[keyL(bIdx, lIdx, 'quantity')] = 'Enter a positive number.'
-    })
-    // mark duplicates
-    for (const [, idxs] of seenLocs) {
-      if (idxs.length > 1) {
-        idxs.forEach((i) => {
-          re[keyL(bIdx, i, 'locationName')] = 'Duplicate location in this batch.'
-        })
+    // locations are optional; if provided, validate them
+    if (b.locations.length > 0) {
+      const seenLocs = new Map<string, number[]>()
+      b.locations.forEach((l, lIdx) => {
+        const name = (l.location ?? '').trim()
+        if (!name) re[keyL(bIdx, lIdx, 'locationName')] = 'Enter a location name.'
+        else {
+          const lk = name.toLowerCase()
+          if (!seenLocs.has(lk)) seenLocs.set(lk, [])
+          seenLocs.get(lk)!.push(lIdx)
+        }
+        const q = Number(l.quantity)
+        if (!Number.isFinite(q) || q <= 0)
+          re[keyL(bIdx, lIdx, 'quantity')] = 'Enter a positive number.'
+      })
+      // mark duplicates
+      for (const [, idxs] of seenLocs) {
+        if (idxs.length > 1) {
+          idxs.forEach((i) => {
+            re[keyL(bIdx, i, 'locationName')] = 'Duplicate location in this batch.'
+          })
+        }
       }
     }
   })
@@ -491,7 +488,8 @@ async function handleSubmit(onSuccess?: () => void) {
     onSuccess?.()
   } catch (err: any) {
     console.error(err)
-    toast.error('Failed to create batches')
+    const human = err?.response?.data?.error
+    toast.error(human || 'Failed to create batches')
   } finally {
     saving.value = false
   }
