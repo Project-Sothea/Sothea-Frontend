@@ -182,14 +182,14 @@
               alt="Selected Image"
               class="h-40 w-52 rounded-lg object-cover"
             />
-            <div v-else>
+            <template v-else>
               <span class="flex items-center justify-center">
                 <img src="@/assets/camera.svg" height="20" width="20" />
               </span>
               <span class="text-sm text-body-color">
                 {{ disabled ? 'No Photo' : 'Add Photo ID' }}
               </span>
-            </div>
+            </template>
           </label>
         </div>
       </div>
