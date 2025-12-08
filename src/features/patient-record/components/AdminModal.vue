@@ -7,6 +7,7 @@
         :form="formRef"
         :disabled="!isEditing && !isAdd"
         :maxDate="maxDate"
+        :gender="patientGender"
       />
 
       <!-- Save Button -->
@@ -56,7 +57,7 @@ import { formatDateISO } from '@shared/utils/date'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@patient-record/types/Patient'
-import { addVisit, updateAdmin } from '@features/patient-record/api/visit'
+import { createPatientVisit, updateAdmin } from '@features/patient-record/api/visit'
 import { handleApiError } from '@shared/api/handleApiError'
 import { useAdminForm } from '@patient-record/composables/useAdminForm'
 import AdminFormFields from './AdminFormFields.vue'
@@ -72,7 +73,14 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   patientVisitCreated: [{ id: string; vid: string; regDate: string | null; queueNo: string | null }]
-  adminUpdated: [{ id: string | undefined; vid: string | undefined; regDate: string | null; queueNo: string | null }]
+  adminUpdated: [
+    {
+      id: string | undefined
+      vid: string | undefined
+      regDate: string | null
+      queueNo: string | null
+    }
+  ]
 }>()
 
 const toast = useToast()
@@ -82,16 +90,10 @@ const formRef = useAdminForm({
   onError: (m) => toast.error(m)
 })
 
-const {
-  regDate,
-  queueNo,
-  pregnant,
-  lastMenstrualPeriod,
-  sentToId,
-  buildPayload,
-  validate,
-  reset
-} = formRef
+const { regDate, queueNo, pregnant, lastMenstrualPeriod, sentToId, buildPayload, validate, reset } =
+  formRef
+
+const patientGender = computed(() => props.patientData?.patientDetails?.gender ?? '')
 
 if (props.isAdd && !regDate.value) regDate.value = new Date()
 
@@ -140,6 +142,17 @@ watch(
   { immediate: true }
 )
 
+watch(
+  patientGender,
+  (gender) => {
+    if (gender === 'M') {
+      pregnant.value = false
+      lastMenstrualPeriod.value = null
+    }
+  },
+  { immediate: true }
+)
+
 async function submitData() {
   if (props.isAdd) {
     if (!props.patientId) {
@@ -150,7 +163,7 @@ async function submitData() {
     const payload = buildPayload()
     if (!payload) return
     try {
-      const response = await addVisit(props.patientId, payload)
+      const response = await createPatientVisit(props.patientId, payload)
       toast.success('New patient visit created successfully!')
       emit('patientVisitCreated', {
         id: String(props.patientId),

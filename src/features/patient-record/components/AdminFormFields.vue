@@ -47,8 +47,8 @@
               </span>
               <select
                 v-model="pregnant"
-                :disabled="disabled"
-                class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200"
+                :disabled="disabled || isMale"
+                class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-12 pr-12 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-[#3f51b5]/50 disabled:border-gray-2"
               >
                 <option :value="true">Y</option>
                 <option :value="false">N</option>
@@ -63,10 +63,13 @@
             <div class="relative z-20">
               <input
                 v-model="lastMenstrualPeriod"
-                :disabled="disabled"
+                :disabled="disabled || isMale"
                 type="date"
                 :max="maxDate"
-                class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+                :class="[
+                  'w-full rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:border-gray-2',
+                  disabled || isMale ? 'bg-[#3f51b5]/50 disabled:bg-[#3f51b5]/50' : 'bg-transparent'
+                ]"
               />
             </div>
           </div>
@@ -109,6 +112,7 @@ const props = defineProps<{
   form: ReturnType<typeof useAdminForm>
   disabled?: boolean
   maxDate: string
+  gender?: 'M' | 'F' | ''
 }>()
 
 function map<K extends keyof ReturnType<typeof useAdminForm>>(key: K) {
@@ -132,13 +136,27 @@ const regDate = computed<string>({
   }
 })
 const queueNo = map('queueNo')
-const pregnant = map('pregnant')
+const isMale = computed(() => props.gender === 'M')
+const pregnant = computed({
+  get: () => (isMale.value ? false : props.form.pregnant.value),
+  set: (v: boolean | null) => {
+    if (isMale.value) {
+      props.form.pregnant.value = false
+      return
+    }
+    props.form.pregnant.value = v
+  }
+})
 const lastMenstrualPeriod = computed<string | null>({
   get() {
-    const v = props.form.lastMenstrualPeriod.value as Date | null
+    const v = isMale.value ? null : (props.form.lastMenstrualPeriod.value as Date | null)
     return v ? formatDateISO(v) : null
   },
   set(dateOnly: string | null) {
+    if (isMale.value) {
+      props.form.setLastMenstrualPeriod(null)
+      return
+    }
     props.form.setLastMenstrualPeriod(dateOnly ? new Date(dateOnly) : null)
   }
 })

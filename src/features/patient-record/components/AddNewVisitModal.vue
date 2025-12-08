@@ -3,11 +3,7 @@
     <div class="flex flex-col rounded-lg w-3/4 max-h-fit border border-gray-300 p-10">
       <h1>New Visit Admin Details</h1>
       <br />
-      <AdminFormFields
-        :form="formRef"
-        :disabled="false"
-        :maxDate="maxDate"
-      />
+      <AdminFormFields :form="formRef" :disabled="false" :maxDate="maxDate" />
 
       <!-- Save Button -->
       <div class="flex flex-row-reverse w-full mt-5">
@@ -27,7 +23,7 @@ import { ref } from 'vue'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { useToast } from 'vue-toast-notification'
 import type Patient from '@patient-record/types/Patient'
-import { addVisit } from '@patient-record/api/visit'
+import { createPatientVisit } from '@patient-record/api/visit'
 import { handleApiError } from '@shared/api/handleApiError'
 import { useAdminForm } from '@patient-record/composables/useAdminForm'
 import AdminFormFields from './AdminFormFields.vue'
@@ -59,7 +55,7 @@ async function submitData() {
   if (!admin) return
   isSubmitting.value = true
   try {
-    const response = await addVisit(props.patientId, admin)
+    const response = await createPatientVisit(props.patientId, admin)
     toast.success('New Patient Visit created successfully!')
     emit('patientVisitCreated', { id: props.patientId, vid: String(response.vid) })
   } catch (error) {

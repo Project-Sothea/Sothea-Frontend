@@ -30,7 +30,7 @@ export async function createPatient(
     const { data } = await http.post<CreatePatientResponse>('/patient', fd)
     return data
   }
-  const { data } = await http.post<CreatePatientResponse>('/patient', { patientDetails: patient })
+  const { data } = await http.post<CreatePatientResponse>('/patient', patient)
   return data
 }
 
@@ -49,7 +49,7 @@ export async function updatePatient(
     await http.put(`/patient/${patientId}`, fd)
     return
   }
-  await http.put(`/patient/${patientId}`, { patientDetails: patient })
+  await http.put(`/patient/${patientId}`, patient )
 }
 
 export async function deletePatient(patientId: string | number): Promise<void> {
