@@ -273,7 +273,7 @@ async function loadPatientData() {
     const data = await fetchPatientRecord(id.value, vid.value)
     patient.value = structuredClone(data)
     const admin = patient.value.admin
-    const patientInfo = patient.value.patientdetails
+    const patientInfo = patient.value.patientDetails
     age.value = calculateAge(patientInfo?.dob)
     name.value = patientInfo?.name ?? ''
     regDate.value = admin?.regDate ? formatDateForInput(admin.regDate as any) : ''
@@ -293,24 +293,24 @@ function formatDateForInput(dateInput: string | Date) {
   return `${year}-${month}-${day}`
 }
 
-function handlePatientCreated(evt: { id: string; patientdetails: PatientDetails; age: number | null }) {
+function handlePatientCreated(evt: { id: string; patientDetails: PatientDetails; age: number | null }) {
   createdPatientId.value = String(evt.id)
-  name.value = evt.patientdetails.name
+  name.value = evt.patientDetails.name
   age.value = evt.age
   activeSection.value = 'admin'
 }
 
 type PatientUpdatedPayload = {
   id?: string
-  patientdetails?: Patient['patientdetails']
+  patientDetails?: Patient['patientDetails']
   age?: number | null
 }
 
 function handlePatientUpdated(evt: PatientUpdatedPayload) {
-  if (evt.patientdetails) {
-    name.value = evt.patientdetails.name
+  if (evt.patientDetails) {
+    name.value = evt.patientDetails.name
     if (patient.value) {
-      patient.value.patientdetails = { ...patient.value.patientdetails, ...evt.patientdetails }
+      patient.value.patientDetails = { ...patient.value.patientDetails, ...evt.patientDetails }
     }
   }
   if (typeof evt.age !== 'undefined') {

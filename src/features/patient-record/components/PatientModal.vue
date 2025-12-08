@@ -72,16 +72,16 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  patientCreated: [{ id: string; patientdetails: PatientDetails; age: number | null }]
-  patientUpdated: [{ id?: string; patientdetails: PatientDetails; age: number | null }]
+  patientCreated: [{ id: string; patientDetails: PatientDetails; age: number | null }]
+  patientUpdated: [{ id?: string; patientDetails: PatientDetails; age: number | null }]
 }>()
 
 const toast = useToast()
 const maxDate = ref(formatDateISO(new Date()))
 const formRef = usePatientForm({
   initial:
-    !props.isAdd && props.patientData?.patientdetails
-      ? props.patientData.patientdetails
+    !props.isAdd && props.patientData?.patientDetails
+      ? props.patientData.patientDetails
       : undefined,
   onError: (m) => toast.error(m)
 })
@@ -140,7 +140,7 @@ watch(
   (patientData) => {
     if (props.isAdd || isEditing.value) return
     if (!patientData) return
-    formDraft.initialize(patientData.patientdetails || null)
+    formDraft.initialize(patientData.patientDetails || null)
   },
   { immediate: true }
 )
@@ -165,7 +165,7 @@ async function submitData() {
     toast.success('New patient created successfully!')
     emit('patientCreated', {
       id: String(response.id),
-      patientdetails: created,
+      patientDetails: created,
       age: ageComputed.value
     })
   } catch (error) {
@@ -193,7 +193,7 @@ async function saveChanges() {
       toast.success('Patient details updated successfully!')
       emit('patientUpdated', {
         id: props.patientId,
-        patientdetails: updated,
+        patientDetails: updated,
         age: ageComputed.value
       })
     }
@@ -203,8 +203,8 @@ async function saveChanges() {
 function discardEdit() {
   discardChanges({
     onDiscard: () => {
-      formDraft.initialize(props.patientData?.patientdetails || null, true)
-      reset(props.patientData?.patientdetails || undefined)
+      formDraft.initialize(props.patientData?.patientDetails || null, true)
+      reset(props.patientData?.patientDetails || undefined)
       if (props.patientId) {
         loadExistingPhoto(props.patientId)
       }

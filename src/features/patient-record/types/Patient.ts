@@ -12,7 +12,7 @@ import type Physiotherapy from './Physiotherapy'
 
 // The Patient type is a composite type that contains all the other types.
 export default interface Patient {
-  patientdetails: PatientDetails
+  patientDetails: PatientDetails
   admin: Admin
   pastMedicalHistory: PastMedicalHistory | null
   socialHistory: SocialHistory | null
