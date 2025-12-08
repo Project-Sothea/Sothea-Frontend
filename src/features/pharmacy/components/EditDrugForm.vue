@@ -890,7 +890,6 @@ async function submit() {
   } catch (err: any) {
     toast.error(
       err?.response.data.error ??
-        'Failed to save line.' ??
         (props.drugId ? 'Failed to update drug' : 'Failed to create drug')
     )
   } finally {

@@ -1044,7 +1044,7 @@ function unitLabel(u?: UnitCode) {
 // A clearer, doctor-readable description of the regimen.
 const scheduleReadable = computed(() => {
   if (isBottleMode.value && form.doseAmount && form.doseUnit) {
-    const baseSchedule = `${form.doseAmount} ${unitLabel(form.doseUnit)}(s) total.`
+    const baseSchedule = `${form.doseAmount} ${unitLabel(form.doseUnit)} total.`
     return form.prn ? `${baseSchedule} (PRN)` : baseSchedule
   }
 

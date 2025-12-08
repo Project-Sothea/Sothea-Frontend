@@ -83,7 +83,7 @@ export const UNIT_LABELS: Record<UnitCode, string> = {
   tab: 'tablet(s)',
   cap: 'capsule(s)',
   drop: 'drop(s)',
-  bottle: 'bottle (s)',
+  bottle: 'bottle(s)',
   sachet: 'sachet(s)',
   inhaler: 'inhaler(s)',
   puff: 'puff(s)',

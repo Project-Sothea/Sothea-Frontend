@@ -5,8 +5,8 @@
       <form @submit.prevent="handleSignIn">
         <h1>SIGN IN</h1>
         <br />
-        <!-- Username Input -->
-        <h2>Username:</h2>
+        <!-- Profile Selection -->
+        <h2>Select Profile:</h2>
         <div class="flex relative">
           <!-- Profile Icon -->
           <span class="icon-container">
@@ -25,52 +25,18 @@
               />
             </svg>
           </span>
-          <input type="text" v-model="username" class="input-style" placeholder="Enter username" />
-        </div>
-
-        <!-- Password Input -->
-        <h2>Password:</h2>
-        <div class="flex relative">
-          <!-- Lock Icon -->
-          <span class="icon-container">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="#9ca3af"
-              class="w-5 h-5"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
-              />
-            </svg>
-          </span>
-          <input
-            :type="showPassword ? 'text' : 'password'"
-            v-model="password"
-            class="input-style"
-            placeholder="Enter password"
-          />
-          <button
-            type="button"
-            @click="togglePasswordVisibility"
-            class="absolute right-0 inset-y-0 px-3"
-          >
-            <!-- Eye Icon -->
-            <img v-if="showPassword" src="@/assets/eye.svg" alt="Eye Icon" class="w-5 h-5" />
-
-            <!-- Slash Icon -->
-            <img v-else src="@/assets/eyeslash.svg" alt="Eye Slash Icon" class="w-5 h-5" />
-          </button>
+          <select v-model="selectedProfile" class="input-style" required>
+            <option value="" disabled>Select a profile...</option>
+            <option v-for="profile in profiles" :key="profile.username" :value="profile.username">
+              {{ profile.name }}
+            </option>
+          </select>
         </div>
         <br />
 
         <!-- Sign In Button -->
         <div class="flex w-full">
-          <button type="submit" class="signin-button">SIGN IN</button>
+          <button type="submit" class="signin-button" :disabled="!selectedProfile">LOG IN</button>
         </div>
       </form>
     </div>
@@ -85,6 +51,7 @@ import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
 import { loginRequest } from '@features/auth/api/auth'
 import { useAuth } from '@features/auth/composables/useAuth'
+import { profiles } from '../types/Profiles'
 
 // Composables
 const toast = useToast()
@@ -92,24 +59,22 @@ const router = useRouter()
 const { login } = useAuth()
 
 // Reactive State
-const username = ref('')
-const password = ref('')
-const showPassword = ref(false)
+const selectedProfile = ref('')
 
 // Handlers
 async function handleSignIn() {
+  if (!selectedProfile.value) {
+    toast.error('Please select a profile')
+    return
+  }
   try {
-    const { token } = await loginRequest(username.value, password.value)
+    const { token } = await loginRequest(selectedProfile.value, '')
     login(token)
     await router.push('/patient-directory')
   } catch (error) {
     console.error(error)
     toast.error('Sign in failed')
   }
-}
-
-function togglePasswordVisibility() {
-  showPassword.value = !showPassword.value
 }
 </script>
 
@@ -170,6 +135,12 @@ function togglePasswordVisibility() {
   font-size: 1rem;
   border-radius: 0 0.5rem 0.5rem 0;
   flex: 1;
+  cursor: pointer;
+}
+
+.input-style:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 h1 {
