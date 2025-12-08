@@ -263,7 +263,7 @@ const props = defineProps<{
 const lEyeVision = ref<number | null>(null)
 const rEyeVision = ref<number | null>(null)
 
-const sentToOpto = ref<boolean>(false)
+const sentToOpto = ref<boolean | null>(null)
 const referredForGlasses = ref<boolean | null>(null)
 
 const calculatedAge = computed(
@@ -313,11 +313,18 @@ watch(
   },
   { immediate: true }
 )
+
+// Clear dependent fields when toggled to No/false
+watch(sentToOpto, (val) => {
+  if (val === null) return
+  // nothing to clear yet; placeholder for future dependent fields
+})
 function buildPayload(): VisualAcuity | null {
   if (
     !runChecks([
       [lEyeVision.value !== null, 'Please fill in L eye vision'],
       [rEyeVision.value !== null, 'Please fill in R eye vision'],
+      [sentToOpto.value !== null, 'Please answer whether sent to optometrist'],
       [
         referredForGlasses.value !== null,
         'Please answer whether the patient ws referred for prescription glasses'
@@ -333,7 +340,7 @@ function buildPayload(): VisualAcuity | null {
   return {
     lEyeVision: lEyeVision.value!,
     rEyeVision: rEyeVision.value!,
-    sentToOpto: sentToOpto.value,
+    sentToOpto: sentToOpto.value ?? false,
     referredForGlasses: referredForGlasses.value!,
     icopeEyeProblem: icopeEyeProblem.value!,
     icopeTreatedForDiabetesOrBp: icopeTreatedForDiabetesOrBp.value!,

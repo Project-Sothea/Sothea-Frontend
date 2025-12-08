@@ -3,7 +3,12 @@
     <div class="flex flex-col rounded-lg w-3/4 max-h-fit border border-gray-300 p-10">
       <h1>New Visit Admin Details</h1>
       <br />
-      <AdminFormFields :form="formRef" :disabled="false" :maxDate="maxDate" />
+      <AdminFormFields
+        :form="formRef"
+        :disabled="false"
+        :maxDate="maxDate"
+        :gender="patientData?.patientDetails?.gender || ''"
+      />
 
       <!-- Save Button -->
       <div class="flex flex-row-reverse w-full mt-5">

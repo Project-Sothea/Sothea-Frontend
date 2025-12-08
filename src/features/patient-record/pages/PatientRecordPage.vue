@@ -8,6 +8,7 @@
         :name="isCreateMode ? undefined : name"
         :age="isCreateMode ? undefined : age || undefined"
         :isAdd="isCreateMode"
+        :canDeleteVisit="visitCount > 1"
         @update:activeSection="setActiveSection"
         @openTryDeleteVisitModal="tryDeleteVisit = true"
         @openTryDeletePatientModal="tryDeletePatient = true"
@@ -29,6 +30,8 @@
             :patientVid="String(vid || createdVisitVid || '')"
             :patientData="patient"
             :age="age"
+            :canDeleteVisit="visitCount > 1"
+            @capturePatientPayload="capturePatientPayload"
             @patientCreated="handlePatientCreated"
             @patientUpdated="handlePatientUpdated"
             @patientVisitCreated="handlePatientVisitCreated"
@@ -44,6 +47,7 @@
       :id="id || ''"
       :vid="vid || ''"
       :isOpen="showRecords"
+      :patientMeta="patientMeta || undefined"
       @close="closeRecords"
     />
 
@@ -158,8 +162,10 @@ import DentalModal from '@patient-record/components/DentalModal.vue'
 import PrescriptionModal from '@patient-record/components/PrescriptionModal.vue'
 import { deletePatient } from '@patient-record/api/patient'
 import { fetchPatientRecord, deletePatientVisit } from '@patient-record/api/visit'
+import { fetchPatientMeta } from '@patient-record/api/record'
 import type Patient from '@patient-record/types/Patient'
 import type PatientDetails from '@patient-record/types/PatientDetails'
+import type PatientMeta from '@patient-record/types/PatientMeta'
 import { useToast } from 'vue-toast-notification'
 import { calculateAge } from '@shared/utils/age'
 
@@ -172,6 +178,7 @@ const id = ref<string | null>((route.params.id as string) || null)
 const vid = ref<string | null>((route.params.vid as string) || null)
 const createdPatientId = ref<string | null>(null)
 const createdVisitVid = ref<string | null>(null)
+const pendingPatientPayload = ref<{ patient?: PatientDetails; photoFile?: File | null } | null>(null)
 
 const activeSection = ref('patient')
 const patient = ref<Patient | null>(null)
@@ -183,6 +190,8 @@ const showRecords = ref(false)
 const tryDeleteVisit = ref(false)
 const tryDeletePatient = ref(false)
 const tryReload = ref(false)
+const visitCount = ref(0)
+const patientMeta = ref<PatientMeta | null>(null)
 
 const activeSectionStorageKey = computed(() => {
   const patientId = id.value ?? createdPatientId.value
@@ -278,9 +287,22 @@ async function loadPatientData() {
     name.value = patientInfo?.name ?? ''
     regDate.value = admin?.regDate ? formatDateForInput(admin.regDate as any) : ''
     queueNo.value = admin?.queueNo ?? ''
+    await loadPatientMeta(id.value)
   } catch (e) {
     console.error(e)
     toast.error('Failed to load patient data')
+  }
+}
+
+async function loadPatientMeta(pid: string) {
+  try {
+    const meta = await fetchPatientMeta(pid)
+    patientMeta.value = meta
+    visitCount.value = Object.keys(meta.visits || {}).length
+  } catch (e) {
+    console.error(e)
+    patientMeta.value = null
+    visitCount.value = 0
   }
 }
 
@@ -294,10 +316,21 @@ function formatDateForInput(dateInput: string | Date) {
 }
 
 function handlePatientCreated(evt: { id: string; patientDetails: PatientDetails; age: number | null }) {
-  createdPatientId.value = String(evt.id)
+  createdPatientId.value = evt.id ? String(evt.id) : null
   name.value = evt.patientDetails.name
   age.value = evt.age
+  // Seed patient data so downstream forms have gender/id immediately
+  patient.value = {
+    ...(patient.value || {}),
+    patientDetails: evt.patientDetails
+  } as Patient
+  visitCount.value = 0
+  patientMeta.value = null
   activeSection.value = 'admin'
+}
+
+function capturePatientPayload(details: PatientDetails, photoFile?: File | null) {
+  pendingPatientPayload.value = { patient: details, photoFile: photoFile ?? null }
 }
 
 type PatientUpdatedPayload = {
@@ -318,11 +351,14 @@ function handlePatientUpdated(evt: PatientUpdatedPayload) {
   }
 }
 
-function handlePatientVisitCreated(evt: any) {
+async function handlePatientVisitCreated(evt: any) {
   if (evt.regDate) regDate.value = evt.regDate
   if (evt.queueNo) queueNo.value = evt.queueNo
   createdVisitVid.value = evt.vid
-  router.push(`/patient/${evt.id}/${evt.vid}`)
+  if (id.value || evt.id) {
+    await loadPatientMeta(String(id.value || evt.id))
+  }
+  await router.push(`/patient/${evt.id}/${evt.vid}`)
   activeSection.value = 'admin'
 }
 
@@ -404,6 +440,8 @@ watch(isCreateMode, (isCreate) => {
     age.value = null
     regDate.value = ''
     queueNo.value = ''
+    patientMeta.value = null
+    visitCount.value = 0
   }
 })
 
