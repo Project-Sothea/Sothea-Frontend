@@ -63,7 +63,6 @@
         </div>
 
         <div class="mb-4">
-        
           <div class="mt-1 flex flex-nowrap items-start gap-x-6">
             <div class="text-sm text-dark basis-[26rem] shrink-0">
               <span>Sent to Khmer Optics Optometrist? (if score for any eye is > 6/24)</span>
@@ -72,13 +71,25 @@
 
             <div class="flex items-center gap-6 pt-0.5">
               <label class="inline-flex items-center gap-2">
-                <input type="radio" name="sent-to-opto" class="w-4 h-4"
-                      v-model="sentToOpto" :value="true" :disabled="!isEditing" />
+                <input
+                  type="radio"
+                  name="sent-to-opto"
+                  class="w-4 h-4"
+                  v-model="sentToOpto"
+                  :value="true"
+                  :disabled="!isEditing"
+                />
                 <span class="text-sm">Y</span>
               </label>
               <label class="inline-flex items-center gap-2">
-                <input type="radio" name="sent-to-opto" class="w-4 h-4"
-                      v-model="sentToOpto" :value="false" :disabled="!isEditing" />
+                <input
+                  type="radio"
+                  name="sent-to-opto"
+                  class="w-4 h-4"
+                  v-model="sentToOpto"
+                  :value="false"
+                  :disabled="!isEditing"
+                />
                 <span class="text-sm">N</span>
               </label>
             </div>
@@ -91,41 +102,65 @@
 
             <div class="flex items-center gap-6 pt-0.5">
               <label class="inline-flex items-center gap-2">
-                <input type="radio" name="referred-for-glasses" class="w-4 h-4"
-                      v-model="referredForGlasses" :value="true" :disabled="!isEditing" />
+                <input
+                  type="radio"
+                  name="referred-for-glasses"
+                  class="w-4 h-4"
+                  v-model="referredForGlasses"
+                  :value="true"
+                  :disabled="!isEditing"
+                />
                 <span class="text-sm">Y</span>
               </label>
               <label class="inline-flex items-center gap-2">
-                <input type="radio" name="referred-for-glasses" class="w-4 h-4"
-                      v-model="referredForGlasses" :value="false" :disabled="!isEditing" />
+                <input
+                  type="radio"
+                  name="referred-for-glasses"
+                  class="w-4 h-4"
+                  v-model="referredForGlasses"
+                  :value="false"
+                  :disabled="!isEditing"
+                />
                 <span class="text-sm">N</span>
               </label>
             </div>
           </div>
-        </div> 
-
+        </div>
 
         <div class="mb-2" v-if="showIcope">
           <!-- Row 1 -->
-          <div class="text-sm font-medium text-dark">
-            ICOPE (60 yo and above):
-          </div>
+          <div class="text-sm font-medium text-dark">ICOPE (60 yo and above):</div>
 
           <div class="mt-1 flex flex-nowrap items-start gap-x-6">
             <div class="text-sm text-dark basis-[26rem] shrink-0">
-              <span>Do you have any eye problems (difficulty seeing far away, difficulty reading, eye disease?)</span>
+              <span
+                >Do you have any eye problems (difficulty seeing far away, difficulty reading, eye
+                disease?)</span
+              >
               <span class="req">*</span>
             </div>
 
             <div class="flex items-center gap-6 pt-0.5">
               <label class="inline-flex items-center gap-2">
-                <input type="radio" name="eye-problem" class="w-4 h-4"
-                      v-model="icopeEyeProblem" :value="true" :disabled="!isEditing" />
+                <input
+                  type="radio"
+                  name="eye-problem"
+                  class="w-4 h-4"
+                  v-model="icopeEyeProblem"
+                  :value="true"
+                  :disabled="!isEditing"
+                />
                 <span class="text-sm">Y</span>
               </label>
               <label class="inline-flex items-center gap-2">
-                <input type="radio" name="eye-problem" class="w-4 h-4"
-                      v-model="icopeEyeProblem" :value="false" :disabled="!isEditing" />
+                <input
+                  type="radio"
+                  name="eye-problem"
+                  class="w-4 h-4"
+                  v-model="icopeEyeProblem"
+                  :value="false"
+                  :disabled="!isEditing"
+                />
                 <span class="text-sm">N</span>
               </label>
             </div>
@@ -138,24 +173,34 @@
 
             <div class="flex items-center gap-6 pt-0.5">
               <label class="inline-flex items-center gap-2">
-                <input type="radio" name="diabetes-or-bp" class="w-4 h-4"
-                      v-model="icopeTreatedForDiabetesOrBp" :value="true" :disabled="!isEditing" />
+                <input
+                  type="radio"
+                  name="diabetes-or-bp"
+                  class="w-4 h-4"
+                  v-model="icopeTreatedForDiabetesOrBp"
+                  :value="true"
+                  :disabled="!isEditing"
+                />
                 <span class="text-sm">Y</span>
               </label>
               <label class="inline-flex items-center gap-2">
-                <input type="radio" name="diabetes-or-bp" class="w-4 h-4"
-                      v-model="icopeTreatedForDiabetesOrBp" :value="false" :disabled="!isEditing" />
+                <input
+                  type="radio"
+                  name="diabetes-or-bp"
+                  class="w-4 h-4"
+                  v-model="icopeTreatedForDiabetesOrBp"
+                  :value="false"
+                  :disabled="!isEditing"
+                />
                 <span class="text-sm">N</span>
               </label>
             </div>
           </div>
-        </div> 
+        </div>
 
         <!-- Additional Intervention -->
         <div class="mt-4">
-          <label for="" class="mb-2 block text-sm font-medium text-dark"
-            >Remarks:
-          </label>
+          <label for="" class="mb-2 block text-sm font-medium text-dark">Remarks: </label>
           <textarea
             v-model="additionalIntervention"
             rows="3"
@@ -205,6 +250,7 @@ import type Patient from '@patient-record/types/Patient'
 import type VisualAcuity from '@patient-record/types/VisualAcuity'
 import { updateSection } from '@features/patient-record/api/visit'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
+import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
   patientId: string
@@ -217,12 +263,15 @@ const props = defineProps<{
 const lEyeVision = ref<number | null>(null)
 const rEyeVision = ref<number | null>(null)
 
-const sentToOpto = ref <boolean>(false)
+const sentToOpto = ref<boolean>(false)
 const referredForGlasses = ref<boolean | null>(null)
 
-const showIcope = computed<boolean>(() => 
-  props.age != null ? props.age >= 60 : true
-);
+const calculatedAge = computed(
+  () => props.age ?? calculateAge(props.patientData?.patientdetails?.dob)
+)
+const showIcope = computed<boolean>(() =>
+  calculatedAge.value != null ? calculatedAge.value >= 60 : true
+)
 
 const icopeEyeProblem = ref<boolean | null>(null)
 const icopeTreatedForDiabetesOrBp = ref<boolean | null>(null)
@@ -244,11 +293,11 @@ const formDraft = useAutoDraft<VisualAcuity>({
     { key: 'referredForGlasses', ref: referredForGlasses },
     { key: 'icopeEyeProblem', ref: icopeEyeProblem },
     { key: 'icopeTreatedForDiabetesOrBp', ref: icopeTreatedForDiabetesOrBp },
-    { key: 'additionalIntervention', ref: additionalIntervention },
+    { key: 'additionalIntervention', ref: additionalIntervention }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved visual acuity draft from this device.',
+  restoreMessage: 'Restored unsaved visual acuity draft from this device.'
 })
 
 // Extract functions from formDraft
@@ -260,7 +309,7 @@ watch(
   (patientData) => {
     if (props.isAdd || isEditing.value) return
     if (!patientData) return
-    formDraft.initialize(patientData.visualacuity || null)
+    formDraft.initialize(patientData.visualAcuity || null)
   },
   { immediate: true }
 )
@@ -269,9 +318,15 @@ function buildPayload(): VisualAcuity | null {
     !runChecks([
       [lEyeVision.value !== null, 'Please fill in L eye vision'],
       [rEyeVision.value !== null, 'Please fill in R eye vision'],
-      [referredForGlasses.value !== null, 'Please answer whether the patient ws referred for prescription glasses'],
+      [
+        referredForGlasses.value !== null,
+        'Please answer whether the patient ws referred for prescription glasses'
+      ],
       [!showIcope.value || icopeEyeProblem.value !== null, 'Please answer ICOPE question'],
-      [!showIcope.value || icopeTreatedForDiabetesOrBp.value !== null, 'Please answer ICOPE question'],
+      [
+        !showIcope.value || icopeTreatedForDiabetesOrBp.value !== null,
+        'Please answer ICOPE question'
+      ]
     ])
   )
     return null
@@ -308,7 +363,7 @@ function discardEdit() {
   discardChanges({
     onDiscard: () => {
       // Reset to server data or defaults (force re-initialization)
-      formDraft.initialize(props.patientData?.visualacuity || null, true)
+      formDraft.initialize(props.patientData?.visualAcuity || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

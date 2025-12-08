@@ -18,6 +18,6 @@ export default interface PastMedicalHistory {
   chronicJointPains: boolean | null
   chronicMuscleAches: boolean | null
   sexuallyTransmittedDisease: boolean | null
-  specifiedSTDs: string | null
+  specifiedStds: string | null
   others: string | null
 }

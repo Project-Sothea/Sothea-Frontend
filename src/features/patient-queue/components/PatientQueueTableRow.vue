@@ -46,7 +46,11 @@
       <div v-else class="text-gray-900 whitespace-no-wrap allergies nil">Nil</div>
     </td>
     <td class="px-5 py-3 text-sm border-b border-gray-200">
-      <div v-if="prescriptionLabel" class="text-gray-900 whitespace-no-wrap prescription" :class="prescriptionClass">
+      <div
+        v-if="prescriptionLabel"
+        class="text-gray-900 whitespace-no-wrap prescription"
+        :class="prescriptionClass"
+      >
         {{ prescriptionLabel }}
       </div>
       <div v-else class="text-gray-500 whitespace-no-wrap prescription none">N/A</div>
@@ -135,13 +139,5 @@ function handleClick() {
 .prescription.none {
   background-color: #e5e7eb;
   color: #374151;
-}
-.prescription.packed {
-  background-color: #dbeafe;
-  color: #1d4ed8;
-}
-.prescription.dispensed {
-  background-color: #dcfce7;
-  color: #166534;
 }
 </style>

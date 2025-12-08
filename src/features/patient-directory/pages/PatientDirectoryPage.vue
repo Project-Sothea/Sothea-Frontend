@@ -6,11 +6,7 @@
         <h2 class="text-3xl leading-tight" style="color: black">Patient Directory</h2>
       </div>
 
-      <PatientDirectoryToolbar
-        @search="handleSearch"
-        @export="exportPatientData"
-        @refresh="getData"
-      />
+      <PatientDirectoryToolbar @search="handleSearch" @refresh="getData" />
 
       <hr class="line" />
 
@@ -29,7 +25,7 @@ import { onMounted, ref } from 'vue'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
 import PatientDirectoryToolbar from '@patient-directory/components/PatientDirectoryToolbar.vue'
 import PatientDirectoryTable from '@patient-directory/components/PatientDirectoryTable.vue'
-import { fetchDirectoryDefault, exportPatientDirectory } from '@patient-directory/api/directory'
+import { fetchDirectoryDefault } from '@patient-directory/api/directory'
 import { matchDateDMY } from '@shared/utils/date'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
@@ -48,22 +44,6 @@ async function getData() {
   } catch (error) {
     console.error(error)
     toast.error('Failed to load patient directory')
-  }
-}
-
-async function exportPatientData() {
-  try {
-    const response = await exportPatientDirectory()
-    const url = window.URL.createObjectURL(new Blob([response.data]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', 'patientdata.csv')
-    document.body.appendChild(link)
-    link.click()
-    link.parentNode?.removeChild(link)
-    window.URL.revokeObjectURL(url)
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || 'An internal server error occurred.')
   }
 }
 
@@ -113,17 +93,9 @@ onMounted(() => {
 .table {
   width: 1240px;
 }
-.table-heading {
-  background: rgba(63, 81, 181);
-}
+
 .line {
   height: 1px;
   background: rgba(0, 0, 0, 0.17);
-}
-.even-row {
-  background-color: #ffffff;
-}
-.odd-row {
-  background-color: #f2f2f2;
 }
 </style>

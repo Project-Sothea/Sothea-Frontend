@@ -43,7 +43,7 @@
             id="options-menu"
             @click="logout"
           >
-            <h2>Logout</h2>
+            <label>Logout</label>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -88,11 +88,5 @@ h1 {
 h2 {
   color: white;
   padding: 0.25rem;
-}
-
-.active {
-  background-color: white;
-  color: #3f51b5;
-  border: 0;
 }
 </style>

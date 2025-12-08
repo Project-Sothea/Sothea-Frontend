@@ -121,10 +121,7 @@
                       @click="handleViewBatch(b)"
                       title="View batch locations"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        class="h-5 w-5"
-                      >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5">
                         <path
                           fill="currentColor"
                           d="M12 5c-5 0-9.27 3.11-10.71 7.5C3.73 16.89 8 20 12 20s8.27-3.11 10.71-7.5C20.27 8.11 16 5 12 5m0 12a4.5 4.5 0 1 1 0-9a4.5 4.5 0 0 1 0 9m0-7a2.5 2.5 0 1 0 0 5a2.5 2.5 0 0 0 0-5Z"
@@ -136,8 +133,19 @@
                       @click="handleEditBatch(b)"
                       title="Edit batch"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-5 h-5"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                        />
                       </svg>
                     </button>
                     <button
@@ -145,8 +153,19 @@
                       @click="handleDeleteBatch(b)"
                       title="Delete batch"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-5 h-5"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -183,8 +202,19 @@
                       @click="handleEditLocation(row)"
                       title="Edit location"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-5 h-5"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                        />
                       </svg>
                     </button>
                     <button
@@ -192,8 +222,19 @@
                       @click="handleDeleteLocation(row)"
                       title="Delete location"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-5 h-5"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -218,10 +259,7 @@
       @close="openAddBatchModal = false"
       @saved="handleBatchSaved"
     />
-    <BatchLocationsModal
-      v-model:open="openViewBatchModal"
-      :batch="selectedBatch || null"
-    />
+    <BatchLocationsModal v-model:open="openViewBatchModal" :batch="selectedBatch || null" />
     <EditBatchModal
       :open="openEditBatchModal"
       :batch="selectedBatch"
@@ -271,7 +309,12 @@ import ConfirmationDialogue from '@features/patient-record/components/Confirmati
 import type { BatchDetail, DrugBatchLocation } from '../types/Batch'
 import { getDrugStock, deleteDrug } from '../api/drug'
 import { deleteBatch } from '../api/batch'
-import { fmtDispenseUnit, fmtStrengthWithRoute, type ISODateString, fmtDrugNameWithBrand } from '../types/Util'
+import {
+  fmtDispenseUnit,
+  fmtStrengthWithRoute,
+  type ISODateString,
+  fmtDrugNameWithBrand
+} from '../types/Util'
 import type { DrugView } from '../types/Drug'
 import { fmtDate } from '../types/Util'
 
@@ -300,7 +343,6 @@ const selectedLocationBatchId = ref<number>(0)
 const openDeleteConfirm = ref(false)
 const openDeleteBatchConfirm = ref(false)
 
-
 /** Fetchers */
 async function fetchData() {
   // Fetch drug details
@@ -324,9 +366,10 @@ function batchTotalQty(b: BatchDetail) {
 const filteredBatches = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
   if (!term) return batches.value
-  return batches.value.filter(b =>
-    (b.batchNumber ?? '').toLowerCase().includes(term) ||
-    b.batchLocations.some(bL => bL.location.toLowerCase().includes(term))
+  return batches.value.filter(
+    (b) =>
+      (b.batchNumber ?? '').toLowerCase().includes(term) ||
+      b.batchLocations.some((bL) => bL.location.toLowerCase().includes(term))
   )
 })
 
@@ -335,21 +378,22 @@ type LocationRow = DrugBatchLocation & {
   expiryDate: ISODateString
 }
 const locationRows = computed<LocationRow[]>(() =>
-  (batches.value ?? []).flatMap(b =>
-    (b.batchLocations ?? []).map(bL => ({
+  (batches.value ?? []).flatMap((b) =>
+    (b.batchLocations ?? []).map((bL) => ({
       ...bL,
       batchNumber: b.batchNumber,
-      expiryDate: b.expiryDate,
+      expiryDate: b.expiryDate
     }))
   )
-);
+)
 
 const filteredLocationRows = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
   if (!term) return locationRows.value
-  return locationRows.value.filter(row =>
-    row.location.toLowerCase().includes(term) ||
-    (row.batchNumber ?? '').toLowerCase().includes(term)
+  return locationRows.value.filter(
+    (row) =>
+      row.location.toLowerCase().includes(term) ||
+      (row.batchNumber ?? '').toLowerCase().includes(term)
   )
 })
 
@@ -380,9 +424,9 @@ async function handleBatchSaved() {
 
 function handleEditLocation(locationRow: LocationRow) {
   // Find the batch for this location
-  const batch = batches.value.find(b => b.id === locationRow.batchId)
+  const batch = batches.value.find((b) => b.id === locationRow.batchId)
   if (batch) {
-    const location = batch.batchLocations.find(loc => loc.id === locationRow.id)
+    const location = batch.batchLocations.find((loc) => loc.id === locationRow.id)
     if (location) {
       selectedLocation.value = location
       selectedLocationBatchId.value = locationRow.batchId
@@ -393,9 +437,9 @@ function handleEditLocation(locationRow: LocationRow) {
 
 function handleDeleteLocation(locationRow: LocationRow) {
   // Find the batch for this location
-  const batch = batches.value.find(b => b.id === locationRow.batchId)
+  const batch = batches.value.find((b) => b.id === locationRow.batchId)
   if (batch) {
-    const location = batch.batchLocations.find(loc => loc.id === locationRow.id)
+    const location = batch.batchLocations.find((loc) => loc.id === locationRow.id)
     if (location) {
       selectedLocation.value = location
       selectedLocationBatchId.value = locationRow.batchId
@@ -413,7 +457,7 @@ async function handleLocationSaved() {
 
 async function handleDeleteBatchConfirm() {
   if (!selectedBatch.value) return
-  
+
   try {
     await deleteBatch(selectedBatch.value.id)
     toast.success('Batch deleted successfully')
@@ -431,7 +475,7 @@ async function handleDeleteDrug() {
   try {
     await deleteDrug(drugId)
     toast.success('Drug deleted successfully')
-    router.push('/pharmacy')
+    await router.push('/pharmacy')
   } catch (err: any) {
     console.error(err)
     toast.error(err?.message ?? 'Failed to delete drug')
@@ -451,14 +495,31 @@ const inactiveBtn = 'bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colo
 </script>
 
 <style scoped>
-.table { width: 1240px; }
-.line { height: 1px; background: rgba(0, 0, 0, 0.17); }
-.th {
-  padding: 1.25rem 1.25rem; font-size: 0.875rem; font-weight: 500;
-  text-align: left; text-transform: uppercase; color: #1f2937;
-  background: #c7d2fe; border-bottom: 1px solid #e5e7eb;
+.table {
+  width: 1240px;
 }
-.td { padding: 1rem 1.25rem; font-size: 0.875rem; }
-.even-row { background-color: #ffffff; }
-.odd-row { background-color: #f2f2f2; }
+.line {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.17);
+}
+.th {
+  padding: 1.25rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  text-transform: uppercase;
+  color: #1f2937;
+  background: #c7d2fe;
+  border-bottom: 1px solid #e5e7eb;
+}
+.td {
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+}
+.even-row {
+  background-color: #ffffff;
+}
+.odd-row {
+  background-color: #f2f2f2;
+}
 </style>

@@ -123,7 +123,7 @@
                 BMI Analysis <span class="req">*</span></label
               >
               <input
-                :value="bmianalysis"
+                :value="bmiAnalysis"
                 disabled
                 type="text"
                 placeholder=""
@@ -134,9 +134,7 @@
 
           <div class="mb-2" v-if="showIcope">
             <!-- Row 1 -->
-            <div class="text-sm font-medium text-dark">
-              ICOPE (60 yo and above):
-            </div>
+            <div class="text-sm font-medium text-dark">ICOPE (60 yo and above):</div>
 
             <div class="mt-1 flex flex-nowrap items-start gap-x-6">
               <div class="text-sm text-dark basis-[26rem] shrink-0">
@@ -146,13 +144,25 @@
 
               <div class="flex items-center gap-6 pt-0.5">
                 <label class="inline-flex items-center gap-2">
-                  <input type="radio" name="lost-weight-3-months" class="w-4 h-4"
-                        v-model="icopeLostWeightPastMonths" :value="true" :disabled="!isEditing" />
+                  <input
+                    type="radio"
+                    name="lost-weight-3-months"
+                    class="w-4 h-4"
+                    v-model="icopeLostWeightPastMonths"
+                    :value="true"
+                    :disabled="!isEditing"
+                  />
                   <span class="text-sm">Y</span>
                 </label>
                 <label class="inline-flex items-center gap-2">
-                  <input type="radio" name="lost-weight-3-months" class="w-4 h-4"
-                        v-model="icopeLostWeightPastMonths" :value="false" :disabled="!isEditing" />
+                  <input
+                    type="radio"
+                    name="lost-weight-3-months"
+                    class="w-4 h-4"
+                    v-model="icopeLostWeightPastMonths"
+                    :value="false"
+                    :disabled="!isEditing"
+                  />
                   <span class="text-sm">N</span>
                 </label>
               </div>
@@ -165,18 +175,30 @@
 
               <div class="flex items-center gap-6 pt-0.5">
                 <label class="inline-flex items-center gap-2">
-                  <input type="radio" name="no-desire-to-eat" class="w-4 h-4"
-                        v-model="icopeNoDesireToEat" :value="true" :disabled="!isEditing" />
+                  <input
+                    type="radio"
+                    name="no-desire-to-eat"
+                    class="w-4 h-4"
+                    v-model="icopeNoDesireToEat"
+                    :value="true"
+                    :disabled="!isEditing"
+                  />
                   <span class="text-sm">Y</span>
                 </label>
                 <label class="inline-flex items-center gap-2">
-                  <input type="radio" name="no-desire-to-eat" class="w-4 h-4"
-                        v-model="icopeNoDesireToEat" :value="false" :disabled="!isEditing" />
+                  <input
+                    type="radio"
+                    name="no-desire-to-eat"
+                    class="w-4 h-4"
+                    v-model="icopeNoDesireToEat"
+                    :value="false"
+                    :disabled="!isEditing"
+                  />
                   <span class="text-sm">N</span>
                 </label>
               </div>
             </div>
-          </div> 
+          </div>
 
           <!-- Edit Button -->
           <div class="flex flex-row-reverse w-full mt-5">
@@ -273,6 +295,7 @@ import type Patient from '@patient-record/types/Patient'
 import type HeightAndWeight from '@patient-record/types/HeightAndWeight'
 import { updateSection } from '@features/patient-record/api/visit'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
+import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
   patientId: string
@@ -292,11 +315,14 @@ const paedsWeight = ref<number | null>(null)
 const icopeLostWeightPastMonths = ref<boolean | null>(null)
 const icopeNoDesireToEat = ref<boolean | null>(null)
 
-const showIcope = computed<boolean>(() => 
-  props.age != null ? props.age >= 60 : true
+const calculatedAge = computed(
+  () => props.age ?? calculateAge(props.patientData?.patientdetails?.dob)
 )
-const showPaeds = computed<boolean>(() => 
-  props.age != null ? props.age <= 16 : true
+const showIcope = computed<boolean>(() =>
+  calculatedAge.value != null ? calculatedAge.value >= 60 : true
+)
+const showPaeds = computed<boolean>(() =>
+  calculatedAge.value != null ? calculatedAge.value <= 16 : true
 )
 
 const showHeightModal = ref(false)
@@ -314,11 +340,11 @@ const formDraft = useAutoDraft<HeightAndWeight>({
     { key: 'paedsHeight', ref: paedsHeight },
     { key: 'paedsWeight', ref: paedsWeight },
     { key: 'icopeLostWeightPastMonths', ref: icopeLostWeightPastMonths },
-    { key: 'icopeNoDesireToEat', ref: icopeNoDesireToEat },
+    { key: 'icopeNoDesireToEat', ref: icopeNoDesireToEat }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved height & weight draft from this device.',
+  restoreMessage: 'Restored unsaved height & weight draft from this device.'
 })
 
 // Extract functions from formDraft
@@ -330,7 +356,7 @@ watch(
   (patientData) => {
     if (props.isAdd || isEditing.value) return
     if (!patientData) return
-    formDraft.initialize(patientData.heightandweight || null)
+    formDraft.initialize(patientData.heightAndWeight || null)
   },
   { immediate: true }
 )
@@ -343,7 +369,7 @@ const bmi = computed(() => {
   return null
 })
 
-const bmianalysis = computed(() => {
+const bmiAnalysis = computed(() => {
   if (bmi.value !== null) {
     const bmiValue = bmi.value
     if (bmiValue < 18.5) {
@@ -365,26 +391,47 @@ function buildPayload(): HeightAndWeight | null {
       [height.value !== null, 'Enter height'],
       [weight.value !== null, 'Enter weight'],
       [!showIcope.value || icopeLostWeightPastMonths.value !== null, 'Answer ICOPE Questions'],
-      [!showIcope.value || icopeNoDesireToEat.value !== null, 'Answer ICOPE Questions'],
+      [!showIcope.value || icopeNoDesireToEat.value !== null, 'Answer ICOPE Questions']
     ])
   )
     return null
-  if (height.value! < 0) return (toast.error('Height cannot be negative'), null)
-  if (height.value! > 9999) return (toast.error('Height cannot be greater than 9999cm'), null)
-  if (weight.value! < 0) return (toast.error('Weight cannot be negative'), null)
-  if (weight.value! > 9999) return (toast.error('Weight cannot be greater than 9999kg'), null)
-  if (paedsHeight.value && paedsHeight.value > 9999)
-    return (toast.error('Paeds: Height % too large'), null)
-  if (paedsWeight.value && paedsWeight.value > 9999)
-    return (toast.error('Paeds: Weight % too large'), null)
-  if (bmi.value === null) return (toast.error('Enter height & weight to calculate BMI'), null)
-  if (bmianalysis.value === null)
-    return (toast.error('Enter height & weight to calculate BMI Analysis'), null)
+  if (height.value! < 0) {
+    toast.error('Height cannot be negative')
+    return null
+  }
+  if (height.value! > 9999) {
+    toast.error('Height cannot be greater than 9999cm')
+    return null
+  }
+  if (weight.value! < 0) {
+    toast.error('Weight cannot be negative')
+    return null
+  }
+  if (weight.value! > 9999) {
+    toast.error('Weight cannot be greater than 9999kg')
+    return null
+  }
+  if (paedsHeight.value && paedsHeight.value > 9999) {
+    toast.error('Paeds: Height % too large')
+    return null
+  }
+  if (paedsWeight.value && paedsWeight.value > 9999) {
+    toast.error('Paeds: Weight % too large')
+    return null
+  }
+  if (bmi.value === null) {
+    toast.error('Enter height & weight to calculate BMI')
+    return null
+  }
+  if (bmiAnalysis.value === null) {
+    toast.error('Enter height & weight to calculate BMI Analysis')
+    return null
+  }
   return {
     height: height.value!,
     weight: weight.value!,
     bmi: bmi.value!,
-    bmiAnalysis: bmianalysis.value!,
+    bmiAnalysis: bmiAnalysis.value!,
     paedsHeight: paedsHeight.value || null,
     paedsWeight: paedsWeight.value || null,
 
@@ -413,7 +460,7 @@ function discardEdit() {
   discardChanges({
     onDiscard: () => {
       // Reset to server data or defaults (force re-initialization)
-      formDraft.initialize(props.patientData?.heightandweight || null, true)
+      formDraft.initialize(props.patientData?.heightAndWeight || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

@@ -145,7 +145,6 @@
           <div class="flex w-1/3 grow">
             <select
               v-model="howRegular"
-              placeholder="If Y, how regularly?"
               :disabled="!isEditing"
               class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
@@ -226,11 +225,11 @@ const formDraft = useAutoDraft<SocialHistory>({
     { key: 'currentSmokingHistory', ref: currentSmokingHistory },
     { key: 'cigarettesPerDay', ref: cigarettesPerDay },
     { key: 'alcoholHistory', ref: alcoholHistory },
-    { key: 'howRegular', ref: howRegular },
+    { key: 'howRegular', ref: howRegular }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved social history draft from this device.',
+  restoreMessage: 'Restored unsaved social history draft from this device.'
 })
 
 // Extract functions from formDraft
@@ -242,7 +241,7 @@ watch(
   (patientData) => {
     if (props.isAdd || isEditing.value) return
     if (!patientData) return
-    formDraft.initialize(patientData.socialhistory || null)
+    formDraft.initialize(patientData.socialHistory || null)
   },
   { immediate: true }
 )
@@ -296,7 +295,7 @@ function discardEdit() {
   discardChanges({
     onDiscard: () => {
       // Reset to server data or defaults (force re-initialization)
-      formDraft.initialize(props.patientData?.socialhistory || null, true)
+      formDraft.initialize(props.patientData?.socialHistory || null, true)
     },
     onSuccess: () => {
       toast.info('Changes discarded.')

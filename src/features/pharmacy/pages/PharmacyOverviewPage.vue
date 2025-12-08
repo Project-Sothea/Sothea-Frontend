@@ -60,9 +60,7 @@
               >
                 <td class="td">{{ b.batchNumber }}</td>
                 <td class="td">
-                  <DrugLabel
-                    :drug="drugsById.get(b.drugId)!"
-                  />
+                  <DrugLabel :drug="drugsById.get(b.drugId)!" />
                 </td>
                 <td class="td">{{ batchTotalQty(b) }}</td>
                 <td class="td">{{ fmtDate(b.expiryDate) }}</td>
@@ -73,10 +71,7 @@
                     title="View locations"
                     @click="openLocations(b)"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      class="h-5 w-5"
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5">
                       <path
                         fill="currentColor"
                         d="M12 5c-5 0-9.27 3.11-10.71 7.5C3.73 16.89 8 20 12 20s8.27-3.11 10.71-7.5C20.27 8.11 16 5 12 5m0 12a4.5 4.5 0 1 1 0-9a4.5 4.5 0 0 1 0 9m0-7a2.5 2.5 0 1 0 0 5a2.5 2.5 0 0 0 0-5Z"
@@ -105,9 +100,7 @@
                 :class="idx % 2 ? 'odd-row' : 'even-row'"
               >
                 <td class="px-4 py-2">
-                  <DrugLabel
-                    :drug="row.drug"
-                  />
+                  <DrugLabel :drug="row.drug" />
                 </td>
                 <td class="td">{{ row.totalQty }}</td>
                 <td class="td">{{ fmtDate(row.earliestExpiry) }}</td>
@@ -133,7 +126,6 @@ import type { DrugView } from '../types/Drug'
 import DrugLabel from '../components/DrugLabel.vue'
 import { fmtDate, fmtDrugName } from '../types/Util'
 
-
 // ---------------- state ----------------
 const tab = ref<'batches' | 'drugs'>('batches')
 
@@ -153,7 +145,7 @@ const selectedBatch = ref<BatchDetail | null>(null)
 async function loadAll() {
   // Drugs now contain all information (merged)
   drugs.value = await listDrugs()
-  
+
   const drugMap = new Map<number, DrugView>()
   for (const drug of drugs.value) {
     drugMap.set(drug.id, drug)
@@ -182,16 +174,17 @@ const filteredBatches = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
   if (!term) return batches.value
 
-  return batches.value.filter(b => {
+  return batches.value.filter((b) => {
     const byBatchNum = (b.batchNumber ?? '').toLowerCase().includes(term)
     const drug = drugForBatch(b)
     if (drug) {
-      const searchText = `${drug.drugCode != null ? drug.drugCode : ''} ${drug.genericName || ''} ${drug.brandName || ''} ${drug.displayLabel || ''}`.toLowerCase()
+      const searchText =
+        `${drug.drugCode != null ? drug.drugCode : ''} ${drug.genericName || ''} ${drug.brandName || ''} ${drug.displayLabel || ''}`.toLowerCase()
       const byDrug = searchText.includes(term)
-      const byLocs = b.batchLocations.some(bL => bL.location.toLowerCase().includes(term))
+      const byLocs = b.batchLocations.some((bL) => bL.location.toLowerCase().includes(term))
       return byBatchNum || byDrug || byLocs
     }
-    const byLocs = b.batchLocations.some(bL => bL.location.toLowerCase().includes(term))
+    const byLocs = b.batchLocations.some((bL) => bL.location.toLowerCase().includes(term))
     return byBatchNum || byLocs
   })
 })
@@ -214,7 +207,7 @@ const drugRows = computed(() => {
       drug: d,
       totalQty: 0,
       earliestExpiryMs: null,
-      numBatches: 0,
+      numBatches: 0
     })
   }
 
@@ -231,11 +224,10 @@ const drugRows = computed(() => {
   }
 
   return Array.from(map.values())
-    .map(r => ({
+    .map((r) => ({
       ...r,
-      earliestExpiry: r.earliestExpiryMs == null
-        ? '–'
-        : new Date(r.earliestExpiryMs).toLocaleDateString('en-SG'),
+      earliestExpiry:
+        r.earliestExpiryMs == null ? '–' : new Date(r.earliestExpiryMs).toLocaleDateString('en-SG')
     }))
     .sort((a, b) => {
       const nameA = fmtDrugName(a.drug)
@@ -247,12 +239,12 @@ const drugRows = computed(() => {
 const filteredDrugRows = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
   if (!term) return drugRows.value
-  return drugRows.value.filter(r => {
-    const searchText = `${r.drug.drugCode != null ? r.drug.drugCode : ''} ${r.drug.genericName || ''} ${r.drug.brandName || ''} ${r.drug.displayLabel || ''}`.toLowerCase()
+  return drugRows.value.filter((r) => {
+    const searchText =
+      `${r.drug.drugCode != null ? r.drug.drugCode : ''} ${r.drug.genericName || ''} ${r.drug.brandName || ''} ${r.drug.displayLabel || ''}`.toLowerCase()
     return searchText.includes(term)
   })
 })
-
 
 // ---------------- modal ----------------
 const openLocations = (b: BatchDetail) => {
@@ -268,7 +260,6 @@ onMounted(loadAll)
 const activeBtn = 'bg-indigo-600 text-white px-4 py-2 rounded transition-colors'
 const inactiveBtn = 'bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colors'
 </script>
-
 
 <style scoped>
 .table {

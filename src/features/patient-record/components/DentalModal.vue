@@ -8,18 +8,16 @@
       <div class="flex flex-row w-full mt-5">
         <div>
           <label for="fluorideExposure" class="mb-1 block text-sm font-medium text-dark">
-            Fluoride Exposure:
-            How many days per week do you brush your teeth with fluoride toothpaste twice a day?
+            Fluoride Exposure: How many days per week do you brush your teeth with fluoride
+            toothpaste twice a day?
             <span class="req">*</span>
           </label>
-          <div class="relative z-20 w-64 md:w-80 text-left"> <!-- optional: ensure wrapper isn't centering -->
+          <div class="relative z-20 w-64 md:w-80 text-left">
+            <!-- optional: ensure wrapper isn't centering -->
             <select
               v-model="fluorideExposure"
               :disabled="!isEditing"
-              class="w-full appearance-none rounded-md border border-stroke bg-transparent
-                    py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6
-                    outline-none transition focus:border-primary active:border-primary
-                    disabled:cursor-default disabled:bg-gray-200"
+              class="w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="'6, 7'">6, 7</option>
               <option :value="'5, 4, 3'">5, 4, 3</option>
@@ -36,22 +34,20 @@
       <div class="flex flex-row w-full mt-5">
         <div>
           <label for="diet" class="mb-1 block text-sm font-medium text-dark">
-            Diet: On average, how many times daily do you consume starch or sugar (food or drinks) between meals?
+            Diet: On average, how many times daily do you consume starch or sugar (food or drinks)
+            between meals?
             <span class="req">*</span>
           </label>
-          <div class="relative z-20 w-64 md:w-80 text-left"> <!-- optional: ensure wrapper isn't centering -->
+          <div class="relative z-20 w-64 md:w-80 text-left">
+            <!-- optional: ensure wrapper isn't centering -->
             <select
               v-model="diet"
               :disabled="!isEditing"
-              class="w-full appearance-none rounded-md border border-stroke bg-transparent
-                    py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6
-                    outline-none transition focus:border-primary active:border-primary
-                    disabled:cursor-default disabled:bg-gray-200"
+              class="w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="'≤1'">≤1</option>
               <option :value="'2-3'">2-3</option>
               <option :value="'>=4'">≥4</option>
-
             </select>
             <span class="absolute top-1/2 right-4 z-10 -translate-y-1/2">
               <img src="@/assets/chevrondown.svg" height="20" width="20" />
@@ -63,8 +59,8 @@
       <!-- Bacterial exposure -->
       <div class="flex flex-col mt-4">
         <div class="font-medium text-sm">
-          Bacterial exposure: Has anyone in the family (including a caregiver)
-          had tooth decay or lost a tooth from tooth decay?<span class="req">*</span>
+          Bacterial exposure: Has anyone in the family (including a caregiver) had tooth decay or
+          lost a tooth from tooth decay?<span class="req">*</span>
         </div>
 
         <!-- Three risk categories matching Dental type -->
@@ -107,11 +103,11 @@
         </div>
       </div>
 
-
       <!-- oralSymptoms -->
       <div class="flex flex-col mt-5">
         <div class="font-medium text-sm">
-          Oral symptoms: Do you have tooth pain or bleeding gums when you brush your teeth? <span class="req">*</span>
+          Oral symptoms: Do you have tooth pain or bleeding gums when you brush your teeth?
+          <span class="req">*</span>
         </div>
         <div class="mt-3 flex items-start gap-8">
           <label class="flex flex-col items-center text-sm">
@@ -143,7 +139,8 @@
       <!-- drinkOtherWater -->
       <div class="flex flex-col mt-5">
         <div class="font-medium text-sm">
-          Do you wake up to drink anything other than water throughout the night? <span class="req">*</span>
+          Do you wake up to drink anything other than water throughout the night?
+          <span class="req">*</span>
         </div>
         <div class="mt-3 flex items-start gap-8">
           <label class="flex flex-col items-center text-sm">
@@ -179,14 +176,12 @@
             Risk for Dental Carries
             <span class="req">*</span>
           </label>
-          <div class="relative z-20 w-64 md:w-80 text-left"> <!-- optional: ensure wrapper isn't centering -->
+          <div class="relative z-20 w-64 md:w-80 text-left">
+            <!-- optional: ensure wrapper isn't centering -->
             <select
               v-model="riskForDentalCarries"
               :disabled="!isEditing"
-              class="w-full appearance-none rounded-md border border-stroke bg-transparent
-                    py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6
-                    outline-none transition focus:border-primary active:border-primary
-                    disabled:cursor-default disabled:bg-gray-200"
+              class="w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-10 !text-left [text-align-last:left] text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
             >
               <option :value="'Low Risk'">Low Risk</option>
               <option :value="'Middle Risk'">Middle Risk</option>
@@ -321,8 +316,9 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 import type Patient from '@features/patient-record/types/Patient'
 import { updateSection } from '@features/patient-record/api/visit'
 import type Dental from '@features/patient-record/types/Dental'
-import { ref, watch, computed, type Ref } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
+import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
   patientId?: string
@@ -335,16 +331,21 @@ const props = defineProps<{
 const toast = useToast()
 
 const fluorideExposure = ref<'6, 7' | '5, 4, 3' | '2, 1, 0' | null>(null)
-const diet = ref<'≤1' | '2-3' | '≥4' | null> (null)
-const bacterialExposure = ref<'None in last 2 years' | 'Yes in last 7 - 23 months' | 'Yes in last 6 months' | null>(null)
+const diet = ref<'≤1' | '2-3' | '≥4' | null>(null)
+const bacterialExposure = ref<
+  'None in last 2 years' | 'Yes in last 7 - 23 months' | 'Yes in last 6 months' | null
+>(null)
 const oralSymptoms = ref<boolean | null>(null)
 const drinkOtherWater = ref<boolean | null>(null)
 
 const riskForDentalCarries = ref<'Low Risk' | 'Middle Risk' | 'High Risk' | null>(null)
 
-const showIcope = computed<boolean>(() => 
-  props.age != null ? props.age >= 60 : true
-);
+const calculatedAge = computed(
+  () => props.age ?? calculateAge(props.patientData?.patientdetails?.dob)
+)
+const showIcope = computed<boolean>(() =>
+  calculatedAge.value != null ? calculatedAge.value >= 60 : true
+)
 
 const icopeDifficultyChewing = ref<boolean | null>(null)
 const icopePainInMouth = ref<boolean | null>(null)
@@ -361,10 +362,8 @@ const draftFields = [
   { key: 'riskForDentalCarries', ref: riskForDentalCarries },
   { key: 'icopeDifficultyChewing', ref: icopeDifficultyChewing },
   { key: 'icopePainInMouth', ref: icopePainInMouth },
-  { key: 'dentalNotes', ref: dentalNotes },
+  { key: 'dentalNotes', ref: dentalNotes }
 ]
-
-
 
 // Automatic draft management - handles everything
 const formDraft = useAutoDraft<Dental>({
@@ -375,7 +374,7 @@ const formDraft = useAutoDraft<Dental>({
   fields: draftFields,
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
-  restoreMessage: 'Restored unsaved dental draft from this device.',
+  restoreMessage: 'Restored unsaved dental draft from this device.'
 })
 
 // Extract functions from formDraft
@@ -398,19 +397,18 @@ const requiredFlags = computed(() => [
   bacterialExposure.value,
   oralSymptoms.value,
   drinkOtherWater.value,
-  riskForDentalCarries.value,
+  riskForDentalCarries.value
 ])
 
 function buildPayload(): Dental | null {
   if (
     requiredFlags.value.some((v) => v === null) ||
-    showIcope.value && (icopeDifficultyChewing.value === null || icopePainInMouth.value === null)
+    (showIcope.value && (icopeDifficultyChewing.value === null || icopePainInMouth.value === null))
   ) {
     toast.error('Please fill in all required fields.')
     return null
   }
   return {
-
     fluorideExposure: fluorideExposure.value!,
     diet: diet.value!,
     bacterialExposure: bacterialExposure.value!,
@@ -422,7 +420,7 @@ function buildPayload(): Dental | null {
     icopeDifficultyChewing: icopeDifficultyChewing.value!,
     icopePainInMouth: icopePainInMouth.value!,
 
-    dentalNotes: dentalNotes.value,
+    dentalNotes: dentalNotes.value
   }
 }
 
