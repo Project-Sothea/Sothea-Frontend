@@ -68,7 +68,7 @@ async function handleSignIn() {
     return
   }
   try {
-    const { token } = await loginRequest(selectedProfile.value, '')
+    const { token } = await loginRequest(selectedProfile.value)
     login(token)
     await router.push('/patient-directory')
   } catch (error) {
