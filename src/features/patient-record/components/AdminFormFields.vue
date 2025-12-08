@@ -137,16 +137,7 @@ const regDate = computed<string>({
 })
 const queueNo = map('queueNo')
 const isMale = computed(() => props.gender === 'M')
-const pregnant = computed({
-  get: () => (isMale.value ? false : props.form.pregnant.value),
-  set: (v: boolean | null) => {
-    if (isMale.value) {
-      props.form.pregnant.value = false
-      return
-    }
-    props.form.pregnant.value = v
-  }
-})
+const pregnant = map('pregnant')
 const lastMenstrualPeriod = computed<string | null>({
   get() {
     const v = isMale.value ? null : (props.form.lastMenstrualPeriod.value as Date | null)

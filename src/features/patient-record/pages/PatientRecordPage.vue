@@ -31,6 +31,7 @@
             :patientData="patient"
             :age="age"
             :canDeleteVisit="visitCount > 1"
+            :pendingPatientPayload="pendingPatientPayload || undefined"
             @capturePatientPayload="capturePatientPayload"
             @patientCreated="handlePatientCreated"
             @patientUpdated="handlePatientUpdated"
@@ -358,6 +359,7 @@ async function handlePatientVisitCreated(evt: any) {
   if (id.value || evt.id) {
     await loadPatientMeta(String(id.value || evt.id))
   }
+  pendingPatientPayload.value = null
   await router.push(`/patient/${evt.id}/${evt.vid}`)
   activeSection.value = 'admin'
 }
@@ -415,7 +417,11 @@ function handleReloadConfirm() {
 }
 
 onMounted(() => {
-  if (!isCreateMode.value) loadPatientData()
+  if (!isCreateMode.value) {
+    loadPatientData()
+  } else {
+    activeSection.value = 'patient'
+  }
 })
 
 watch(
@@ -442,6 +448,8 @@ watch(isCreateMode, (isCreate) => {
     queueNo.value = ''
     patientMeta.value = null
     visitCount.value = 0
+    pendingPatientPayload.value = null
+    activeSection.value = 'patient'
   }
 })
 
