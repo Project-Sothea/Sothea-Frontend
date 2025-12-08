@@ -43,7 +43,7 @@
 
         <div class="px-5 py-4 text-sm text-gray-900">
           <span class="font-semibold">Drug Allergies:</span>
-          <span class="ml-1">{{ patientData?.patientdetails?.drugAllergies ?? 'No Data' }}</span>
+          <span class="ml-1">{{ patientData?.patientDetails?.drugAllergies ?? 'No Data' }}</span>
         </div>
         <div class="px-5 text-sm text-gray-900">
           <span class="font-semibold">Diagnosis:</span>

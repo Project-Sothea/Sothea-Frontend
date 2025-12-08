@@ -23,14 +23,14 @@ export async function createPatient(
   if (photoFile) {
     const fd = new FormData()
     fd.append(
-      'patientdetails',
+      'patient_details',
       JSON.stringify(snakecaseKeys(patient as unknown as Record<string, unknown>, { deep: true }))
     )
     fd.append('photo', photoFile)
     const { data } = await http.post<CreatePatientResponse>('/patient', fd)
     return data
   }
-  const { data } = await http.post<CreatePatientResponse>('/patient', { patientdetails: patient })
+  const { data } = await http.post<CreatePatientResponse>('/patient', { patientDetails: patient })
   return data
 }
 
@@ -42,14 +42,14 @@ export async function updatePatient(
   if (photoFile) {
     const fd = new FormData()
     fd.append(
-      'patientdetails',
+      'patient_details',
       JSON.stringify(snakecaseKeys(patient as unknown as Record<string, unknown>, { deep: true }))
     )
     fd.append('photo', photoFile)
     await http.put(`/patient/${patientId}`, fd)
     return
   }
-  await http.put(`/patient/${patientId}`, { patientdetails: patient })
+  await http.put(`/patient/${patientId}`, { patientDetails: patient })
 }
 
 export async function deletePatient(patientId: string | number): Promise<void> {
