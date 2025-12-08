@@ -16,11 +16,11 @@
 
         <!-- pill-style toggle -->
         <div class="space-x-2">
-          <button :class="tab === 'batches' ? activeBtn : inactiveBtn" @click="tab = 'batches'">
-            All&nbsp;Batches
-          </button>
           <button :class="tab === 'drugs' ? activeBtn : inactiveBtn" @click="tab = 'drugs'">
             By&nbsp;Drug
+          </button>
+          <button :class="tab === 'batches' ? activeBtn : inactiveBtn" @click="tab = 'batches'">
+            All&nbsp;Batches
           </button>
         </div>
       </div>
@@ -127,7 +127,7 @@ import DrugLabel from '../components/DrugLabel.vue'
 import { fmtDate, fmtDrugName } from '../types/Util'
 
 // ---------------- state ----------------
-const tab = ref<'batches' | 'drugs'>('batches')
+const tab = ref<'batches' | 'drugs'>('drugs')
 
 // raw data
 const drugs = ref<DrugView[]>([])
@@ -230,6 +230,12 @@ const drugRows = computed(() => {
         r.earliestExpiryMs == null ? '–' : new Date(r.earliestExpiryMs).toLocaleDateString('en-SG')
     }))
     .sort((a, b) => {
+      const codeA = a.drug.drugCode
+      const codeB = b.drug.drugCode
+      // Sort by numeric drugCode first (null/undefined go last), then by name
+      if (codeA != null && codeB != null && codeA !== codeB) return codeA - codeB
+      if (codeA == null && codeB != null) return 1
+      if (codeA != null && codeB == null) return -1
       const nameA = fmtDrugName(a.drug)
       const nameB = fmtDrugName(b.drug)
       return nameA.localeCompare(nameB)

@@ -73,9 +73,7 @@
             <!-- Locations -->
             <div class="space-y-4">
               <div class="flex items-center justify-between">
-                <h4 class="text-sm font-semibold text-gray-700">
-                  Locations <span class="text-red-600">*</span>
-                </h4>
+                <h4 class="text-sm font-semibold text-gray-700">Locations</h4>
                 <button
                   type="button"
                   class="px-3 py-1 text-sm rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
@@ -122,7 +120,6 @@
                   <div class="col-span-3 sm:col-span-1">
                     <button
                       type="button"
-                      v-if="form.locations.length > 1"
                       class="w-full h-[42px] mt-1 px-1 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors flex items-center justify-center text-sm"
                       @click="removeLocation(idx)"
                       title="Remove location"
@@ -222,17 +219,16 @@ function addLocation() {
 }
 
 function removeLocation(idx: number) {
-  if (form.value.locations.length > 1) {
-    form.value.locations.splice(idx, 1)
-    // Remove errors for this location
-    const newErrors: Record<number, Record<string, string>> = {}
-    Object.keys(locationErrors.value).forEach((key) => {
-      const k = Number(key)
-      if (k < idx) newErrors[k] = locationErrors.value[k]
-      else if (k > idx) newErrors[k - 1] = locationErrors.value[k]
-    })
-    locationErrors.value = newErrors
-  }
+  if (form.value.locations.length === 0) return
+  form.value.locations.splice(idx, 1)
+  // Remove errors for this location
+  const newErrors: Record<number, Record<string, string>> = {}
+  Object.keys(locationErrors.value).forEach((key) => {
+    const k = Number(key)
+    if (k < idx) newErrors[k] = locationErrors.value[k]
+    else if (k > idx) newErrors[k - 1] = locationErrors.value[k]
+  })
+  locationErrors.value = newErrors
 }
 
 function validate(): boolean {
@@ -260,45 +256,42 @@ function validate(): boolean {
     }
   }
 
-  // Validate locations
-  if (form.value.locations.length === 0) {
-    errors.value.locations = 'Add at least one location.'
-    valid = false
-  }
+  // Validate locations only if provided
+  if (form.value.locations.length > 0) {
+    const seenLocs = new Map<string, number[]>()
+    form.value.locations.forEach((loc, idx) => {
+      const locErrors: Record<string, string> = {}
+      const name = (loc.location ?? '').trim()
 
-  const seenLocs = new Map<string, number[]>()
-  form.value.locations.forEach((loc, idx) => {
-    const locErrors: Record<string, string> = {}
-    const name = (loc.location ?? '').trim()
+      if (!name) {
+        locErrors.location = 'Location is required.'
+        valid = false
+      } else {
+        const lk = name.toLowerCase()
+        if (!seenLocs.has(lk)) seenLocs.set(lk, [])
+        seenLocs.get(lk)!.push(idx)
+      }
 
-    if (!name) {
-      locErrors.location = 'Location is required.'
-      valid = false
-    } else {
-      const lk = name.toLowerCase()
-      if (!seenLocs.has(lk)) seenLocs.set(lk, [])
-      seenLocs.get(lk)!.push(idx)
-    }
+      const q = Number(loc.quantity)
+      if (!Number.isFinite(q) || q <= 0) {
+        locErrors.quantity = 'Quantity must be greater than 0.'
+        valid = false
+      }
 
-    const q = Number(loc.quantity)
-    if (!Number.isFinite(q) || q <= 0) {
-      locErrors.quantity = 'Quantity must be greater than 0.'
-      valid = false
-    }
+      if (Object.keys(locErrors).length > 0) {
+        locationErrors.value[idx] = locErrors
+      }
+    })
 
-    if (Object.keys(locErrors).length > 0) {
-      locationErrors.value[idx] = locErrors
-    }
-  })
-
-  // Check for duplicate locations
-  for (const [, idxs] of seenLocs) {
-    if (idxs.length > 1) {
-      idxs.forEach((i) => {
-        if (!locationErrors.value[i]) locationErrors.value[i] = {}
-        locationErrors.value[i].location = 'Duplicate location in this batch.'
-      })
-      valid = false
+    // Check for duplicate locations
+    for (const [, idxs] of seenLocs) {
+      if (idxs.length > 1) {
+        idxs.forEach((i) => {
+          if (!locationErrors.value[i]) locationErrors.value[i] = {}
+          locationErrors.value[i].location = 'Duplicate location in this batch.'
+        })
+        valid = false
+      }
     }
   }
 
@@ -328,7 +321,8 @@ async function handleSubmit() {
     emit('close')
   } catch (err: any) {
     console.error(err)
-    toast.error(err?.response?.data?.error ?? 'Failed to create batch')
+    const human = err?.response?.data?.error
+    toast.error(human || 'Failed to create batch')
   } finally {
     saving.value = false
   }
