@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 // Profile definitions
 export const profiles = [
   { username: 'admin', name: 'Admin' },
@@ -20,3 +21,13 @@ export const profiles = [
   { username: 'dr_celeste', name: 'Dr Celeste' },
   { username: 'dr_barbara', name: 'Dr Barbara' }
 ]
+=======
+export interface LoginResponse {
+  token: string
+}
+
+export interface User {
+  username: string
+  name: string
+}
+>>>>>>> Stashed changes
