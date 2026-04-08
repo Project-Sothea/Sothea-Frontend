@@ -22,6 +22,10 @@ export interface CreatePatientWithVisitResponse {
   vid: number
 }
 
+/**
+ * Create a new patient record. If a photo file is provided the request is sent
+ * as multipart/form-data; otherwise a plain JSON body is used.
+ */
 export async function createPatient(
   patient: PatientPayload,
   photoFile?: File | null
@@ -40,6 +44,10 @@ export async function createPatient(
   return data
 }
 
+/**
+ * Create a new patient together with their first visit in a single request.
+ * Sends multipart/form-data when a photo is provided.
+ */
 export async function createPatientWithVisit(
   patient: PatientPayload,
   admin: AdminPayload,
@@ -68,6 +76,7 @@ export async function createPatientWithVisit(
   return data
 }
 
+/** Update an existing patient's details. Sends multipart/form-data when a photo is provided. */
 export async function updatePatient(
   patientId: string | number,
   patient: PatientPayload,
@@ -86,6 +95,7 @@ export async function updatePatient(
   await http.put(`/patient/${patientId}`, patient )
 }
 
+/** Permanently delete a patient and all associated data. */
 export async function deletePatient(patientId: string | number): Promise<void> {
   await http.delete(`/patient/${patientId}`)
 }

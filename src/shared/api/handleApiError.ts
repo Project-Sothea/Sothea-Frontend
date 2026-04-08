@@ -1,5 +1,9 @@
 import { AxiosError } from 'axios'
 
+/**
+ * Converts an unknown thrown value into a human-readable error message.
+ * Handles Axios errors by inspecting response, request, and setup failure states.
+ */
 export function handleApiError(error: unknown): string {
   if (isAxiosError(error)) {
     const err = error as AxiosError<any>

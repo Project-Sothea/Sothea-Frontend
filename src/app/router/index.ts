@@ -38,6 +38,8 @@ const router = createRouter({
   routes
 })
 
+// Global auth guard: unauthenticated users are redirected to sign-in;
+// authenticated users attempting to visit sign-in are redirected to the directory.
 router.beforeEach((to) => {
   const { isAuthenticated } = useAuth()
   if (!isAuthenticated.value && to.name !== 'sign-in') {

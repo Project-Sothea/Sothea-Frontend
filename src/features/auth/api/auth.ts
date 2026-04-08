@@ -1,10 +1,13 @@
 import { http } from '@shared/api/http'
 
-interface LoginResponse {
-  token: string
+/** Send a login request and return the server response (includes auth token). */
+export async function loginRequest(username: string) {
+  const { data } = await http.post<LoginResponse>('/login', { username })
+  return data
 }
 
-export async function loginRequest(username: string): Promise<LoginResponse> {
-  const { data } = await http.post<LoginResponse>('/login', { username })
+/** Fetch the list of all registered users. */
+export async function listUsers() {
+  const { data } = await http.get<User[]>('/users')
   return data
 }
