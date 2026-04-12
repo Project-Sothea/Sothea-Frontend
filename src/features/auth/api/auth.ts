@@ -1,4 +1,5 @@
 import { http } from '@shared/api/http'
+import type { LoginResponse, User } from '../types/Profiles'
 
 /** Send a login request and return the server response (includes auth token). */
 export async function loginRequest(username: string) {
