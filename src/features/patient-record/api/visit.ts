@@ -24,7 +24,11 @@ export interface createPatientVisitResponse {
   vid: number
 }
 
-// Accept either AdminPayload (used when creating a visit) or Admin (built from existing form) to avoid casts at call sites
+/**
+ * Create a new visit for an existing patient.
+ * Accepts either `AdminPayload` (from a create form) or `Admin` (from an existing record)
+ * to avoid casts at call sites.
+ */
 export async function createPatientVisit(
   patientId: string | number,
   admin: AdminPayload | Admin
@@ -33,6 +37,10 @@ export async function createPatientVisit(
   return data
 }
 
+/**
+ * Partially update a patient visit with an arbitrary body shape.
+ * Prefer the typed helpers (`updateAdmin`, `updateSection`) over calling this directly.
+ */
 export async function updatePatientVisit<T = unknown>(
   patientId: string | number,
   visitId: string | number,
@@ -42,6 +50,7 @@ export async function updatePatientVisit<T = unknown>(
   return data
 }
 
+/** Update only the admin section of an existing visit. */
 export async function updateAdmin(
   patientId: string | number,
   visitId: string | number,
@@ -50,17 +59,19 @@ export async function updateAdmin(
   await updatePatientVisit(patientId, visitId, { admin })
 }
 
+/** Fetch a complete patient record (all sections) for the given patient and visit IDs. */
 export async function fetchPatientRecord(patientId: string, visitId: string): Promise<Patient> {
   const { data } = await http.get<Patient>(`/patient/${patientId}/${visitId}`)
   return data
 }
 
+/** Delete a specific visit and all its associated section data. */
 export async function deletePatientVisit(patientId: string, visitId: string): Promise<void> {
   await http.delete(`/patient/${patientId}/${visitId}`)
 }
 
-// Generic section updater (e.g., vitalStats, visualAcuity, etc.)
-// Section name -> payload type mapping
+// Generic section updater — maps each section name to its payload type so
+// updateSection() can be called with full type safety.
 export type SectionPayloadMap = {
   vitalStatistics: VitalStatistics
   visualAcuity: VisualAcuity
@@ -75,6 +86,10 @@ export type SectionPayloadMap = {
 }
 export type SectionName = keyof SectionPayloadMap
 
+/**
+ * Update a named section of a visit (e.g. `vitalStatistics`, `dental`).
+ * The section name is used as the key in the PATCH body.
+ */
 export async function updateSection<K extends SectionName>(
   patientId: string | number,
   visitId: string | number,

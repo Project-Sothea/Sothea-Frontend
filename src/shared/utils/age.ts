@@ -1,3 +1,7 @@
+/**
+ * Calculate a person's age in whole years from their date of birth.
+ * Returns null if the input is missing or cannot be parsed as a valid date.
+ */
 export function calculateAge(dobInput: Date | string | null | undefined): number | null {
   if (!dobInput) return null
   const dob = dobInput instanceof Date ? dobInput : new Date(dobInput)
