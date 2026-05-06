@@ -34,6 +34,11 @@ function normalizeDate(input: unknown, fallback: Date | null = null): Date | nul
   return fallback
 }
 
+/**
+ * Composable that manages reactive state and validation for the visit admin section form
+ * (registration date, queue number, pregnant status, etc.).
+ * Mirrors the pattern of `usePatientForm` for consistency.
+ */
 export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
   const { initial = null, onError } = options
 

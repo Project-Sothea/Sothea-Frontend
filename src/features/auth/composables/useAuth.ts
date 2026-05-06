@@ -1,5 +1,13 @@
 import { ref, computed } from 'vue'
 
+/**
+ * Composable for managing authentication state.
+ *
+ * The JWT token is persisted in sessionStorage so it survives page refreshes
+ * within the same tab but is cleared when the tab is closed. The `http`
+ * interceptor in `src/shared/api/http.ts` reads `authToken` from sessionStorage
+ * and attaches it as the `Authorization: Bearer` header automatically.
+ */
 export function useAuth() {
   // Token Management
   const token = ref<string | null>(sessionStorage.getItem('authToken'))

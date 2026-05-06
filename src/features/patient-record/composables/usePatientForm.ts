@@ -4,7 +4,9 @@ import type { PatientPayload } from '@patient-record/api/patient'
 import { calculateAge } from '@shared/utils/age'
 
 export interface UsePatientFormOptions {
+  /** Existing patient data to pre-populate the form in edit mode. */
   initial?: Partial<PatientDetails> | null
+  /** Callback invoked with the first failing validation message (e.g. show a toast). */
   onError?: (message: string) => void
 }
 
@@ -35,6 +37,11 @@ function normalizeDate(input: unknown, fallback: Date | null = null): Date | nul
   return fallback
 }
 
+/**
+ * Composable that manages reactive state and validation for the patient details form.
+ * Provides `buildPayload()` to construct a submit-ready `PatientPayload` and `reset()`
+ * to re-populate the form from new server data.
+ */
 export function usePatientForm(options: UsePatientFormOptions = {}): UsePatientForm {
   const { initial = null, onError } = options
 

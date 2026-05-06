@@ -25,8 +25,8 @@
               />
             </svg>
           </span>
-          <select v-model="selectedProfile" class="input-style" required>
-            <option value="" disabled>Select a profile...</option>
+          <select v-model="selectedProfile" class="input-style" required :disabled="loading">
+            <option value="" disabled>{{ loading ? 'Loading profiles...' : 'Select a profile...' }}</option>
             <option v-for="profile in profiles" :key="profile.username" :value="profile.username">
               {{ profile.name }}
             </option>
@@ -45,13 +45,13 @@
 
 <script setup lang="ts">
 // Imports
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification'
 import 'vue-toast-notification/dist/theme-sugar.css'
-import { loginRequest } from '@features/auth/api/auth'
+import { loginRequest, listUsers } from '@features/auth/api/auth'
 import { useAuth } from '@features/auth/composables/useAuth'
-import { profiles } from '../types/Profiles'
+import type { User } from '../types/Profiles'
 
 // Composables
 const toast = useToast()
@@ -60,6 +60,21 @@ const { login } = useAuth()
 
 // Reactive State
 const selectedProfile = ref('')
+const profiles = ref<User[]>([])
+const loading = ref(false)
+
+// Load profiles from API
+async function loadProfiles() {
+  loading.value = true
+  try {
+    profiles.value = await listUsers()
+  } catch (error) {
+    console.error(error)
+    toast.error('Failed to load profiles')
+  } finally {
+    loading.value = false
+  }
+}
 
 // Handlers
 async function handleSignIn() {
@@ -76,6 +91,9 @@ async function handleSignIn() {
     toast.error('Sign in failed')
   }
 }
+
+// Load profiles on mount
+onMounted(loadProfiles)
 </script>
 
 <style scoped>
