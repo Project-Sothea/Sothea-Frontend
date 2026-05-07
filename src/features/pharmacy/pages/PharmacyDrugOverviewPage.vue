@@ -378,8 +378,8 @@ type LocationRow = DrugBatchLocation & {
   expiryDate: ISODateString
 }
 const locationRows = computed<LocationRow[]>(() =>
-  (batches.value ?? []).flatMap((b) =>
-    (b.batchLocations ?? []).map((bL) => ({
+  (batches.value ?? []).flatMap((b: BatchDetail) =>
+    (b.batchLocations ?? []).map((bL: DrugBatchLocation) => ({
       ...bL,
       batchNumber: b.batchNumber,
       expiryDate: b.expiryDate
