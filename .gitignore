@@ -34,3 +34,4 @@ coverage
 /playwright/.cache/
 
 .vscode
+.env
