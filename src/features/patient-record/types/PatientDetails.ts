@@ -6,6 +6,6 @@ export default interface PatientDetails {
   dob: Date
   gender: 'M' | 'F'
   village: string
-  contactNo: string
+  contactNo: string | null
   drugAllergies: string | null
 }
