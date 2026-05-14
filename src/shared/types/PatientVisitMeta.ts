@@ -13,7 +13,7 @@ export default interface PatientVisitMeta {
   khmerName: string
   gender: 'M' | 'F'
   village: string
-  contactNo: string
+  contactNo: string | undefined
   drugAllergies: string | undefined
   /** Whether the patient was referred to the Infectious Disease station */
   sentToId: boolean

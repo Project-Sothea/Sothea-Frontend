@@ -17,7 +17,7 @@ export interface UsePatientForm {
   gender: Ref<'M' | 'F' | ''>
   village: Ref<string>
   familyGroup: Ref<string>
-  contactNo: Ref<string>
+  contactNo: Ref<string | null>
   drugAllergies: Ref<string | null>
   selectedPhoto: Ref<string>
   photoFile: Ref<File | null>
@@ -51,7 +51,7 @@ export function usePatientForm(options: UsePatientFormOptions = {}): UsePatientF
   const gender = ref<'M' | 'F' | ''>((initial?.gender as any) ?? '')
   const village = ref(initial?.village ?? '')
   const familyGroup = ref(initial?.familyGroup ?? '')
-  const contactNo = ref(initial?.contactNo ?? '')
+  const contactNo = ref<string | null>(initial?.contactNo ?? '')
   const drugAllergies = ref<string | null>(initial?.drugAllergies ?? '')
   const selectedPhoto = ref('')
   const photoFile = ref<File | null>(null)
@@ -85,7 +85,7 @@ export function usePatientForm(options: UsePatientFormOptions = {}): UsePatientF
       dob: dob.value,
       gender: gender.value || '',
       village: village.value.trim(),
-      contactNo: contactNo.value.trim(),
+      contactNo: (contactNo.value || '').trim() || null,
       drugAllergies: (drugAllergies.value || '').trim() || null
     }
   }

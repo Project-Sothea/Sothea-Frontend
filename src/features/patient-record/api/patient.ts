@@ -9,7 +9,7 @@ export interface PatientPayload {
   dob: Date
   gender: string
   village: string
-  contactNo: string
+  contactNo: string | null
   drugAllergies: string | null
 }
 
