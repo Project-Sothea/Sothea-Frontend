@@ -3,46 +3,30 @@
     <div class="flex flex-col rounded-lg w-3/4 max-h-fit border border-gray-300 p-10">
       <h1>Admin Details</h1>
       <br />
-      <AdminFormFields
-        :form="formRef"
-        :disabled="!isEditing && !isAdd"
-        :maxDate="maxDate"
-        :gender="patientGender"
-      />
+      <AdminFormFields :form="formRef" :disabled="!isEditing && !isAdd" :maxDate="maxDate" :gender="patientGender" />
 
       <!-- Save Button -->
       <div class="flex flex-row-reverse w-full mt-5">
-        <button
-          v-if="isAdd"
-          @click="submitData"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
-        >
+        <button v-if="isAdd" @click="submitData"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
           Save
         </button>
       </div>
       <!-- Edit Button -->
       <div class="flex flex-row-reverse w-full mt-5">
-        <button
-          v-if="!isEditing && !isAdd"
-          @click="toggleEdit"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
-        >
+        <button v-if="!isEditing && !isAdd" @click="toggleEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
           Edit
         </button>
       </div>
       <!-- Save Edits Button -->
       <div class="flex flex-row-reverse w-full mt-5 gap-3" v-if="isEditing && !isAdd">
-        <button
-          @click="saveChanges"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none"
-        >
+        <button @click="saveChanges"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-[#3f51b5] hover:bg-[#3f51b5] hover:text-white border-2 border-[#3f51b5] focus:outline-none">
           Save Edits
         </button>
-        <button
-          type="button"
-          @click="discardEdit"
-          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none"
-        >
+        <button type="button" @click="discardEdit"
+          class="px-5 py-2 transition ease-in duration-200 rounded-lg text-sm text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-600 focus:outline-none">
           Discard Changes
         </button>
       </div>
@@ -225,7 +209,8 @@ async function submitData() {
           regDate: regDate.value ? formatDateISO(regDate.value as any) : null,
           queueNo: queueNo.value
         })
-      }
+      },
+      showToastOnSuccess: false
     })
   }
 }

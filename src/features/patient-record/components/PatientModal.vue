@@ -199,7 +199,8 @@ async function saveChanges() {
         patientDetails: updated,
         age: ageComputed.value
       })
-    }
+    },
+    showToastOnSuccess: false
   })
 }
 
