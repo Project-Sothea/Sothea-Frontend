@@ -416,11 +416,11 @@ function buildPayload(): VitalStatistics | null {
     systolicBp2: systolicBp2.value || null,
     diastolicBp1: diastolicBp1.value || null,
     diastolicBp2: diastolicBp2.value || null,
-    averageSystolicBP: avgSystolicBP.value,
-    averageDiastolicBP: avgDiastolicBP.value,
+    avgSystolicBP: avgSystolicBP.value,
+    avgDiastolicBP: avgDiastolicBP.value,
     hr1: hr1.value!,
     hr2: hr2.value!,
-    averageHR: avgHR.value!,
+    avgHR: avgHR.value!,
     randBloodGlucoseMmolL: randBloodGlucoseMmolL.value || null,
     icopeHighBp: icopeHighBp.value || null
   }
@@ -440,7 +440,8 @@ async function submitData() {
       // After saving, the form already has the correct values in memory
       // We don't need to reload from parent - the form state is the source of truth
       // The initialized flag prevents re-initialization from stale patientData
-    }
+    },
+    showToastOnSuccess: false
   })
 }
 

@@ -14,15 +14,15 @@ export default interface VitalStatistics {
   /** Second diastolic blood pressure reading (mmHg) */
   diastolicBp2: number | null
   /** Average of systolicBp1 and systolicBp2 */
-  averageSystolicBP: number | null
+  avgSystolicBP: number | null
   /** Average of diastolicBp1 and diastolicBp2 */
-  averageDiastolicBP: number | null
+  avgDiastolicBP: number | null
   /** First heart rate reading (bpm) */
   hr1: number
   /** Second heart rate reading (bpm) */
   hr2: number
   /** Average of hr1 and hr2 */
-  averageHR: number
+  avgHR: number
   /** Random blood glucose level (mmol/L) */
   randBloodGlucoseMmolL: number | null
   /** ICOPE flag: patient flagged for high blood pressure follow-up */
