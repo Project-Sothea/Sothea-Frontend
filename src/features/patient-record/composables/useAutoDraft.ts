@@ -53,6 +53,7 @@ export interface UseAutoDraftReturn<TFormData> {
     buildPayload: () => TFormData | null
     update: () => Promise<void>
     onSuccess?: () => void
+    showToastOnSuccess?: boolean
   }) => Promise<void>
   /** Discard changes and restore to server data */
   discardChanges: (opts: { onDiscard: () => void; onSuccess?: () => void }) => void
@@ -308,6 +309,7 @@ export function useAutoDraft<TFormData>(
     buildPayload: () => TFormData | null
     update: () => Promise<void>
     onSuccess?: () => void
+    showToastOnSuccess?: boolean
   }): Promise<void> {
     if (isSubmitting.value) return
     const payload = opts.buildPayload()
@@ -315,7 +317,9 @@ export function useAutoDraft<TFormData>(
     isSubmitting.value = true
     try {
       await opts.update()
-      toast.success('Saved successfully!')
+      if (opts.showToastOnSuccess !== false) {
+        toast.success('Saved successfully!')
+      }
       setEditing(false)
       clearDraft()
       opts.onSuccess?.()

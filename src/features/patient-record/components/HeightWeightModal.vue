@@ -452,7 +452,8 @@ async function submitData() {
     onSuccess: () => {
       toast.success('Height and Weight saved successfully!')
       // Draft is automatically cleared by save()
-    }
+    },
+    showToastOnSuccess: false
   })
 }
 

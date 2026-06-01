@@ -362,7 +362,8 @@ async function submitData() {
       // After saving, the form already has the correct values in memory
       // We don't need to reload from parent - the form state is the source of truth
       // The initialized flag prevents re-initialization from stale patientData
-    }
+    },
+    showToastOnSuccess: false
   })
 }
 
