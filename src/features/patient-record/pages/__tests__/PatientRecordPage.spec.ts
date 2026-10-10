@@ -111,8 +111,8 @@ describe('patient and visit form scope', () => {
     vi.mocked(fetchPatientRecord).mockImplementation((_, vid) =>
       vid === '1'
         ? new Promise((resolve) => {
-            finishOld = resolve
-          })
+          finishOld = resolve
+        })
         : Promise.resolve(record('new visit'))
     )
     const { router } = await mountPage()
