@@ -430,8 +430,6 @@ function buildPayload(): HeightAndWeight | null {
   return {
     height: height.value!,
     weight: weight.value!,
-    bmi: bmi.value!,
-    bmiAnalysis: bmiAnalysis.value!,
     paedsHeight: paedsHeight.value || null,
     paedsWeight: paedsWeight.value || null,
 
