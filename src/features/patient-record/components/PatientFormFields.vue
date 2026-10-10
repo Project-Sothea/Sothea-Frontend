@@ -1,4 +1,8 @@
 <template>
+  <p class="text-sm text-red-500 hidden data-[visible=true]:block" :data-visible="age !== null && age <= 16">
+    PAEDS required
+  </p>
+
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
     <div class="col-span-1 space-y-3 lg:col-span-2">
       <!-- Row 1: Name, Khmer Name -->
@@ -51,7 +55,8 @@
               :disabled="disabled"
               type="date"
               :max="maxDate"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+              :data-warning="age !== null && age <= 16"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2 data-[warning=true]:bg-red-200"
             />
           </div>
         </div>
@@ -201,6 +206,7 @@
 import { computed } from 'vue'
 import { usePatientForm } from '@patient-record/composables/usePatientForm'
 import { formatDateISO } from '@shared/utils/date'
+import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
   form: ReturnType<typeof usePatientForm>
@@ -231,6 +237,8 @@ const dob = computed<string | null>({
     props.form.setDob(dateOnly ? new Date(dateOnly) : props.form.dob.value)
   }
 })
+const age = computed(() => calculateAge(dob.value))
+console.log('age', age.value)
 const gender = map('gender')
 const village = map('village')
 const familyGroup = map('familyGroup')

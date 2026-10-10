@@ -6,9 +6,15 @@
         :activeSection="activeSection"
         :id="isCreateMode ? undefined : id || undefined"
         :name="isCreateMode ? undefined : name"
-        :age="isCreateMode ? undefined : age || undefined"
+        :age="isCreateMode ? undefined : (age ?? undefined)"
         :isAdd="isCreateMode"
         :canDeleteVisit="visitCount > 1"
+        :fallRisk="isCreateMode ? null : patient?.fallRisk"
+        :visualAcuity="isCreateMode ? null : patient?.visualAcuity"
+        :temperature="isCreateMode ? null : patient?.vitalStatistics?.temperature"
+        :patientDetails="isCreateMode ? null : patient?.patientDetails"
+        :heightAndWeight="isCreateMode ? null : patient?.heightAndWeight"
+        :visitDate="isCreateMode ? null : patient?.admin?.regDate"
         @update:activeSection="setActiveSection"
         @openTryDeleteVisitModal="tryDeleteVisit = true"
         @openTryDeletePatientModal="tryDeletePatient = true"
@@ -22,9 +28,11 @@
           @openModal="openRecords"
           @refresh="tryReload = true"
         />
-        <keep-alive>
+        <keep-alive :key="recordScope">
           <component
+            v-if="isCreateMode || patient"
             :is="activeComponent"
+            :key="`${recordScope}:${activeSection}`"
             :isAdd="isCreateMode"
             :patientId="String(id || createdPatientId || '')"
             :patientVid="String(vid || createdVisitVid || '')"
@@ -37,6 +45,11 @@
             @patientUpdated="handlePatientUpdated"
             @patientVisitCreated="handlePatientVisitCreated"
             @adminUpdated="handleAdminUpdated"
+            @fallRiskUpdated="patient && (patient.fallRisk = $event)"
+            @vitalStatisticsUpdated="patient && (patient.vitalStatistics = $event)"
+            @heightAndWeightUpdated="patient && (patient.heightAndWeight = $event)"
+            @visualAcuityUpdated="patient && (patient.visualAcuity = $event)"
+            @doctorsConsultationUpdated="patient && (patient.doctorsConsultation = $event)"
             @reload="loadPatientData"
           />
         </keep-alive>
@@ -179,7 +192,13 @@ const id = ref<string | null>((route.params.id as string) || null)
 const vid = ref<string | null>((route.params.vid as string) || null)
 const createdPatientId = ref<string | null>(null)
 const createdVisitVid = ref<string | null>(null)
-const pendingPatientPayload = ref<{ patient?: PatientDetails; photoFile?: File | null } | null>(null)
+const recordScope = computed(
+  () =>
+    `${id.value || createdPatientId.value || 'new'}:${vid.value || createdVisitVid.value || 'new'}`
+)
+const pendingPatientPayload = ref<{ patient?: PatientDetails; photoFile?: File | null } | null>(
+  null
+)
 
 const activeSection = ref('patient')
 const patient = ref<Patient | null>(null)
@@ -277,10 +296,15 @@ function setActiveSection(section: string) {
   activeSection.value = section
 }
 
+let recordLoadVersion = 0
 async function loadPatientData() {
   if (!id.value || !vid.value) return
+  const loadVersion = ++recordLoadVersion
+  const patientId = id.value
+  const visitId = vid.value
   try {
-    const data = await fetchPatientRecord(id.value, vid.value)
+    const data = await fetchPatientRecord(patientId, visitId)
+    if (loadVersion !== recordLoadVersion || id.value !== patientId || vid.value !== visitId) return
     patient.value = structuredClone(data)
     const admin = patient.value.admin
     const patientInfo = patient.value.patientDetails
@@ -288,8 +312,9 @@ async function loadPatientData() {
     name.value = patientInfo?.name ?? ''
     regDate.value = admin?.regDate ? formatDateForInput(admin.regDate as any) : ''
     queueNo.value = admin?.queueNo ?? ''
-    await loadPatientMeta(id.value)
+    await loadPatientMeta(patientId)
   } catch (e) {
+    if (loadVersion !== recordLoadVersion || id.value !== patientId || vid.value !== visitId) return
     console.error(e)
     toast.error('Failed to load patient data')
   }
@@ -298,9 +323,11 @@ async function loadPatientData() {
 async function loadPatientMeta(pid: string) {
   try {
     const meta = await fetchPatientMeta(pid)
+    if (String(id.value || createdPatientId.value) !== pid) return
     patientMeta.value = meta
     visitCount.value = Object.keys(meta.visits || {}).length
   } catch (e) {
+    if (String(id.value || createdPatientId.value) !== pid) return
     console.error(e)
     patientMeta.value = null
     visitCount.value = 0
@@ -316,7 +343,11 @@ function formatDateForInput(dateInput: string | Date) {
   return `${year}-${month}-${day}`
 }
 
-function handlePatientCreated(evt: { id: string; patientDetails: PatientDetails; age: number | null }) {
+function handlePatientCreated(evt: {
+  id: string
+  patientDetails: PatientDetails
+  age: number | null
+}) {
   createdPatientId.value = evt.id ? String(evt.id) : null
   name.value = evt.patientDetails.name
   age.value = evt.age
@@ -431,6 +462,17 @@ watch(
 
     id.value = (newId as string) ?? null
     vid.value = (newVid as string) ?? null
+    ++recordLoadVersion
+    patient.value = null
+    name.value = ''
+    age.value = null
+    regDate.value = ''
+    queueNo.value = ''
+    patientMeta.value = null
+    visitCount.value = 0
+    createdPatientId.value = null
+    createdVisitVid.value = null
+    pendingPatientPayload.value = null
 
     if (!isCreateMode.value && id.value && vid.value) {
       loadPatientData()

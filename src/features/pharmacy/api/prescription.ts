@@ -16,10 +16,12 @@ export async function getPrescriptionByVisit(patientId: number, vid: number) {
   const { data } = await http.get<Prescription[]>(
     `/prescriptions?patient_id=${patientId}&vid=${vid}`
   )
-  if (data.length != 1) {
-    return null
+  if (data.length > 1) {
+    throw new Error(
+      'Multiple prescriptions exist for this visit. Resolve duplicate records before editing.'
+    )
   }
-  return data[0]
+  return data[0] ?? null
 }
 
 /** Fetch a prescription by its ID. */

@@ -92,7 +92,7 @@ export async function updatePatient(
     await http.put(`/patient/${patientId}`, fd)
     return
   }
-  await http.put(`/patient/${patientId}`, patient )
+  await http.put(`/patient/${patientId}`, patient)
 }
 
 /** Permanently delete a patient and all associated data. */

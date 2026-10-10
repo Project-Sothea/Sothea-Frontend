@@ -13,10 +13,6 @@ export default interface VitalStatistics {
   systolicBp2: number | null
   /** Second diastolic blood pressure reading (mmHg) */
   diastolicBp2: number | null
-  /** Average of systolicBp1 and systolicBp2 */
-  avgSystolicBP: number | null
-  /** Average of diastolicBp1 and diastolicBp2 */
-  avgDiastolicBP: number | null
   /** First heart rate reading (bpm) */
   hr1: number
   /** Second heart rate reading (bpm) */

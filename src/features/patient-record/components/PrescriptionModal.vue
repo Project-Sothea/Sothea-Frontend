@@ -283,7 +283,12 @@ const allPacked = computed(
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────
 onMounted(async () => {
-  await Promise.all([ensureHeader(), loadDrugs()])
+  try {
+    await Promise.all([ensureHeader(), loadDrugs()])
+  } catch (err: any) {
+    toast.error(err?.message ?? 'Failed to load prescription.')
+    return
+  }
 
   // After data is loaded, initialize form draft
   // If draft was restored, it will have already been applied to the refs
@@ -341,7 +346,7 @@ async function refreshRx() {
   const fresh = await getPrescriptionByID(rx.value.id)
   rx.value = fresh
   // Only update header notes if we don't have unsaved changes
-  if (!formDraft.isEditing.value || headerNotes.value === (rx.value.notes ?? '')) {
+  if (!headerNotesEditing.value) {
     headerNotes.value = fresh.notes ?? ''
   }
   // Clear unsaved edits for lines that no longer exist
@@ -359,7 +364,7 @@ async function refreshRx() {
   if (
     draftLines.value.length === 0 &&
     Object.keys(unsavedLineEdits.value).length === 0 &&
-    !formDraft.isEditing.value
+    !headerNotesEditing.value
   ) {
     formDraft.clearDraft()
   }

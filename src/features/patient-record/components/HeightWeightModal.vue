@@ -3,6 +3,10 @@
     <div class="flex items-center justify-center">
       <div class="flex flex-col rounded-lg w-3/4 max-h-fit border border-gray-300 p-10">
         <h1>Height & Weight</h1>
+        <p
+          class="text-sm text-red-500 whitespace-pre-line hidden data-[visible=true]:block"
+          :data-visible="paedsPercentileWarning !== ''"
+        >{{ paedsPercentileWarning }}</p>
         <br />
         <div class="flex flex-col">
           <!-- Row 1 -->
@@ -61,13 +65,12 @@
                 >
               </div>
               <input
-                v-model="paedsHeight"
+                :value="paedsHeight"
+                :data-warning="paedsHeight !== null && (paedsHeight < 3 || paedsHeight > 97)"
                 type="number"
                 placeholder=""
-                class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
-                :disabled="!isEditing"
-                @keydown="preventNegative"
-                min="0"
+                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2 data-[warning=true]:bg-red-200"
+                disabled
               />
             </div>
 
@@ -86,13 +89,12 @@
                 >
               </div>
               <input
-                v-model="paedsWeight"
+                :value="paedsWeight"
+                :data-warning="paedsWeight !== null && (paedsWeight < 3 || paedsWeight > 97)"
                 type="number"
                 placeholder=""
-                class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
-                :disabled="!isEditing"
-                @keydown="preventNegative"
-                min="0"
+                class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-2 disabled:border-gray-2 data-[warning=true]:bg-red-200"
+                disabled
               />
             </div>
           </div>
@@ -296,6 +298,10 @@ import type HeightAndWeight from '@patient-record/types/HeightAndWeight'
 import { updateSection } from '@features/patient-record/api/visit'
 import { useAutoDraft } from '@features/patient-record/composables/useAutoDraft'
 import { calculateAge } from '@shared/utils/age'
+import {
+  calculatePaedsHeightPercentile,
+  calculatePaedsWeightPercentile
+} from '@shared/utils/paeds'
 
 const props = defineProps<{
   patientId: string
@@ -307,11 +313,13 @@ const props = defineProps<{
 
 const toast = useToast()
 
+const emit = defineEmits<{
+  heightAndWeightUpdated: [heightAndWeight: HeightAndWeight]
+}>()
+
 // Form fields
 const height = ref<number | null>(null)
 const weight = ref<number | null>(null)
-const paedsHeight = ref<number | null>(null)
-const paedsWeight = ref<number | null>(null)
 const icopeLostWeightPastMonths = ref<boolean | null>(null)
 const icopeNoDesireToEat = ref<boolean | null>(null)
 
@@ -337,8 +345,6 @@ const formDraft = useAutoDraft<HeightAndWeight>({
   fields: [
     { key: 'height', ref: height },
     { key: 'weight', ref: weight },
-    { key: 'paedsHeight', ref: paedsHeight },
-    { key: 'paedsWeight', ref: paedsWeight },
     { key: 'icopeLostWeightPastMonths', ref: icopeLostWeightPastMonths },
     { key: 'icopeNoDesireToEat', ref: icopeNoDesireToEat }
   ],
@@ -367,6 +373,44 @@ const bmi = computed(() => {
     return +(weight.value / (heightInMeters * heightInMeters)).toFixed(2)
   }
   return null
+})
+
+const paedsHeight = computed(() => {
+  const details = props.patientData?.patientDetails
+  if (!details || height.value == null) return null
+  const percentile = calculatePaedsHeightPercentile(
+    details.dob,
+    details.gender,
+    height.value,
+    props.patientData?.admin?.regDate
+  )
+  return percentile == null ? null : +percentile.toFixed(2)
+})
+
+const paedsWeight = computed(() => {
+  const details = props.patientData?.patientDetails
+  if (!details || weight.value == null) return null
+  const percentile = calculatePaedsWeightPercentile(
+    details.dob,
+    details.gender,
+    weight.value,
+    props.patientData?.admin?.regDate
+  )
+  return percentile == null ? null : +percentile.toFixed(2)
+})
+
+const paedsPercentileWarning = computed(() => {
+  const age = calculatedAge.value
+  if (age == null || age < 0 || age >= 2) return ''
+
+  const warnings: string[] = []
+  const percentiles = [['Height', paedsHeight.value], ['Weight', paedsWeight.value]] as const
+  for (const [label, percentile] of percentiles) {
+    if (percentile == null) continue
+    if (percentile < 15) warnings.push(`${label} is below 15th percentile`)
+    else if (percentile > 85) warnings.push(`${label} is above 85th percentile`)
+  }
+  return warnings.join('\n')
 })
 
 const bmiAnalysis = computed(() => {
@@ -411,14 +455,6 @@ function buildPayload(): HeightAndWeight | null {
     toast.error('Weight cannot be greater than 9999kg')
     return null
   }
-  if (paedsHeight.value && paedsHeight.value > 9999) {
-    toast.error('Paeds: Height % too large')
-    return null
-  }
-  if (paedsWeight.value && paedsWeight.value > 9999) {
-    toast.error('Paeds: Weight % too large')
-    return null
-  }
   if (bmi.value === null) {
     toast.error('Enter height & weight to calculate BMI')
     return null
@@ -430,10 +466,6 @@ function buildPayload(): HeightAndWeight | null {
   return {
     height: height.value!,
     weight: weight.value!,
-    bmi: bmi.value!,
-    bmiAnalysis: bmiAnalysis.value!,
-    paedsHeight: paedsHeight.value || null,
-    paedsWeight: paedsWeight.value || null,
 
     icopeLostWeightPastMonths: icopeLostWeightPastMonths.value!,
     icopeNoDesireToEat: icopeNoDesireToEat.value!
@@ -450,6 +482,7 @@ async function submitData() {
     update: () =>
       updateSection(props.patientId, props.patientVid!, 'heightAndWeight', buildPayload()!),
     onSuccess: () => {
+      emit('heightAndWeightUpdated', buildPayload()!)
       toast.success('Height and Weight saved successfully!')
       // Draft is automatically cleared by save()
     },

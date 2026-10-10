@@ -124,9 +124,21 @@ export function fmtStrength(drug?: DrugView) {
   }
   if (n != null && nu && d != null && du) {
     // liquids/creams: "250 mg/5 mL SYR" or "5% SYR" if displayAsPercentage
-    if (displayAsPercentage) {
-      // Calculate percentage: (n / d) * 100
-      const percentage = (n / d) * 100
+    const mass: Partial<Record<UnitCode, number>> = { mcg: 0.000001, mg: 0.001, g: 1 }
+    const volume: Partial<Record<UnitCode, number>> = { mL: 1, L: 1000 }
+    const numeratorScale = mass[nu] ?? volume[nu]
+    const denominatorScale = mass[du] ?? volume[du]
+    // Percentages support mass/mass, volume/volume and grams per 100 mL.
+    if (
+      displayAsPercentage &&
+      d > 0 &&
+      numeratorScale &&
+      denominatorScale &&
+      !(volume[nu] && mass[du])
+    ) {
+      const percentage = Number(
+        (((n * numeratorScale) / (d * denominatorScale)) * 100).toPrecision(12)
+      )
       return `${percentage}% ${form}`
     }
     return `${n} ${nu} / ${d} ${du} ${form}`
