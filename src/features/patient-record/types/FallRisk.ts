@@ -6,7 +6,6 @@ export default interface FallRisk {
   tandemBalance: number
   gaitSpeedTest: number
   chairStandTest: number
-  fallRiskScore: number
 
   icopeCompleteChairStands: boolean | null
   icopeChairStandsTime: boolean | null

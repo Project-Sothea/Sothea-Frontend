@@ -462,7 +462,6 @@ function buildPayload(): FallRisk | null {
     chairStandTest: chairStandTest.value!,
     icopeCompleteChairStands: icopeCompleteChairStands.value!,
     icopeChairStandsTime: icopeChairStandsTime.value!,
-    fallRiskScore: fallRiskScore.value
   }
 }
 

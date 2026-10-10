@@ -416,8 +416,6 @@ function buildPayload(): VitalStatistics | null {
     systolicBp2: systolicBp2.value || null,
     diastolicBp1: diastolicBp1.value || null,
     diastolicBp2: diastolicBp2.value || null,
-    avgSystolicBP: avgSystolicBP.value,
-    avgDiastolicBP: avgDiastolicBP.value,
     hr1: hr1.value!,
     hr2: hr2.value!,
     avgHR: avgHR.value!,
