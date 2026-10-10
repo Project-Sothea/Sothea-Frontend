@@ -443,6 +443,9 @@ const props = defineProps<{
 }>()
 
 const toast = useToast()
+const emit = defineEmits<{
+  doctorsConsultationUpdated: [consultation: DoctorsConsultation]
+}>()
 
 const well = ref<boolean | null>(null)
 const msk = ref<boolean | null>(null)
@@ -542,15 +545,14 @@ function buildPayload(): DoctorsConsultation | null {
 
 async function submitData() {
   if (!props.patientVid) return toast.error('Missing visit id')
+  const payload = buildPayload()
+  if (!payload) return
   await save({
-    buildPayload,
-    update: () =>
-      updateSection(props.patientId, props.patientVid!, 'doctorsConsultation', buildPayload()!),
+    buildPayload: () => payload,
+    update: () => updateSection(props.patientId, props.patientVid!, 'doctorsConsultation', payload),
     onSuccess: () => {
+      emit('doctorsConsultationUpdated', payload)
       toast.success('Doctors Consultation saved successfully!')
-      // After saving, the form already has the correct values in memory
-      // We don't need to reload from parent - the form state is the source of truth
-      // The initialized flag prevents re-initialization from stale patientData
     },
     showToastOnSuccess: false
   })

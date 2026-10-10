@@ -425,7 +425,7 @@ function buildPayload(): VitalStatistics | null {
     hr2: hr2.value!,
     avgHR: avgHR.value!,
     randBloodGlucoseMmolL: randBloodGlucoseMmolL.value || null,
-    icopeHighBp: icopeHighBp.value || null
+    icopeHighBp: icopeHighBp.value ?? null
   }
 }
 
