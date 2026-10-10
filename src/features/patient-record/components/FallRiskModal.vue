@@ -381,6 +381,10 @@ const props = defineProps<{
 
 const toast = useToast()
 
+const emit = defineEmits<{
+  fallRiskUpdated: [fallRisk: FallRisk]
+}>()
+
 const sideToSideBalance = ref<number | null>(null)
 const semiTandemBalance = ref<number | null>(null)
 const tandemBalance = ref<number | null>(null)
@@ -474,6 +478,7 @@ async function submitData() {
     buildPayload,
     update: () => updateSection(props.patientId, props.patientVid!, 'fallRisk', buildPayload()!),
     onSuccess: () => {
+      emit('fallRiskUpdated', buildPayload()!)
       toast.success('Fall Risk saved successfully!')
       // After saving, the form already has the correct values in memory
       // We don't need to reload from parent - the form state is the source of truth

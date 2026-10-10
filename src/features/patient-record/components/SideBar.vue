@@ -3,7 +3,10 @@
     <div class="flex flex-col items-start justify-start mx-6 mt-5">
       <h2 class="text-sm font-medium text-[#6675c9]">Name: {{ name }}</h2>
       <h2 class="text-sm font-medium text-[#6675c9]">ID: {{ id }}</h2>
-      <h2 class="text-sm font-medium text-[#6675c9]">Age: {{ age }}</h2>
+      <h2 class="flex items-center text-sm font-medium text-[#6675c9]">
+        Age: {{ age }}
+        <WarningIndicator v-if="age != null && age <= 16" class="ml-2" tooltip="PAEDS" />
+      </h2>
     </div>
     <nav class="mt-3 px-6 flex flex-col flex-1">
       <div class="space-y-2 pt-6">
@@ -192,6 +195,11 @@
           >
                 Vital Statistics
               </span>
+          <WarningIndicator
+            v-if="temperature != null && temperature >= 38"
+            class="ml-2"
+            tooltip="High Temperature: Referral to ID needed"
+          />
         </a>
 
         <a
@@ -243,6 +251,11 @@
           >
                 Height and Weight
               </span>
+          <WarningIndicator
+            v-if="heightWeightWarning"
+            class="ml-2"
+            :tooltip="heightWeightWarning"
+          />
         </a>
         <a
           class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
@@ -304,6 +317,11 @@
           >
                 Visual Acuity
               </span>
+          <WarningIndicator
+            v-if="needsKhmerOpticsReferral"
+            class="ml-2"
+            tooltip="Referral to Khmer Optics needed"
+          />
         </a>
 
         <a
@@ -368,6 +386,11 @@
           >
                 Fall Risk
               </span>
+          <WarningIndicator
+            v-if="needsPhysiotherapistReferral"
+            class="ml-2"
+            tooltip="Referral to Physiotherapist needed"
+          />
         </a>
 
         <a
@@ -586,14 +609,73 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+import WarningIndicator from '@shared/ui/WarningIndicator.vue'
+import type FallRisk from '@patient-record/types/FallRisk'
+import type VisualAcuity from '@patient-record/types/VisualAcuity'
+import type HeightAndWeight from '@patient-record/types/HeightAndWeight'
+import type PatientDetails from '@patient-record/types/PatientDetails'
+import {
+  calculatePaedsHeightPercentile,
+  calculatePaedsWeightPercentile
+} from '@shared/utils/paeds'
+
+const props = defineProps<{
   activeSection: string
   name?: string | null
   id?: string | null
   age?: number | null
   isAdd?: boolean
   canDeleteVisit?: boolean
+  fallRisk?: FallRisk | null
+  visualAcuity?: VisualAcuity | null
+  temperature?: number | null
+  patientDetails?: PatientDetails | null
+  heightAndWeight?: HeightAndWeight | null
+  visitDate?: Date | string | null
 }>()
+
+const heightWeightWarning = computed(() => {
+  if (props.age == null || props.age < 0 || props.age >= 2) return ''
+  const details = props.patientDetails
+  const measurements = props.heightAndWeight
+  if (!details || !measurements) return ''
+
+  const percentiles = [
+    ['Height', calculatePaedsHeightPercentile(
+      details.dob, details.gender, measurements.height, props.visitDate
+    )],
+    ['Weight', calculatePaedsWeightPercentile(
+      details.dob, details.gender, measurements.weight, props.visitDate
+    )]
+  ] as const
+  const warnings: string[] = []
+  for (const [label, percentile] of percentiles) {
+    if (percentile == null) continue
+    // Match the percentile displayed in HeightWeightModal.
+    const displayedPercentile = +percentile.toFixed(2)
+    if (displayedPercentile < 15) warnings.push(`${label} is below 15th percentile`)
+    else if (displayedPercentile > 85) warnings.push(`${label} is above 85th percentile`)
+  }
+  return warnings.join('\n')
+})
+
+const needsKhmerOpticsReferral = computed(() => {
+  const visualAcuity = props.visualAcuity
+  if (!visualAcuity) return false
+  return visualAcuity.lEyeVision > 24 || visualAcuity.rEyeVision > 24
+})
+
+const needsPhysiotherapistReferral = computed(() => {
+  if (!props.fallRisk) return false
+  const fallRiskScore =
+    (props.fallRisk.sideToSideBalance ?? 0) +
+    (props.fallRisk.semiTandemBalance ?? 0) +
+    (props.fallRisk.tandemBalance ?? 0) +
+    (props.fallRisk.gaitSpeedTest ?? 0) +
+    (props.fallRisk.chairStandTest ?? 0)
+  return fallRiskScore < 7
+})
 
 const emit = defineEmits<{
   'update:activeSection': [section: string]

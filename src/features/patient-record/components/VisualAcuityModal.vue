@@ -15,8 +15,9 @@
             <div class="relative z-20">
               <select
                 v-model="lEyeVision"
+                :data-warning="lEyeVision != null && lEyeVision > 24"
                 :disabled="!isEditing"
-                class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 data-[warning=true]:bg-red-200 disabled:data-[warning=true]:bg-red-200"
               >
                 <option :value="6">6</option>
                 <option :value="9">9</option>
@@ -28,7 +29,7 @@
                 <option :value="-1">-1</option>
                 <option :value="-2">-2</option>
               </select>
-              <span class="absolute top-1/2 right-4 z-10 -translate-y-1/2">
+              <span class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2">
                 <img src="@/assets/chevrondown.svg" height="20" width="20" />
               </span>
             </div>
@@ -42,8 +43,9 @@
             <div class="relative z-20">
               <select
                 v-model="rEyeVision"
+                :data-warning="rEyeVision != null && rEyeVision > 24"
                 :disabled="!isEditing"
-                class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                class="relative z-20 w-full appearance-none rounded-md border border-stroke bg-transparent py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 data-[warning=true]:bg-red-200 disabled:data-[warning=true]:bg-red-200"
               >
                 <option :value="6">6</option>
                 <option :value="9">9</option>
@@ -55,7 +57,7 @@
                 <option :value="-1">-1</option>
                 <option :value="-2">-2</option>
               </select>
-              <span class="absolute top-1/2 right-4 z-10 -translate-y-1/2">
+              <span class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2">
                 <img src="@/assets/chevrondown.svg" height="20" width="20" />
               </span>
             </div>
@@ -261,6 +263,9 @@ const props = defineProps<{
 }>()
 
 const lEyeVision = ref<number | null>(null)
+const emit = defineEmits<{
+  visualAcuityUpdated: [visualAcuity: VisualAcuity]
+}>()
 const rEyeVision = ref<number | null>(null)
 
 const sentToOpto = ref<boolean | null>(null)
@@ -358,6 +363,7 @@ async function submitData() {
     update: () =>
       updateSection(props.patientId, props.patientVid!, 'visualAcuity', buildPayload()!),
     onSuccess: () => {
+      emit('visualAcuityUpdated', buildPayload()!)
       toast.success('Visual Acuity saved successfully!')
       // After saving, the form already has the correct values in memory
       // We don't need to reload from parent - the form state is the source of truth

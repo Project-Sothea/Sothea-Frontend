@@ -2,6 +2,7 @@
   <div class="flex items-center justify-center">
     <div class="flex flex-col rounded-lg w-3/4 max-h-fit border border-gray-300 p-10">
       <h1>Vital Statistics</h1>
+      <p class="text-sm text-red-500 hidden data-[visible=true]:block" :data-visible="temperature != null && temperature >= 38">High Temperature: Referral to ID needed</p>
       <br />
       <div class="flex flex-col">
         <!-- Row 1 -->
@@ -15,8 +16,9 @@
               v-model="temperature"
               type="number"
               step="0.01"
+              :data-warning="temperature != null && temperature >= 38"
               placeholder="Degree Celsius"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2 data-[warning=true]:bg-red-200"
               :disabled="!isEditing"
               @keydown="preventNegative"
               min="0"
@@ -306,6 +308,9 @@ const props = defineProps<{
 }>()
 
 const temperature = ref<number | null>(null)
+const emit = defineEmits<{
+  vitalStatisticsUpdated: [vitalStatistics: VitalStatistics]
+}>()
 const spo2 = ref<number | null>(null)
 const systolicBp1 = ref<number | null>(null)
 const systolicBp2 = ref<number | null>(null)
@@ -434,6 +439,7 @@ async function submitData() {
     update: () =>
       updateSection(props.patientId, props.patientVid!, 'vitalStatistics', buildPayload()!),
     onSuccess: () => {
+      emit('vitalStatisticsUpdated', buildPayload()!)
       toast.success('Vital Statistics saved successfully!')
       // After saving, the form already has the correct values in memory
       // We don't need to reload from parent - the form state is the source of truth
