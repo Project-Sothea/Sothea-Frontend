@@ -1,4 +1,5 @@
 import type Admin from './Admin'
+import type Referral from './Referral'
 import type PatientDetails from './PatientDetails'
 import type PastMedicalHistory from './PastMedicalHistory'
 import type SocialHistory from './SocialHistory'
@@ -23,4 +24,5 @@ export default interface Patient {
   dental: Dental | null
   doctorsConsultation: DoctorsConsultation | null
   physiotherapy: Physiotherapy | null
+  referral: Referral | null
 }
