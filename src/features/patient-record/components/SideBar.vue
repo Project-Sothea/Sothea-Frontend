@@ -198,7 +198,7 @@
           <WarningIndicator
             v-if="temperature != null && temperature >= 38"
             class="ml-2"
-            tooltip="High Temperature: Referral to ID needed"
+            tooltip="Referral to ID needed: High Temperature"
           />
         </a>
 
@@ -392,7 +392,21 @@
             tooltip="Referral to Physiotherapist needed"
           />
         </a>
-
+        <button
+          type="button"
+          class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full text-left"
+          :class="{
+            'border-l-white bg-[#3f51b5] text-white': activeSection === 'referral',
+            'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'referral'
+          }"
+          @click="setActiveSection('referral')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 3h7v7m0-7L10 14m0-9H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
+          </svg>
+          <span class="ml-3 text-sm font-medium">Referral</span>
+        </button>
+<!--
         <a
           class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
           :class="{
@@ -506,7 +520,7 @@
           >
               Prescription
             </span>
-        </a>
+        </a> -->
 
         <a
           class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
@@ -609,16 +623,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import WarningIndicator from '@shared/ui/WarningIndicator.vue'
 import type FallRisk from '@patient-record/types/FallRisk'
 import type VisualAcuity from '@patient-record/types/VisualAcuity'
 import type HeightAndWeight from '@patient-record/types/HeightAndWeight'
 import type PatientDetails from '@patient-record/types/PatientDetails'
-import {
-  calculatePaedsHeightPercentile,
-  calculatePaedsWeightPercentile
-} from '@shared/utils/paeds'
+import { useReferralWarnings } from '@patient-record/composables/useReferralWarnings'
 
 const props = defineProps<{
   activeSection: string
@@ -635,47 +645,8 @@ const props = defineProps<{
   visitDate?: Date | string | null
 }>()
 
-const heightWeightWarning = computed(() => {
-  if (props.age == null || props.age < 0 || props.age >= 2) return ''
-  const details = props.patientDetails
-  const measurements = props.heightAndWeight
-  if (!details || !measurements) return ''
-
-  const percentiles = [
-    ['Height', calculatePaedsHeightPercentile(
-      details.dob, details.gender, measurements.height, props.visitDate
-    )],
-    ['Weight', calculatePaedsWeightPercentile(
-      details.dob, details.gender, measurements.weight, props.visitDate
-    )]
-  ] as const
-  const warnings: string[] = []
-  for (const [label, percentile] of percentiles) {
-    if (percentile == null) continue
-    // Match the percentile displayed in HeightWeightModal.
-    const displayedPercentile = +percentile.toFixed(2)
-    if (displayedPercentile < 15) warnings.push(`${label} is below 15th percentile`)
-    else if (displayedPercentile > 85) warnings.push(`${label} is above 85th percentile`)
-  }
-  return warnings.join('\n')
-})
-
-const needsKhmerOpticsReferral = computed(() => {
-  const visualAcuity = props.visualAcuity
-  if (!visualAcuity) return false
-  return visualAcuity.lEyeVision > 24 || visualAcuity.rEyeVision > 24
-})
-
-const needsPhysiotherapistReferral = computed(() => {
-  if (!props.fallRisk) return false
-  const fallRiskScore =
-    (props.fallRisk.sideToSideBalance ?? 0) +
-    (props.fallRisk.semiTandemBalance ?? 0) +
-    (props.fallRisk.tandemBalance ?? 0) +
-    (props.fallRisk.gaitSpeedTest ?? 0) +
-    (props.fallRisk.chairStandTest ?? 0)
-  return fallRiskScore < 7
-})
+const { heightWeightWarning, needsKhmerOpticsReferral, needsPhysiotherapistReferral, redFlags } =
+  useReferralWarnings(props)
 
 const emit = defineEmits<{
   'update:activeSection': [section: string]

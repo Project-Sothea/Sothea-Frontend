@@ -40,6 +40,7 @@
             :age="age"
             :canDeleteVisit="visitCount > 1"
             :pendingPatientPayload="pendingPatientPayload || undefined"
+            @update:activeSection="setActiveSection"
             @capturePatientPayload="capturePatientPayload"
             @patientCreated="handlePatientCreated"
             @patientUpdated="handlePatientUpdated"
@@ -49,6 +50,7 @@
             @vitalStatisticsUpdated="patient && (patient.vitalStatistics = $event)"
             @heightAndWeightUpdated="patient && (patient.heightAndWeight = $event)"
             @visualAcuityUpdated="patient && (patient.visualAcuity = $event)"
+            @referralUpdated="patient && (patient.referral = $event)"
             @doctorsConsultationUpdated="patient && (patient.doctorsConsultation = $event)"
             @reload="loadPatientData"
           />
@@ -170,6 +172,7 @@ import HeightWeightModal from '@patient-record/components/HeightWeightModal.vue'
 import VisualAcuityModal from '@patient-record/components/VisualAcuityModal.vue'
 import FallRiskModal from '@patient-record/components/FallRiskModal.vue'
 import DrConsultModal from '@patient-record/components/DrConsultModal.vue'
+import ReferralModal from '@patient-record/components/ReferralModal.vue'
 import PhysiotherapyModal from '@patient-record/components/PhysiotherapyModal.vue'
 import AddNewVisitModal from '@patient-record/components/AddNewVisitModal.vue'
 import DentalModal from '@patient-record/components/DentalModal.vue'
@@ -231,6 +234,7 @@ const componentMap: Record<string, any> = {
   'fall-risk': FallRiskModal,
   dental: DentalModal,
   'dr-consult': DrConsultModal,
+  referral: ReferralModal,
   'add-new-visit': AddNewVisitModal,
   physiotherapy: PhysiotherapyModal,
   prescriptions: PrescriptionModal

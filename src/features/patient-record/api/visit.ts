@@ -10,6 +10,7 @@ import type Dental from '../types/Dental'
 import type DoctorsConsultation from '../types/DoctorsConsultation'
 import type Admin from '../types/Admin'
 import type Patient from '../types/Patient'
+import type Referral from '../types/Referral'
 
 export interface AdminPayload {
   regDate: Date
@@ -82,6 +83,7 @@ export type SectionPayloadMap = {
   physiotherapy: Physiotherapy
   dental: Dental
   doctorsConsultation: DoctorsConsultation
+  referral: Referral
   // prescriptions handled separately
 }
 export type SectionName = keyof SectionPayloadMap
