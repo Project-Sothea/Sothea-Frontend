@@ -1,27 +1,27 @@
 <template>
-  <div class="flex justify-between items-center py-5">
-    <div class="relative flex-grow flex flex-row">
-      <div class="mr-2">
+  <div class="flex flex-col gap-3 py-5 lg:flex-row lg:justify-between lg:items-center">
+    <div class="relative min-w-0 flex-grow flex flex-col gap-2 sm:flex-row">
+      <div class="min-w-0">
         <input
           type="text"
           v-model="localSearch"
           @input="emitSearch"
           @keyup.enter="emitSearch"
-          class="rounded-lg border-transparent appearance-none w-[26rem] bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+          class="rounded-lg border-transparent appearance-none w-full sm:w-[26rem] max-w-full bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
           placeholder="Search by Queue No/ID/Name/Khmer Name/Drug Allergies"
         />
       </div>
-      <div>
+      <div class="shrink-0">
         <input
           type="date"
           :max="maxDate"
           v-model="localDate"
           @input="emitDateChange"
-          class="rounded-lg border-transparent appearance-none w-48 bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+          class="rounded-lg border-transparent appearance-none w-full sm:w-48 bg-gray-300 border border-gray-300 py-3 px-5 text-gray-700 placeholder-gray-400 shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
         />
       </div>
     </div>
-    <div class="flex items-center space-x-3 hover:cursor-pointer">
+    <div class="flex shrink-0 items-center space-x-3 hover:cursor-pointer">
       <p style="font-size: medium" class="hover:text-gray-500" @click="$emit('refresh')">
         Refresh List &#x21bb;
       </p>

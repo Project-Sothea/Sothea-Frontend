@@ -238,7 +238,6 @@ const dob = computed<string | null>({
   }
 })
 const age = computed(() => calculateAge(dob.value))
-console.log('age', age.value)
 const gender = map('gender')
 const village = map('village')
 const familyGroup = map('familyGroup')

@@ -1,5 +1,5 @@
 <template>
-  <div class="relative bg-gray-800 w-64 flex-shrink-0 min-h-screen">
+  <div class="relative bg-gray-800 w-full min-w-0 min-h-full flow-root">
     <div class="flex flex-col items-start justify-start mx-6 mt-5">
       <h2 class="text-sm font-medium text-[#6675c9]">Name: {{ name }}</h2>
       <h2 class="text-sm font-medium text-[#6675c9]">ID: {{ id }}</h2>

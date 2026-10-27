@@ -1,6 +1,6 @@
 <template>
   <NavBar />
-  <div class="container max-w-3xl px-4 mx-auto sm:px-8 table">
+  <div class="w-full max-w-[90vw] px-4 mx-auto sm:px-8">
     <div class="py-8">
       <div class="flex flex-row justify-between w-full mb-1 sm:mb-0">
         <h2 class="text-3xl leading-tight" style="color: black">Patient Queue</h2>
@@ -141,9 +141,6 @@ onMounted(() => {
 </script>
 
 <style>
-.table {
-  width: 1240px;
-}
 .line {
   height: 1px;
   background: rgba(0, 0, 0, 0.17);
