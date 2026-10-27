@@ -1,25 +1,86 @@
 <template>
-  <div>
-    <NavBar />
-    <div class="flex">
-      <SideBar
-        :activeSection="activeSection"
-        :id="isCreateMode ? undefined : id || undefined"
-        :name="isCreateMode ? undefined : name"
-        :age="isCreateMode ? undefined : (age ?? undefined)"
-        :isAdd="isCreateMode"
-        :canDeleteVisit="visitCount > 1"
-        :fallRisk="isCreateMode ? null : patient?.fallRisk"
-        :visualAcuity="isCreateMode ? null : patient?.visualAcuity"
-        :temperature="isCreateMode ? null : patient?.vitalStatistics?.temperature"
-        :patientDetails="isCreateMode ? null : patient?.patientDetails"
-        :heightAndWeight="isCreateMode ? null : patient?.heightAndWeight"
-        :visitDate="isCreateMode ? null : patient?.admin?.regDate"
-        @update:activeSection="setActiveSection"
-        @openTryDeleteVisitModal="tryDeleteVisit = true"
-        @openTryDeletePatientModal="tryDeletePatient = true"
-      />
-      <div class="flex-grow">
+  <div class="flex h-dvh flex-col">
+    <NavBar class="shrink-0" />
+    <button
+      v-if="hideSidebar"
+      ref="showSidebarButton"
+      type="button"
+      aria-label="Show sidebar"
+      title="Show sidebar"
+      aria-controls="patient-sidebar"
+      :aria-expanded="false"
+      class="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] left-5 z-40 flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-[#3f51b5] text-white shadow-lg shadow-indigo-950/25 transition duration-200 hover:bg-[#334296] hover:shadow-xl active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-300 focus-visible:ring-offset-2 motion-reduce:transition-none"
+      @click="toggleSidebar(false)"
+    >
+      <svg
+        aria-hidden="true"
+        class="h-6 w-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M9 4v16m4-11 3 3-3 3" />
+      </svg>
+    </button>
+    <div class="flex min-h-0 flex-1 overflow-y-auto">
+      <aside
+        v-show="!hideSidebar"
+        id="patient-sidebar"
+        aria-label="Patient navigation"
+        class="sticky top-0 flex h-full w-64 shrink-0 flex-col self-start bg-gray-800"
+      >
+        <div class="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <SideBar
+            :activeSection="activeSection"
+            :id="isCreateMode ? undefined : id || undefined"
+            :name="isCreateMode ? undefined : name"
+            :age="isCreateMode ? undefined : (age ?? undefined)"
+            :isAdd="isCreateMode"
+            :canDeleteVisit="visitCount > 1"
+            :fallRisk="isCreateMode ? null : patient?.fallRisk"
+            :visualAcuity="isCreateMode ? null : patient?.visualAcuity"
+            :temperature="isCreateMode ? null : patient?.vitalStatistics?.temperature"
+            :patientDetails="isCreateMode ? null : patient?.patientDetails"
+            :heightAndWeight="isCreateMode ? null : patient?.heightAndWeight"
+            :visitDate="isCreateMode ? null : patient?.admin?.regDate"
+            @update:activeSection="setActiveSection"
+            @openTryDeleteVisitModal="tryDeleteVisit = true"
+            @openTryDeletePatientModal="tryDeletePatient = true"
+          />
+        </div>
+        <div
+          class="shrink-0 border-t border-white/10 bg-gray-800 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
+        >
+          <button
+            ref="hideSidebarButton"
+            type="button"
+            aria-controls="patient-sidebar"
+            :aria-expanded="true"
+            class="flex min-h-11 w-full items-center justify-center gap-3 rounded-xl bg-white/5 px-4 py-3 text-sm font-medium text-gray-200 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800"
+            @click="toggleSidebar(true)"
+          >
+            <svg
+              aria-hidden="true"
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M9 4v16m7-11-3 3 3 3" />
+            </svg>
+            Hide sidebar
+          </button>
+        </div>
+      </aside>
+      <div class="min-w-0 flex-1">
         <SubNavBar
           v-if="!isCreateMode"
           :id="id || ''"
@@ -157,7 +218,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NavBar from '@shared/ui/navigation/NavBar.vue'
 import SideBar from '@patient-record/components/SideBar.vue'
@@ -189,6 +250,18 @@ import { calculateAge } from '@shared/utils/age'
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+
+// Match Tailwind's md breakpoint; users can toggle either layout afterwards.
+const hideSidebar = ref(typeof window !== 'undefined' && window.innerWidth < 768)
+const showSidebarButton = ref<HTMLButtonElement | null>(null)
+const hideSidebarButton = ref<HTMLButtonElement | null>(null)
+
+async function toggleSidebar(hidden: boolean) {
+  hideSidebar.value = hidden
+  await nextTick()
+  const button = hidden ? showSidebarButton.value : hideSidebarButton.value
+  button?.focus({ preventScroll: true })
+}
 
 const isCreateMode = computed(() => route.name === 'patient-new')
 const id = ref<string | null>((route.params.id as string) || null)
@@ -298,6 +371,9 @@ function setActiveSection(section: string) {
     if (!allowed) return
   }
   activeSection.value = section
+  if (typeof window !== 'undefined' && window.innerWidth < 768 && !hideSidebar.value) {
+    void toggleSidebar(true)
+  }
 }
 
 let recordLoadVersion = 0

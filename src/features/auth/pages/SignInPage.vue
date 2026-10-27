@@ -115,8 +115,14 @@ onMounted(loadProfiles)
 }
 
 .form-container {
-  width: 30%;
+  width: 80%;
   margin: 0 auto;
+}
+
+@media (min-width: 48rem) {
+  .form-container {
+    width: 30%;
+  }
 }
 
 .signin-button {

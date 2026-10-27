@@ -1,7 +1,7 @@
 <template>
-  <div class="px-4 py-4 -mx-4 overflow-x-auto sm:-mx-8 sm:px-8 table">
-    <div class="inline-block min-w-full overflow-hidden shadow table">
-      <table class="min-w-full leading-normal">
+  <div class="px-4 py-4 -mx-4 overflow-x-auto sm:-mx-8 sm:px-8">
+    <div class="inline-block min-w-full overflow-hidden shadow">
+      <table class="w-full min-w-[1240px] leading-normal">
         <thead>
           <tr>
             <th
@@ -98,9 +98,6 @@ const emit = defineEmits<{ (e: 'sortById'): void }>()
 </script>
 
 <style scoped>
-.table {
-  width: 1240px;
-}
 .even-row {
   background-color: #ffffff;
 }
