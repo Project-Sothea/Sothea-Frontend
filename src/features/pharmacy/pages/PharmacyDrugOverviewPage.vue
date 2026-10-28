@@ -1,9 +1,9 @@
 <template>
   <NavBar />
-  <div class="container max-w-5xl px-4 mx-auto sm:px-8 table">
+  <div class="w-full max-w-5xl px-4 mx-auto sm:px-8">
     <div class="py-8">
       <!-- Back & Title -->
-      <div class="flex flex-row justify-between w-full mb-4">
+      <div class="flex flex-wrap items-center gap-3 justify-between w-full mb-4">
         <h2 class="text-3xl leading-tight" style="color: black">Drug Overview</h2>
         <div class="space-x-2">
           <router-link
@@ -18,8 +18,8 @@
       <!-- Drug Header (bigger/clearer) -->
       <div class="mb-8">
         <div class="rounded-2xl border bg-indigo-50 p-5 sm:p-6">
-          <div class="flex items-start justify-between">
-            <div class="leading-snug flex-1">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0 break-words leading-snug flex-1">
               <!-- Line 1: Drug -->
               <div class="text-gray-900 font-semibold text-2xl sm:text-3xl">
                 {{ headerTitle }}
@@ -40,7 +40,7 @@
                 <span class="font-semibold">Notes:</span> {{ drug?.notes || '–' }}
               </div>
             </div>
-            <div class="flex gap-2 ml-4">
+            <div class="flex shrink-0 gap-2">
               <button
                 class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow transition-colors"
                 @click="openEditDrugModal = true"
@@ -60,7 +60,7 @@
 
       <hr class="line" />
 
-      <div class="mt-6 flex flex-row justify-between w-full mb-4">
+      <div class="mt-6 flex flex-wrap gap-3 justify-between w-full mb-4">
         <div class="flex items-center gap-4">
           <h3 class="text-2xl">Batches</h3>
           <button
@@ -88,7 +88,7 @@
           type="text"
           v-model="searchTerm"
           placeholder="Search batch / location"
-          class="rounded-lg border-transparent w-[25rem] bg-gray-300 py-3 px-5 text-sm placeholder-gray-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          class="rounded-lg border-transparent w-full max-w-[25rem] bg-gray-300 py-3 px-5 text-sm placeholder-gray-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
       </div>
 
@@ -495,9 +495,6 @@ const inactiveBtn = 'bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colo
 </script>
 
 <style scoped>
-.table {
-  width: 1240px;
-}
 .line {
   height: 1px;
   background: rgba(0, 0, 0, 0.17);

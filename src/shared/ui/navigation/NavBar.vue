@@ -1,30 +1,30 @@
 <template>
   <nav class="bg-[#3F51B5]">
-    <div class="pl-6 mx-auto">
+    <div class="px-4 sm:px-6 mx-auto">
       <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <h1 class="py-4">Project Sothea</h1>
-          <div class="flex items-baseline ml-10">
+        <div class="flex min-w-0 items-center">
+          <h1 class="min-w-0 py-4"><span class="hidden sm:inline">Project </span>Sothea</h1>
+          <div class="flex min-w-0 items-baseline ml-2 sm:ml-10">
             <router-link
-              class="text-white hover:text-gray-300 px-3 py-4 text-base font-medium"
+              class="min-w-0 break-words text-white hover:text-gray-300 px-1 sm:px-3 py-4 text-base font-medium"
               active-class="active"
               to="/patient-queue"
             >
-              Patient Queue
+              <span class="hidden sm:inline">Patient </span>Queue
             </router-link>
             <router-link
-              class="text-white hover:text-gray-300 px-3 py-4 text-base font-medium"
+              class="min-w-0 break-words text-white hover:text-gray-300 px-1 sm:px-3 py-4 text-base font-medium"
               active-class="active"
               to="/patient-directory"
             >
-              Patient Directory
+              <span class="hidden sm:inline">Patient </span>Directory
             </router-link>
             <router-link
-              class="text-white hover:text-gray-300 px-3 py-4 text-base font-medium"
+              class="min-w-0 break-words text-white hover:text-gray-300 px-1 sm:px-3 py-4 text-base font-medium"
               active-class="active"
               to="/patient/new"
             >
-              Add Patient
+              Add<span class="hidden sm:inline"> Patient</span>
             </router-link>
             <!-- <router-link
               class="text-white hover:text-gray-300 px-3 py-4 text-base font-medium"
@@ -36,10 +36,10 @@
           </div>
         </div>
 
-        <div class="flex items-center ml-4 md:ml-6">
+        <div class="flex shrink-0 items-center ml-auto pl-1 sm:pl-4 md:pl-6">
           <button
             type="button"
-            class="relative ml-3 text-left flex items-center justify-center w-full rounded-md px-4 py-2 text-base font-medium hover:text-gray-300 text-white"
+            class="relative text-left flex items-center justify-center gap-1 rounded-md px-1 sm:px-4 py-2 text-base font-medium hover:text-gray-300 text-white"
             id="options-menu"
             @click="logout"
           >
