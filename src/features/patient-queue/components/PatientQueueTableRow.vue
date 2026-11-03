@@ -40,12 +40,12 @@
       </p>
     </td>
     <td class="px-5 py-3 text-sm border-b border-gray-200">
-      <div v-if="allergies" class="text-gray-900 whitespace-no-wrap allergies yes">
+      <div v-if="allergies && allergies.trim() !== '-' && allergies.trim() !== '' && allergies.trim().toLowerCase() !== 'no'" class="text-gray-900 whitespace-no-wrap allergies yes">
         {{ allergies }}
       </div>
-      <div v-else class="text-gray-900 whitespace-no-wrap allergies nil">Nil</div>
+      <div v-else class="text-gray-900 whitespace-no-wrap allergies nil">NA</div>
     </td>
-    <td class="px-5 py-3 text-sm border-b border-gray-200">
+    <!-- <td class="px-5 py-3 text-sm border-b border-gray-200">
       <div
         v-if="prescriptionLabel"
         class="text-gray-900 whitespace-no-wrap prescription"
@@ -58,7 +58,7 @@
     <td class="px-7 py-4 text-sm border-b border-gray-200">
       <p class="text-gray-900 whitespace-no-wrap" v-if="referralNeeded === true">Yes</p>
       <p class="text-gray-900 whitespace-no-wrap" v-else-if="referralNeeded === false">No</p>
-    </td>
+    </td> -->
   </tr>
 </template>
 

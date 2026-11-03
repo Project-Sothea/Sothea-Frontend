@@ -58,7 +58,7 @@
             >
               Allergies
             </th>
-            <th
+            <!-- <th
               class="px-5 py-5 text-sm font-medium text-left text-gray-800 uppercase bg-indigo-200 border-b border-gray-200"
               style="background: rgba(63, 81, 181, 0.3)"
             >
@@ -81,7 +81,7 @@
                   </template>
                 </span>
               </span>
-            </th>
+            </th> -->
           </tr>
         </thead>
         <tbody>
