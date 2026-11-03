@@ -356,14 +356,20 @@
               </span>
         </a> -->
 
-        <a
+        <Tooltip
+          as="a"
+          text="Fall Risk not required for patients under 60"
+          :disabled="!isFallRiskDisabled"
           class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
           :class="{
-                'border-l-white bg-[#3f51b5] text-white': activeSection === 'fall-risk',
-                'text-gray-500 hover:bg-[#3f51b5] hover:text-white': activeSection !== 'fall-risk'
+                'border-l-white bg-[#3f51b5] text-white': !isFallRiskDisabled && activeSection === 'fall-risk',
+                'text-gray-500 hover:bg-[#3f51b5] hover:text-white': !isFallRiskDisabled && activeSection !== 'fall-risk',
+                'text-gray-500 opacity-50 cursor-not-allowed': isFallRiskDisabled
               }"
-          @click="setActiveSection('fall-risk')"
-          href="#"
+          :aria-disabled="isFallRiskDisabled"
+          :tabindex="isFallRiskDisabled ? 0 : undefined"
+          @click.prevent="setActiveSection('fall-risk')"
+          :href="isFallRiskDisabled ? undefined : '#'"
         >
           <svg
             width="20"
@@ -391,7 +397,7 @@
             class="ml-2"
             tooltip="Referral to Physiotherapist needed"
           />
-        </a>
+        </Tooltip>
         <button
           type="button"
           class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full text-left"
@@ -623,6 +629,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import Tooltip from '@shared/ui/Tooltip.vue'
 import WarningIndicator from '@shared/ui/WarningIndicator.vue'
 import type FallRisk from '@patient-record/types/FallRisk'
 import type VisualAcuity from '@patient-record/types/VisualAcuity'
@@ -648,6 +656,7 @@ const props = defineProps<{
 const { heightWeightWarning, needsKhmerOpticsReferral, needsPhysiotherapistReferral, redFlags } =
   useReferralWarnings(props)
 
+const isFallRiskDisabled = computed(() => props.age != null && props.age < 60)
 const emit = defineEmits<{
   'update:activeSection': [section: string]
   openTryDeleteVisitModal: []
@@ -655,6 +664,7 @@ const emit = defineEmits<{
 }>()
 
 function setActiveSection(section: string) {
+  if (section === 'fall-risk' && isFallRiskDisabled.value) return
   emit('update:activeSection', section)
 }
 function tryDeleteVisit() {
