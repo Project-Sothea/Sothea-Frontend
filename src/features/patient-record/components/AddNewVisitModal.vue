@@ -46,8 +46,7 @@ const formRef = useAdminForm({ initial: adminInitial })
 const { regDate, buildPayload } = formRef
 
 // Override regDate with "today" for a new visit scenario
-if (!regDate.value) regDate.value = new Date()
-else regDate.value = new Date()
+regDate.value = new Date()
 
 // Image handling helper kept inline for now
 

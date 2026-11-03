@@ -1,6 +1,7 @@
 import { ref, type Ref } from 'vue'
 import type Admin from '@patient-record/types/Admin'
 import type { AdminPayload } from '@patient-record/api/visit'
+import { formatDateISO } from '@shared/utils/date'
 
 export interface UseAdminFormOptions {
   /** Existing admin data for edit mode */
@@ -66,7 +67,9 @@ export function useAdminForm(options: UseAdminFormOptions = {}): UseAdminForm {
   function buildPayload(): AdminPayload | null {
     if (!validate()) return null
     return {
-      regDate: regDate.value,
+      // Registration is a calendar date. Keep the displayed day when JSON converts
+      // Dates to UTC and the backend converts them to its clinic timezone.
+      regDate: new Date(`${formatDateISO(regDate.value)}T00:00:00.000Z`),
       queueNo: queueNo.value,
       pregnant: pregnant.value ?? false,
       lastMenstrualPeriod: lastMenstrualPeriod.value,
