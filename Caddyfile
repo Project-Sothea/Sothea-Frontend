@@ -31,7 +31,7 @@
 :80 {
 	import app
 }
-https://{$SITE_HOST}:443, https://${SITE_HOST_ALT}:443 {
+https://{$SITE_HOST}:443, https://{$SITE_HOST_ALT}:443 {
 	tls internal
 	import app
 }
