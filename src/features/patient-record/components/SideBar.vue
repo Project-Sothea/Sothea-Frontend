@@ -5,7 +5,7 @@
       <h2 class="text-sm font-medium text-[#6675c9]">ID: {{ id }}</h2>
       <h2 class="flex items-center text-sm font-medium text-[#6675c9]">
         Age: {{ age }}
-        <WarningIndicator v-if="age != null && age <= 16" class="ml-2" tooltip="PAEDS" />
+        <span v-if="age != null && age <= 16" class="ml-2">[PAEDS]</span>
       </h2>
     </div>
     <nav class="mt-3 px-6 flex flex-col flex-1">

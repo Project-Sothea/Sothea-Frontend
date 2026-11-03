@@ -195,7 +195,7 @@
         </div>
 
         <!-- Row 5 -->
-        <div class="flex flex-row mb-2">
+        <div class="flex flex-row mb-2" v-if="age !== null && age > 16">
           <!-- Random Blood Glucose (mmol/L) -->
           <div class="w-1/4">
             <label for="" class="mb-1 block text-sm font-medium text-dark">

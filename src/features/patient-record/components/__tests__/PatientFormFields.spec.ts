@@ -17,7 +17,10 @@ async function flush() {
 }
 
 async function mountForm(disabled = false) {
-  const form = usePatientForm({ initial: { dob: new Date(2000, 5, 15) } })
+  const form = usePatientForm({ initial: {
+    name: 'Patient', khmerName: 'Patient', gender: 'F', village: 'SO', familyGroup: '1',
+    dob: new Date(2000, 5, 15)
+  } })
   const root = document.createElement('div')
   document.body.append(root)
   app = createApp({
@@ -79,9 +82,64 @@ describe('patient date of birth', () => {
     for (const value of ['31/02/1990', '29/02/1991', '04/11/2026']) {
       await typeDate(input, value)
       expect(format(form.dob.value, 'yyyy-MM-dd')).toBe('2000-06-15')
+      expect(form.buildPayload()).toBeNull()
     }
     await typeDate(input, '29/02/1992')
     expect(format(form.dob.value, 'yyyy-MM-dd')).toBe('1992-02-29')
+    expect(form.validate()).toBe(true)
+  })
+
+  it.each(['1/06/1990', '15/6/1990', '1/6/1990'])(
+    'accepts a typed date with single-digit day or month: %s', async (value) => {
+      const { form, input } = await mountForm()
+      input.focus()
+      for (let i = 1; i <= value.length; i++) {
+        await typeDate(input, value.slice(0, i))
+        if (i < value.length) expect(form.buildPayload()).toBeNull()
+      }
+      expect(format(form.dob.value, 'd/M/yyyy')).toBe(value.replace(/\/0/g, '/'))
+      expect(form.buildPayload()?.dob).toEqual(form.dob.value)
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }))
+      input.blur()
+      await flush()
+      expect(input.value).toBe(format(form.dob.value, 'dd/MM/yyyy'))
+    }
+  )
+
+  it('blocks saving an emptied DOB and recovers after typing a valid date', async () => {
+    const { form, input } = await mountForm()
+    expect(form.validate()).toBe(true)
+    input.focus()
+    await typeDate(input, '')
+    expect(form.buildPayload()).toBeNull()
+    expect(form.ageComputed.value).toBeNull()
+    expect(input.getAttribute('aria-invalid')).toBe('true')
+    expect(document.querySelector('[role="alert"]')?.textContent).toContain('Date of Birth is required')
+    input.blur()
+    await flush()
+    expect(form.buildPayload()).toBeNull()
+    await typeDate(input, '2/3/1990')
+    expect(form.buildPayload()?.dob).toEqual(new Date(1990, 2, 2))
+    expect(form.dobInputError.value).toBeNull()
+  })
+
+  it('clears a DOB input error when selecting a calendar date or resetting the form', async () => {
+    const { form, input } = await mountForm()
+    input.click()
+    await typeDate(input, 'invalid')
+    expect(form.validate()).toBe(false)
+    await vi.waitFor(() => {
+      expect(document.querySelector('.dp--calendar-item:not([aria-disabled="true"])')).not.toBeNull()
+    })
+    document.querySelector<HTMLElement>('.dp--calendar-item:not([aria-disabled="true"])')!.click()
+    await flush()
+    expect(form.validate()).toBe(true)
+    await typeDate(input, '')
+    expect(form.validate()).toBe(false)
+    form.reset({ dob: new Date(1985, 0, 2) })
+    await flush()
+    expect(form.dobInputError.value).toBeNull()
+    expect(input.value).toBe('02/01/1985')
   })
 
   it('updates from form resets and respects read-only patient details', async () => {

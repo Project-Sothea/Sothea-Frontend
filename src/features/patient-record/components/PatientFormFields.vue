@@ -51,8 +51,10 @@
       <!-- Row 2: DOB, Age, Gender -->
       <div class="grid grid-cols-1 gap-2 md:grid-cols-4">
         <div class="md:col-span-2">
-          <label for="patient-dob" class="mb-1 block text-sm font-medium text-dark">DOB</label>
-          <div class="relative z-20">
+          <label for="patient-dob" class="mb-1 block text-sm font-medium text-dark">DOB
+            <span class="req">*</span>
+          </label>
+          <div class="relative z-40">
             <VueDatePicker
               v-model="dob"
               :disabled="disabled"
@@ -65,22 +67,29 @@
                 tabSubmit: true,
                 openMenu: 'open'
               }"
-              :input-attrs="{ id: 'patient-dob', clearable: false, inputmode: 'text' }"
+              :input-attrs="{
+                id: 'patient-dob', clearable: false, inputmode: 'text', required: true,
+                state: form.dobInputError.value ? false : undefined
+              }"
               :aria-labels="{ input: 'Date of birth', calendarIcon: 'Choose date of birth' }"
               auto-apply
               placeholder="DD/MM/YYYY"
               :data-warning="age !== null && age <= 16"
-              class="dob-picker"
+              class="dob-picker data-[warning=true]:[--dp-background-color:theme('colors.red.200')] data-[warning=true]:![--dp-disabled-color:theme('colors.red.200')] "
+              @text-input="validateDobInput"
             />
           </div>
+          <p v-if="form.dobInputError.value" class="mt-1 text-sm text-red-500" role="alert">
+            {{ form.dobInputError.value }}
+          </p>
         </div>
         <div>
           <label class="mb-1 block text-sm font-medium text-dark">Age</label>
           <input
             :value="form.ageComputed.value"
             readonly
-            type="number"
-            class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2"
+            disabled
+            class="w-full bg-[#3f51b5]/50 rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none disabled:cursor-default"
           />
         </div>
         <div>
@@ -222,7 +231,6 @@ import { VueDatePicker } from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import { isValid, parse } from 'date-fns'
 import { usePatientForm } from '@patient-record/composables/usePatientForm'
-import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
   form: ReturnType<typeof usePatientForm>
@@ -253,12 +261,23 @@ const dob = computed<Date>({
 
 function parseDobInput(value: string): Date | null {
   // Do not commit intermediate years while the user is still typing.
-  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return null
-  const date = parse(value, 'dd/MM/yyyy', new Date())
+  if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value)) return null
+  const date = parse(value, 'd/M/yyyy', new Date())
   return isValid(date) ? date : null
 }
 
-const age = computed(() => calculateAge(dob.value))
+function validateDobInput(event: Event | string) {
+  const value = typeof event === 'string' ? event : (event.target as HTMLInputElement).value
+  const date = parseDobInput(value)
+  const maxDate = parse(props.maxDate, 'yyyy-MM-dd', new Date())
+  props.form.dobInputError.value = !value
+    ? 'Date of Birth is required'
+    : !date || date > maxDate
+      ? 'Enter a valid Date of Birth (DD/MM/YYYY) that is not in the future'
+      : null
+}
+
+const age = computed(() => props.form.ageComputed.value)
 const gender = map('gender')
 const village = map('village')
 const familyGroup = map('familyGroup')
@@ -276,6 +295,7 @@ const drugAllergies = map('drugAllergies')
   --dp-primary-color: #3f51b5;
   --dp-input-padding: 6px 12px 6px 35px;
   --dp-disabled-color: #e5e7eb;
+  --dp-icon-color: #000000;
 }
 
 .dob-picker :deep(.dp--input) {

@@ -14,6 +14,7 @@ export interface UsePatientForm {
   name: Ref<string>
   khmerName: Ref<string>
   dob: Ref<Date>
+  dobInputError: Ref<string | null>
   gender: Ref<'M' | 'F' | ''>
   village: Ref<string>
   familyGroup: Ref<string>
@@ -48,6 +49,7 @@ export function usePatientForm(options: UsePatientFormOptions = {}): UsePatientF
   const name = ref(initial?.name ?? '')
   const khmerName = ref(initial?.khmerName ?? '')
   const dob = ref(normalizeDate(initial?.dob, new Date()) as Date)
+  const dobInputError = ref<string | null>(null)
   const gender = ref<'M' | 'F' | ''>((initial?.gender as any) ?? '')
   const village = ref(initial?.village ?? '')
   const familyGroup = ref(initial?.familyGroup ?? '')
@@ -56,13 +58,14 @@ export function usePatientForm(options: UsePatientFormOptions = {}): UsePatientF
   const selectedPhoto = ref('')
   const photoFile = ref<File | null>(null)
 
-  const ageComputed = computed(() => calculateAge(dob.value))
+  const ageComputed = computed(() => dobInputError.value ? null : calculateAge(dob.value))
 
   function validate(): boolean {
     const checks: Array<[boolean, string]> = [
       [!!name.value, 'Name is required'],
       [!!khmerName.value, 'Khmer Name is required'],
       [!!dob.value, 'Date of Birth is required'],
+      [!dobInputError.value, dobInputError.value ?? 'Please enter a valid Date of Birth'],
       [!!gender.value, 'Gender is required'],
       [familyGroup.value !== '', 'Family Group is required'],
       [!!village.value, 'Village is required'],
@@ -95,6 +98,7 @@ export function usePatientForm(options: UsePatientFormOptions = {}): UsePatientF
     name.value = src?.name ?? ''
     khmerName.value = src?.khmerName ?? ''
     dob.value = (normalizeDate(src?.dob, dob.value) || dob.value) as Date
+    dobInputError.value = null
     gender.value = (src?.gender as any) ?? ''
     village.value = src?.village ?? ''
     familyGroup.value = src?.familyGroup ?? ''
@@ -106,12 +110,14 @@ export function usePatientForm(options: UsePatientFormOptions = {}): UsePatientF
 
   function setDob(next: Date) {
     dob.value = (normalizeDate(next, dob.value) || dob.value) as Date
+    dobInputError.value = null
   }
 
   return {
     name,
     khmerName,
     dob,
+    dobInputError,
     gender,
     village,
     familyGroup,
