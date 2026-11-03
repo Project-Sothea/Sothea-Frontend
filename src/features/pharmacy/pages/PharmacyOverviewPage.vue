@@ -1,6 +1,6 @@
 <template>
   <NavBar />
-  <div class="container max-w-5xl px-4 mx-auto sm:px-8 table">
+  <div class="w-full max-w-5xl px-4 mx-auto sm:px-8">
     <div class="py-8">
       <div class="flex justify-end mb-4">
         <router-link
@@ -11,7 +11,7 @@
         </router-link>
       </div>
       <!-- ── PAGE TITLE & TOGGLE ─────────────────────────────────────── -->
-      <div class="flex flex-row justify-between w-full mb-4">
+      <div class="flex flex-wrap gap-3 justify-between w-full mb-4">
         <h2 class="text-3xl leading-tight" style="color: black">Drug&nbsp;Batches</h2>
 
         <!-- pill-style toggle -->
@@ -32,7 +32,7 @@
           type="text"
           v-model="searchTerm"
           placeholder="Search batch / drug / location"
-          class="rounded-lg border-transparent w-[25rem] bg-gray-300 py-3 px-5 text-sm placeholder-gray-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          class="rounded-lg border-transparent w-full max-w-[25rem] bg-gray-300 py-3 px-5 text-sm placeholder-gray-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
       </div>
 
@@ -268,9 +268,6 @@ const inactiveBtn = 'bg-gray-200 text-gray-700 px-4 py-2 rounded transition-colo
 </script>
 
 <style scoped>
-.table {
-  width: 1240px;
-}
 .line {
   height: 1px;
   background: rgba(0, 0, 0, 0.17);
