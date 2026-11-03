@@ -1,4 +1,4 @@
-import { computed, ref, watch, type Ref, type ComputedRef } from 'vue'
+import { computed, ref, toRaw, watch, type Ref, type ComputedRef } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import { handleApiError } from '@shared/api/handleApiError'
 
@@ -94,6 +94,9 @@ export function useAutoDraft<TFormData>(
   const draftRestored = ref(false)
   const isEditing = ref(false)
   const isSubmitting = ref(false)
+
+  // Capture defaults before an existing draft can overwrite the fields.
+  const defaultValues = options.fields.map((field) => structuredClone(toRaw(field.ref.value)))
 
   const expirationMs = options.expirationMs ?? 30 * 60 * 1000 // Default: 30 minutes
 
@@ -195,6 +198,13 @@ export function useAutoDraft<TFormData>(
     })
   }
 
+  function applyServerState(state: TFormData | null | undefined): void {
+    options.fields.forEach((field, index) => {
+      const value = state?.[field.key as keyof TFormData]
+      field.ref.value = structuredClone(toRaw(value === undefined ? defaultValues[index] : value))
+    })
+  }
+
   // Watch form changes and persist to draft (when enabled)
   // Only watch when initialized to prevent interfering during initialization
   watch(
@@ -262,8 +272,8 @@ export function useAutoDraft<TFormData>(
     }
 
     // Priority 2: Use server data if no draft exists (or force is true)
-    if (serverData) {
-      applyFormState(serverData)
+    if (serverData || force) {
+      applyServerState(serverData)
       initialized.value = true
       draftRestored.value = false
       // Only clear draft if explicitly forced (e.g., after successful save)
