@@ -324,7 +324,7 @@
           />
         </a>
 
-        <a
+        <!-- <a
           class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
           :class="{
                 'border-l-white bg-[#3f51b5] text-white': activeSection === 'dental',
@@ -354,7 +354,7 @@
           >
                 Dental
               </span>
-        </a>
+        </a> -->
 
         <a
           class="border-l-4 border-l-transparent flex items-center p-2 my-2 transition-colors duration-200 w-full"
