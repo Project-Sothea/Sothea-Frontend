@@ -1,5 +1,8 @@
 <template>
-  <p class="text-sm text-red-500 hidden data-[visible=true]:block" :data-visible="age !== null && age <= 16">
+  <p
+    class="text-sm text-red-500 hidden data-[visible=true]:block"
+    :data-visible="age !== null && age <= 16"
+  >
     PAEDS required
   </p>
 
@@ -48,15 +51,26 @@
       <!-- Row 2: DOB, Age, Gender -->
       <div class="grid grid-cols-1 gap-2 md:grid-cols-4">
         <div class="md:col-span-2">
-          <label class="mb-1 block text-sm font-medium text-dark">DOB</label>
+          <label for="patient-dob" class="mb-1 block text-sm font-medium text-dark">DOB</label>
           <div class="relative z-20">
-            <input
+            <VueDatePicker
               v-model="dob"
               :disabled="disabled"
-              type="date"
-              :max="maxDate"
+              :max-date="maxDate"
+              :time-config="{ enableTimePicker: false }"
+              :formats="{ input: 'dd/MM/yyyy' }"
+              :text-input="{
+                format: parseDobInput,
+                enterSubmit: true,
+                tabSubmit: true,
+                openMenu: 'open'
+              }"
+              :input-attrs="{ id: 'patient-dob', clearable: false, inputmode: 'text' }"
+              :aria-labels="{ input: 'Date of birth', calendarIcon: 'Choose date of birth' }"
+              auto-apply
+              placeholder="DD/MM/YYYY"
               :data-warning="age !== null && age <= 16"
-              class="w-full bg-transparent rounded-md border border-stroke py-1.5 px-3 text-dark-6 outline-none transition focus:border-primary disabled:cursor-default disabled:bg-gray-200 disabled:border-gray-2 data-[warning=true]:bg-red-200"
+              class="dob-picker"
             />
           </div>
         </div>
@@ -204,8 +218,10 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
+import { VueDatePicker } from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
+import { isValid, parse } from 'date-fns'
 import { usePatientForm } from '@patient-record/composables/usePatientForm'
-import { formatDateISO } from '@shared/utils/date'
 import { calculateAge } from '@shared/utils/age'
 
 const props = defineProps<{
@@ -228,15 +244,20 @@ function map<K extends keyof ReturnType<typeof usePatientForm>>(key: K) {
 
 const name = map('name')
 const khmerName = map('khmerName')
-const dob = computed<string | null>({
-  get() {
-    const v = props.form.dob.value as Date
-    return formatDateISO(v)
-  },
-  set(dateOnly: string | null) {
-    props.form.setDob(dateOnly ? new Date(dateOnly) : props.form.dob.value)
+const dob = computed<Date>({
+  get: () => props.form.dob.value,
+  set(value: Date | null) {
+    if (value && isValid(value)) props.form.setDob(value)
   }
 })
+
+function parseDobInput(value: string): Date | null {
+  // Do not commit intermediate years while the user is still typing.
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return null
+  const date = parse(value, 'dd/MM/yyyy', new Date())
+  return isValid(date) ? date : null
+}
+
 const age = computed(() => calculateAge(dob.value))
 const gender = map('gender')
 const village = map('village')
@@ -247,5 +268,21 @@ const drugAllergies = map('drugAllergies')
 <style scoped>
 .req {
   color: red;
+}
+
+.dob-picker {
+  --dp-font-family: inherit;
+  --dp-border-radius: 6px;
+  --dp-primary-color: #3f51b5;
+  --dp-input-padding: 6px 12px 6px 35px;
+  --dp-disabled-color: #e5e7eb;
+}
+
+.dob-picker :deep(.dp--input) {
+  min-height: 38px;
+}
+
+.dob-picker[data-warning='true'] :deep(.dp--input:not(:disabled)) {
+  background-color: #fecaca;
 }
 </style>
