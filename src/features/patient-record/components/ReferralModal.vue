@@ -15,7 +15,7 @@
               class="flex w-full items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-left text-sm text-red-700 hover:bg-red-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
               @click="emit('update:activeSection', flag.section)"
             >
-              <WarningIndicator :tooltip="flag.message" tabindex="-1" />
+              <WarningIndicator :tooltip="flag.message" tabindex="-1" color="text-orange-500" :noTooltip="true"/>
               <span>{{ flag.message }}</span>
             </button>
           </li>
