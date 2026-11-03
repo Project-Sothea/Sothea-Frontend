@@ -263,73 +263,80 @@
         Refer to Physiotherapist
       </div>
 
-      <div v-if="showIcope">
-        <div class="font-medium text-lg mt-6">ICOPE (60 yo and above):</div>
+      <div class="font-medium text-lg mt-6">ICOPE</div>
 
-        <div class="mt-4 flex flex-nowrap items-start gap-x-6">
-          <div class="text-sm text-dark basis-[26rem] shrink-0">
-            <span>Completed 5 chair stands?</span>
-            <span class="req">*</span>
-          </div>
-
-          <div class="flex items-center gap-6 pt-0.5">
-            <label class="inline-flex items-center gap-2">
-              <input
-                type="radio"
-                name="icopeCompleteChairStands"
-                class="w-4 h-4"
-                v-model="icopeCompleteChairStands"
-                :value="true"
-                :disabled="!isEditing"
-              />
-              <span class="text-sm">Y</span>
-            </label>
-            <label class="inline-flex items-center gap-2">
-              <input
-                type="radio"
-                name="icopeCompleteChairStands"
-                class="w-4 h-4"
-                v-model="icopeCompleteChairStands"
-                :value="false"
-                :disabled="!isEditing"
-              />
-              <span class="text-sm">N</span>
-            </label>
-          </div>
+      <div class="mt-4 flex flex-nowrap items-start gap-x-6">
+        <div class="text-sm text-dark basis-[26rem] shrink-0">
+          <span>Completed 5 chair stands?</span>
+          <span class="req">*</span>
         </div>
-        <div class="mt-4 flex flex-nowrap items-start gap-x-6">
-          <div class="text-sm text-dark basis-[26rem] shrink-0">
-            <span>Was it completed in 14 seconds?</span>
-            <span class="req">*</span>
-          </div>
 
-          <div class="flex items-center gap-6 pt-0.5">
-            <label class="inline-flex items-center gap-2">
-              <input
-                type="radio"
-                name="icopeChairStandsTime"
-                class="w-4 h-4"
-                v-model="icopeChairStandsTime"
-                :value="true"
-                :disabled="!isEditing"
-              />
-              <span class="text-sm">Y</span>
-            </label>
-            <label class="inline-flex items-center gap-2">
-              <input
-                type="radio"
-                name="icopeChairStandsTime"
-                class="w-4 h-4"
-                v-model="icopeChairStandsTime"
-                :value="false"
-                :disabled="!isEditing"
-              />
-              <span class="text-sm">N</span>
-            </label>
-          </div>
+        <div class="flex items-center gap-6 pt-0.5">
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="radio"
+              name="icopeCompleteChairStands"
+              class="w-4 h-4"
+              v-model="icopeCompleteChairStands"
+              :value="true"
+              :disabled="!isEditing"
+            />
+            <span class="text-sm">Y</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="radio"
+              name="icopeCompleteChairStands"
+              class="w-4 h-4"
+              v-model="icopeCompleteChairStands"
+              :value="false"
+              :disabled="!isEditing"
+            />
+            <span class="text-sm">N</span>
+          </label>
+        </div>
+      </div>
+      <div class="mt-4 flex flex-nowrap items-start gap-x-6">
+        <div class="text-sm text-dark basis-[26rem] shrink-0">
+          <span>Was it completed in 14 secondss?</span>
+          <span class="req">*</span>
+        </div>
+
+        <div class="flex items-center gap-6 pt-0.5">
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="radio"
+              name="icopeChairStandsTime"
+              class="w-4 h-4"
+              v-model="icopeChairStandsTime"
+              :value="true"
+              :disabled="!isEditing"
+            />
+            <span class="text-sm">Y</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input
+              type="radio"
+              name="icopeChairStandsTime"
+              class="w-4 h-4"
+              v-model="icopeChairStandsTime"
+              :value="false"
+              :disabled="!isEditing"
+            />
+            <span class="text-sm">N</span>
+          </label>
         </div>
       </div>
 
+      <label for="additional-comments" class="mt-6 text-sm font-medium">Additional Comments</label>
+      <textarea
+        id="additional-comments"
+        rows="4"
+        v-model="additionalComments"
+        placeholder="Enter additional comments (e.g. patient unable to understand instructions, patient unable to perform test due to injury, etc.)"
+        :disabled="!isEditing"
+        class="mt-2 w-full rounded-md border border-gray-300 p-3 text-sm outline-none focus:border-[#3f51b5] disabled:bg-gray-200"
+      ></textarea>
       <!-- Edit Button -->
       <div class="flex flex-row-reverse w-full mt-5">
         <button
@@ -391,15 +398,9 @@ const tandemBalance = ref<number | null>(null)
 const gaitSpeedTest = ref<number | null>(null)
 const chairStandTest = ref<number | null>(null)
 
-const calculatedAge = computed(
-  () => props.age ?? calculateAge(props.patientData?.patientDetails?.dob)
-)
-const showIcope = computed<boolean>(() =>
-  calculatedAge.value != null ? calculatedAge.value >= 60 : true
-)
-
 const icopeCompleteChairStands = ref<boolean | null>(null)
 const icopeChairStandsTime = ref<boolean | null>(null)
+const additionalComments = ref<string | null>('')
 
 const fallRiskScore = computed(() => {
   return (
@@ -424,7 +425,8 @@ const formDraft = useAutoDraft<FallRisk>({
     { key: 'gaitSpeedTest', ref: gaitSpeedTest },
     { key: 'chairStandTest', ref: chairStandTest },
     { key: 'icopeCompleteChairStands', ref: icopeCompleteChairStands },
-    { key: 'icopeChairStandsTime', ref: icopeChairStandsTime }
+    { key: 'icopeChairStandsTime', ref: icopeChairStandsTime },
+    { key: 'additionalComments', ref: additionalComments }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
@@ -453,8 +455,8 @@ function buildPayload(): FallRisk | null {
       [tandemBalance.value !== null, 'Select tandem balance'],
       [gaitSpeedTest.value !== null, 'Select gait balance'],
       [chairStandTest.value !== null, 'Select chair stand test'],
-      [!showIcope.value || icopeCompleteChairStands.value !== null, 'Answer ICOPE Questions'],
-      [!showIcope.value || icopeChairStandsTime.value !== null, 'Answer ICOPE Questions']
+      [icopeCompleteChairStands.value !== null, 'Select 5 chair stand completion'],
+      [icopeChairStandsTime.value !== null, 'Select 5 chair stand completion time']
     ])
   )
     return null
@@ -466,6 +468,7 @@ function buildPayload(): FallRisk | null {
     chairStandTest: chairStandTest.value!,
     icopeCompleteChairStands: icopeCompleteChairStands.value!,
     icopeChairStandsTime: icopeChairStandsTime.value!,
+    additionalComments: additionalComments.value ?? ''
   }
 }
 

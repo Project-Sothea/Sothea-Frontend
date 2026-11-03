@@ -9,4 +9,5 @@ export default interface FallRisk {
 
   icopeCompleteChairStands: boolean | null
   icopeChairStandsTime: boolean | null
+  additionalComments: string | null
 }
