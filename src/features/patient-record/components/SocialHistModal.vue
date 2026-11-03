@@ -4,160 +4,136 @@
       <h1>Social History</h1>
       <br />
 
-      <div class="flex flex-col">
-        <!-- Header -->
-        <div class="flex flex-row">
-          <div class="font-medium text-md w-1/3">History</div>
-          <div class="font-medium text-md pr-5">Yes</div>
-          <div class="font-medium text-md">No</div>
-          <div class="font-medium text-md w-1/3 pl-10">Remarks</div>
-        </div>
-      </div>
-
-      <!-- Past Smoking History -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-normal items-center inline-flex text-sm w-1/3">
-            Past Smoking History <span class="req">*</span>
-          </div>
-
-          <div class="flex w-1/6">
-            <div class="flex items-center pr-7">
-              <label class="inline-flex items-center">
+      <div class="w-full overflow-x-auto">
+        <table class="w-full min-w-[600px] table-fixed" aria-label="Social history">
+          <colgroup>
+            <col class="w-1/3" />
+            <col class="w-12" />
+            <col class="w-12" />
+            <col />
+          </colgroup>
+          <thead>
+            <tr class="border-b border-stroke">
+              <th scope="col" class="pb-3 pr-4 text-left font-medium text-md">History</th>
+              <th scope="col" class="pb-3 text-center font-medium text-md">Yes</th>
+              <th scope="col" class="pb-3 text-center font-medium text-md">No</th>
+              <th scope="col" class="pb-3 pl-4 text-left font-medium text-md">Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" class="py-3 pr-4 text-left align-middle font-normal text-sm">
+                Past Smoking History <span class="req">*</span>
+              </th>
+              <td class="py-3 text-center align-middle">
                 <input
-                  type="radio"
-                  name="smoking-hist"
-                  class="w-4 h-4"
-                  v-model="pastSmokingHistory"
-                  :value="true"
-                  :disabled="!isEditing"
+                type="radio"
+                aria-label="Past Smoking History: Yes"
+                name="smoking-hist"
+                class="w-4 h-4"
+                v-model="pastSmokingHistory"
+                :value="true"
+                :disabled="!isEditing"
                 />
-              </label>
-            </div>
-            <div class="flex items-center">
-              <label class="inline-flex items-center">
+              </td>
+              <td class="py-3 text-center align-middle">
                 <input
-                  type="radio"
-                  name="smoking-hist"
-                  class="w-4 h-4"
-                  v-model="pastSmokingHistory"
-                  :value="false"
-                  :disabled="!isEditing"
+                type="radio"
+                aria-label="Past Smoking History: No"
+                name="smoking-hist"
+                class="w-4 h-4"
+                v-model="pastSmokingHistory"
+                :value="false"
+                :disabled="!isEditing"
                 />
-              </label>
-            </div>
-          </div>
-
-          <div class="flex w-1/3 grow">
-            <textarea
-              rows="1"
-              placeholder="If Y, no. of years"
-              type="number"
-              v-model="numberOfYears"
-              class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
-              :disabled="!isEditing"
-            ></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Current Smoking History -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-normal items-center inline-flex text-sm w-1/3">
-            Current Smoking History <span class="req">*</span>
-          </div>
-
-          <div class="flex w-1/6">
-            <div class="flex items-center pr-7">
-              <label class="inline-flex items-center">
+              </td>
+              <td class="py-3 pl-4 align-middle">
+                <textarea
+                rows="1"
+                aria-label="Past Smoking History remarks"
+                placeholder="If Y, no. of years"
+                v-model="pastSmokingInformation"
+                class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                :disabled="!isEditing"
+                ></textarea>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row" class="py-3 pr-4 text-left align-middle font-normal text-sm">
+                Current Smoking History <span class="req">*</span>
+              </th>
+              <td class="py-3 text-center align-middle">
                 <input
-                  type="radio"
-                  name="curr-smoking-hist"
-                  class="w-4 h-4"
-                  v-model="currentSmokingHistory"
-                  :value="true"
-                  :disabled="!isEditing"
+                type="radio"
+                aria-label="Current Smoking History: Yes"
+                name="curr-smoking-hist"
+                class="w-4 h-4"
+                v-model="currentSmokingHistory"
+                :value="true"
+                :disabled="!isEditing"
                 />
-              </label>
-            </div>
-            <div class="flex items-center">
-              <label class="inline-flex items-center">
+              </td>
+              <td class="py-3 text-center align-middle">
                 <input
-                  type="radio"
-                  name="curr-smoking-hist"
-                  class="w-4 h-4"
-                  v-model="currentSmokingHistory"
-                  :value="false"
-                  :disabled="!isEditing"
+                type="radio"
+                aria-label="Current Smoking History: No"
+                name="curr-smoking-hist"
+                class="w-4 h-4"
+                v-model="currentSmokingHistory"
+                :value="false"
+                :disabled="!isEditing"
                 />
-              </label>
-            </div>
-          </div>
-
-          <div class="flex w-1/3 grow">
-            <textarea
-              rows="1"
-              placeholder="If Y, how many cigarettes/day?"
-              type="number"
-              v-model="cigarettesPerDay"
-              class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
-              :disabled="!isEditing"
-            ></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Alcohol History -->
-      <div class="flex flex-col mt-4">
-        <div class="flex flex-row">
-          <div class="font-normal items-center inline-flex text-sm w-1/3">
-            Alcohol History <span class="req">*</span>
-          </div>
-
-          <div class="flex w-1/6">
-            <div class="flex items-center pr-7">
-              <label class="inline-flex items-center">
+              </td>
+              <td class="py-3 pl-4 align-middle">
+                <textarea
+                rows="1"
+                aria-label="Current Smoking History remarks"
+                placeholder="If Y, how many cigarettes/day?"
+                v-model="currentSmokingInformation"
+                class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                :disabled="!isEditing"
+                ></textarea>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row" class="py-3 pr-4 text-left align-middle font-normal text-sm">
+                Alcohol History <span class="req">*</span>
+              </th>
+              <td class="py-3 text-center align-middle">
                 <input
-                  type="radio"
-                  name="alc-hist"
-                  class="w-4 h-4"
-                  v-model="alcoholHistory"
-                  :value="true"
-                  :disabled="!isEditing"
+                type="radio"
+                aria-label="Alcohol History: Yes"
+                name="alc-hist"
+                class="w-4 h-4"
+                v-model="alcoholHistory"
+                :value="true"
+                :disabled="!isEditing"
                 />
-              </label>
-            </div>
-            <div class="flex items-center">
-              <label class="inline-flex items-center">
+              </td>
+              <td class="py-3 text-center align-middle">
                 <input
-                  type="radio"
-                  name="alc-hist"
-                  class="w-4 h-4"
-                  v-model="alcoholHistory"
-                  :value="false"
-                  :disabled="!isEditing"
+                type="radio"
+                aria-label="Alcohol History: No"
+                name="alc-hist"
+                class="w-4 h-4"
+                v-model="alcoholHistory"
+                :value="false"
+                :disabled="!isEditing"
                 />
-              </label>
-            </div>
-          </div>
-
-          <div class="flex w-1/3 grow">
-            <select
-              v-model="howRegular"
-              :disabled="!isEditing || alcoholHistory === false"
-              :class="[
-                'relative z-20 w-full appearance-none rounded-md border border-stroke py-1.5 pl-3 pr-12 text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default',
-                alcoholHistory === false ? 'bg-[#3f51b5]/50 disabled:bg-[#3f51b5]/50' : 'bg-transparent disabled:bg-gray-200'
-              ]"
-            >
-              <option :value="'A'">A</option>
-              <option :value="'B'">B</option>
-              <option :value="'C'">C</option>
-              <option :value="'D'">D</option>
-            </select>
-          </div>
-        </div>
+              </td>
+              <td class="py-3 pl-4 align-middle">
+                <textarea
+                rows="1"
+                aria-label="Alcohol History remarks"
+                placeholder="If Y, how regular and what type of alcohol?"
+                v-model="alcoholInformation"
+                class="w-full bg-transparent rounded-md border border-stroke p-3 text-sm text-dark-6 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-gray-200"
+                :disabled="!isEditing"
+                ></textarea>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Edit Button -->
@@ -208,11 +184,11 @@ const props = defineProps<{
 }>()
 
 const pastSmokingHistory = ref<boolean | null>(null)
-const numberOfYears = ref<number | null>(null)
+const pastSmokingInformation = ref<string | null>(null)
 const currentSmokingHistory = ref<boolean | null>(null)
-const cigarettesPerDay = ref<number | null>(null)
+const currentSmokingInformation = ref<string | null>(null)
 const alcoholHistory = ref<boolean | null>(null)
-const howRegular = ref<string | null>('')
+const alcoholInformation = ref<string | null>('')
 
 const toast = useToast()
 
@@ -224,11 +200,11 @@ const formDraft = useAutoDraft<SocialHistory>({
   }),
   fields: [
     { key: 'pastSmokingHistory', ref: pastSmokingHistory },
-    { key: 'numberOfYears', ref: numberOfYears },
+    { key: 'pastSmokingInformation', ref: pastSmokingInformation },
     { key: 'currentSmokingHistory', ref: currentSmokingHistory },
-    { key: 'cigarettesPerDay', ref: cigarettesPerDay },
+    { key: 'currentSmokingInformation', ref: currentSmokingInformation },
     { key: 'alcoholHistory', ref: alcoholHistory },
-    { key: 'howRegular', ref: howRegular }
+    { key: 'alcoholInformation', ref: alcoholInformation }
   ],
   persistWhen: (isEditing) => isEditing.value && !props.isAdd,
   expirationMs: 30 * 60 * 1000, // 30 minutes
@@ -254,25 +230,29 @@ function buildPayload(): SocialHistory | null {
     !runChecks([
       [pastSmokingHistory.value !== null, 'Indicate past smoking history'],
       [currentSmokingHistory.value !== null, 'Indicate current smoking history'],
-      [alcoholHistory.value !== null, 'Indicate alcohol history']
+      [alcoholHistory.value !== null, 'Indicate alcohol history'],
+      [
+        pastSmokingHistory.value !== true || !!pastSmokingInformation.value?.trim(),
+        'Enter past smoking remarks'
+      ],
+      [
+        currentSmokingHistory.value !== true || !!currentSmokingInformation.value?.trim(),
+        'Enter current smoking remarks'
+      ],
+      [
+        alcoholHistory.value !== true || !!alcoholInformation.value?.trim(),
+        'Enter alcohol remarks'
+      ]
     ])
   )
     return null
-  if (numberOfYears.value && isNaN(numberOfYears.value)) {
-    toast.error('Number of years must be a valid number')
-    return null
-  }
-  if (cigarettesPerDay.value && isNaN(cigarettesPerDay.value)) {
-    toast.error('Cigarettes per day must be a valid number')
-    return null
-  }
   return {
     pastSmokingHistory: pastSmokingHistory.value!,
-    numberOfYears: numberOfYears.value || null,
+    pastSmokingInformation: pastSmokingInformation.value || null,
     currentSmokingHistory: currentSmokingHistory.value!,
-    cigarettesPerDay: cigarettesPerDay.value || null,
+    currentSmokingInformation: currentSmokingInformation.value || null,
     alcoholHistory: alcoholHistory.value!,
-    howRegular: alcoholHistory.value === false ? null : howRegular.value || null
+    alcoholInformation: alcoholHistory.value === false ? null : alcoholInformation.value || null
   }
 }
 
@@ -309,7 +289,7 @@ function discardEdit() {
 
 watch(alcoholHistory, (val) => {
   if (val === false) {
-    howRegular.value = null
+    alcoholInformation.value = null
   }
 })
 </script>

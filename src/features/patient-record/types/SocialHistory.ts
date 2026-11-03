@@ -2,9 +2,9 @@ export default interface SocialHistory {
   id?: number
   vid?: number
   pastSmokingHistory: boolean
-  numberOfYears: number | null
+  pastSmokingInformation: string | null
   currentSmokingHistory: boolean
-  cigarettesPerDay: number | null
+  currentSmokingInformation: string | null
   alcoholHistory: boolean
-  howRegular: string | null
+  alcoholInformation: string | null
 }
