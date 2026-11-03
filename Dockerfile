@@ -1,13 +1,15 @@
-FROM node:26-alpine AS build
+FROM ghcr.io/pnpm/pnpm:12-alpine AS build
+
+RUN apk add --no-cache nodejs
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 ARG VITE_API_URL="/api"
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
 FROM nginx:stable-alpine-slim AS production
 
