@@ -1,3 +1,7 @@
+{
+	default_sni {$SITE_HOST}
+}
+
 (app) {
 	@api path /api /api/*
 
@@ -26,9 +30,6 @@
 
 :80 {
 	import app
-}
-{
-	default_sni {$SITE_HOST}
 }
 https://{$SITE_HOST}:443, https://${SiTE_HOST_ALT}:443 {
 	tls internal
