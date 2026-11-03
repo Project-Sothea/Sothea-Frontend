@@ -15,10 +15,12 @@
     "serve": "vite"
   },
   "dependencies": {
+    "@vuepic/vue-datepicker": "^14.0.0",
     "autoprefixer": "^10.4.22",
     "axios": "^1.7.2",
     "browser-image-compression": "^2.0.2",
     "camelcase-keys": "^10.0.1",
+    "date-fns": "^4.4.0",
     "heic2any": "^0.0.4",
     "postcss": "^8.4.38",
     "snakecase-keys": "^9.0.2",
